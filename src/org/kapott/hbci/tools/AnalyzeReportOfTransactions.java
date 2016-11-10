@@ -110,12 +110,23 @@ public final class AnalyzeReportOfTransactions {
     public static void main(String[] args)
             throws Exception {
 
-        Properties properties = loadPropertiesFile("/Users/alexg/tools/hbci4java.properties");
+        HBCIUtils.refreshBLZList(ClassLoader.getSystemResource("blz.properties").openStream());
+
+        Properties properties = new Properties();
         properties.put("kernel.rewriter", "InvalidSegment,WrongStatusSegOrder,WrongSequenceNumbers,MissingMsgRef,HBCIVersion,SigIdLeadingZero,InvalidSuppHBCIVersion,SecTypeTAN,KUmsDelimiters,KUmsEmptyBDateSets");
+        properties.put("client.passport.default", "PinTanNoFile");
+        properties.put("log.loglevel.default", "2");
+        properties.put("default.hbciversion", "FinTS3");
+        properties.put("client.passport.PinTan.checkcert", "1");
+        properties.put("client.passport.PinTan.init", "1");
+
+        properties.put("client.passport.country", "DE");
+        properties.put("client.passport.blz", "blz");
+        properties.put("client.passport.customerId", "konto");
 
         // Nutzer-Passport initialisieren
         HBCIPassportPinTan passport = (HBCIPassportPinTan)AbstractHBCIPassport.getInstance(new MyHBCICallback(), properties);
-        passport.setPIN("");
+        passport.setPIN("PIN");
 
         // HBCI Objekte
         HBCIHandler hbciHandle = null;

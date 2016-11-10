@@ -179,7 +179,7 @@ public final class HBCIInstitute
 
     private void doDialogEnd(String dialogid,boolean needSig)
     {
-        HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_DIALOG_END,null);
+        passport.getCallback().status(passport,HBCICallback.STATUS_DIALOG_END,null);
         
         kernel.rawNewMsg("DialogEndAnon");
         kernel.rawSet("MsgHead.dialogid",dialogid);
@@ -187,7 +187,7 @@ public final class HBCIInstitute
         kernel.rawSet("DialogEndS.dialogid",dialogid);
         kernel.rawSet("MsgTail.msgnum","2");
         HBCIMsgStatus status=kernel.rawDoIt(HBCIKernelImpl.DONT_SIGNIT,HBCIKernelImpl.DONT_CRYPTIT,needSig,HBCIKernelImpl.DONT_NEED_CRYPT);
-        HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_DIALOG_END_DONE,status);
+        passport.getCallback().status(passport,HBCICallback.STATUS_DIALOG_END_DONE,status);
         
         if (!status.isOK()) {
             HBCIUtils.log("dialog end failed: "+status.getErrorString(),HBCIUtils.LOG_ERR);
@@ -288,8 +288,8 @@ public final class HBCIInstitute
                     passport.getBPD().setProperty("BPA.version","0");
                     passport.saveChanges();
                 }
-                
-                HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_INST_BPD_INIT,null);
+
+                passport.getCallback().status(passport,HBCICallback.STATUS_INST_BPD_INIT,null);
                 HBCIUtils.log("fetching BPD",HBCIUtils.LOG_INFO);
                 
                 HBCIMsgStatus status=null;

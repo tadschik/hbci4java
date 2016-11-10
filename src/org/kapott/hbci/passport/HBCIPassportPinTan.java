@@ -93,7 +93,7 @@ public class HBCIPassportPinTan
         String  header="client.passport.PinTan.";
         String  fname=properties.getProperty(header+"filename");
         boolean init=properties.getProperty(header+"init","1").equals("1");
-        
+
         setFileName(fname);
         setCertFile(properties.getProperty(header+"certfile"));
         setCheckCert(properties.getProperty(header+"checkcert","1").equals("1"));
@@ -110,12 +110,12 @@ public class HBCIPassportPinTan
                 saveChanges();
         }
     }
-    
+
     /**
      * Gibt den Dateinamen der Schlüsseldatei zurück.
      * @return Dateiname der Schlüsseldatei
      */
-    public String getFileName() 
+    public String getFileName()
     {
         return filename;
     }
@@ -124,11 +124,11 @@ public class HBCIPassportPinTan
      * Speichert den Dateinamen der Passport-Datei.
      * @param filename
      */
-    public void setFileName(String filename) 
-    { 
+    public void setFileName(String filename)
+    {
         this.filename=filename;
     }
-    
+
     /**
      * @see org.kapott.hbci.passport.HBCIPassportInternal#resetPassphrase()
      */
@@ -156,7 +156,7 @@ public class HBCIPassportPinTan
         File file = new File(fname);
         if (file.exists() && file.isFile() && file.canRead())
             return;
-        
+
         HBCIUtils.log("have to create new passport file",HBCIUtils.LOG_WARN);
         askForMissingData(true,true,true,true,true,true,true);
         saveChanges();
@@ -170,7 +170,7 @@ public class HBCIPassportPinTan
     protected void read()
     {
         create();
-        
+
         String fname = this.getFileName();
         if (fname==null) {
             throw new NullPointerException("client.passport.PinTan.filename must not be null");
