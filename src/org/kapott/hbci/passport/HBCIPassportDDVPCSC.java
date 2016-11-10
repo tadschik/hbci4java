@@ -62,18 +62,18 @@ public class HBCIPassportDDVPCSC extends HBCIPassportDDV
      * @param init
      * @param dummy
      */
-    public HBCIPassportDDVPCSC(Object init, int dummy)
+    public HBCIPassportDDVPCSC(Properties properties, HBCICallback callback, Object init, int dummy)
     {
-      super(init,dummy);
+      super(properties, callback, init,dummy);
     }
 
     /**
      * ct.
      * @param init
      */
-    public HBCIPassportDDVPCSC(Object init)
+    public HBCIPassportDDVPCSC(Properties properties, HBCICallback callback, Object init)
     {
-      this(init,0);
+      this(properties, callback, init,0);
       
       ObjectInputStream is = null;
       

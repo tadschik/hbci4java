@@ -151,6 +151,10 @@ public final class HBCIHandler
         	updateMetaInfo();
         }
     }
+
+    public Object getProperty(String key) {
+       return passport.getProperties().get(key);
+    }
     
     /**
      * Ruft die SEPA-Infos der Konten sowie die TAN-Medienbezeichnungen ab.

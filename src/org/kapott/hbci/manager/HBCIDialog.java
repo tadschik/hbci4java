@@ -105,7 +105,7 @@ public final class HBCIDialog
             HBCIUtils.log("passport supported: "+s,HBCIUtils.LOG_DEBUG);
             
             HBCIUtils.log(HBCIUtilsInternal.getLocMsg("STATUS_DIALOG_INIT"),HBCIUtils.LOG_INFO);
-            HBCIUtilsInternal.getCallback().status(mainPassport,HBCICallback.STATUS_DIALOG_INIT,null);
+            mainPassport.getCallback().status(mainPassport,HBCICallback.STATUS_DIALOG_INIT,null);
             String country=mainPassport.getCountry();
             String blz=mainPassport.getBLZ();
     
@@ -187,7 +187,7 @@ public final class HBCIDialog
                     } catch (Exception e) {
                         break;
                     }
-                    HBCIUtilsInternal.getCallback().callback(mainPassport,
+                    mainPassport.getCallback().callback(mainPassport,
                                                      HBCICallback.HAVE_INST_MSG,
                                                      msg.toString(),
                                                      HBCICallback.TYPE_NONE,
@@ -195,7 +195,7 @@ public final class HBCIDialog
                 }
             }
 
-            HBCIUtilsInternal.getCallback().status(mainPassport,HBCICallback.STATUS_DIALOG_INIT_DONE,new Object[] {ret,dialogid});
+            mainPassport.getCallback().status(mainPassport,HBCICallback.STATUS_DIALOG_INIT_DONE,new Object[] {ret,dialogid});
         } catch (Exception e) {
             ret.addException(e);
         }
@@ -255,7 +255,7 @@ public final class HBCIDialog
                             
                             String taskName=task.getName();
                             HBCIUtils.log("adding task "+taskName,HBCIUtils.LOG_DEBUG);
-                            HBCIUtilsInternal.getCallback().status(mainPassport,HBCICallback.STATUS_SEND_TASK,task);
+                            mainPassport.getCallback().status(mainPassport,HBCICallback.STATUS_SEND_TASK,task);
                             task.setIdx(taskNum);
                             
                             // Daten für den Task festlegen
@@ -317,7 +317,7 @@ public final class HBCIDialog
                                 // nur wenn der auftrag auch tatsaechlich gesendet werden musste
                                 try {
                                     task.fillJobResult(msgstatus,offset);
-                                    HBCIUtilsInternal.getCallback().status(mainPassport,HBCICallback.STATUS_SEND_TASK_DONE,task);
+                                    mainPassport.getCallback().status(mainPassport,HBCICallback.STATUS_SEND_TASK_DONE,task);
                                 } catch (Exception e) {
                                     msgstatus.addException(e);
                                 }
@@ -361,7 +361,7 @@ public final class HBCIDialog
         
         try {
             HBCIUtils.log(HBCIUtilsInternal.getLocMsg("LOG_DIALOG_END"),HBCIUtils.LOG_INFO);
-            HBCIUtilsInternal.getCallback().status(mainPassport,HBCICallback.STATUS_DIALOG_END,null);
+            mainPassport.getCallback().status(mainPassport,HBCICallback.STATUS_DIALOG_END,null);
     
             kernel.rawNewMsg("DialogEnd"+anonSuffix);
             kernel.rawSet("DialogEndS.dialogid", dialogid);
@@ -374,7 +374,7 @@ public final class HBCIDialog
                                !isAnon && HBCIKernelImpl.NEED_SIG,
                                !isAnon && HBCIKernelImpl.NEED_CRYPT);
 
-            HBCIUtilsInternal.getCallback().status(mainPassport,HBCICallback.STATUS_DIALOG_END_DONE,ret);
+            mainPassport.getCallback().status(mainPassport,HBCICallback.STATUS_DIALOG_END_DONE,ret);
         } catch (Exception e) {
             ret.addException(e);
         }

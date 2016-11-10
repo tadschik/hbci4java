@@ -103,9 +103,9 @@ public class HBCIPassportDDV
                                                (byte)0x1f,(byte)0xe3,(byte)0x73,(byte)0xcc};
     protected final static int CIPHER_ITERATIONS=987;
 
-    public HBCIPassportDDV(Object init,int dummy)
+    public HBCIPassportDDV(Properties properties, HBCICallback callback, Object init,int dummy)
     {
-        super(init);
+        super(properties, callback, init);
         setParamHeader("client.passport.DDV");
         
         keys=new HBCIKey[2];
@@ -114,9 +114,9 @@ public class HBCIPassportDDV
         }
     }
 
-    public HBCIPassportDDV(Object init)
+    public HBCIPassportDDV(Properties properties, HBCICallback callback, Object init)
     {
-        this(init,0);
+        this(properties, callback, init,0);
 
         // get ddv-parameters
         String path=HBCIUtils.getParam(paramHeader+".path","./");

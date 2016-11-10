@@ -69,7 +69,7 @@ public final class HBCIUser
 
     private void doDialogEnd(String dialogid,String msgnum,boolean signIt,boolean cryptIt,boolean needCrypt)
     {
-        HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_DIALOG_END,null);
+        passport.getCallback().status(passport,HBCICallback.STATUS_DIALOG_END,null);
 
         kernel.rawNewMsg("DialogEnd"+anonSuffix);
         kernel.rawSet("MsgHead.dialogid",dialogid);
@@ -80,7 +80,7 @@ public final class HBCIUser
                                             !isAnon && cryptIt,
                                             !isAnon && HBCIKernelImpl.NEED_SIG,
                                             !isAnon && needCrypt);
-        HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_DIALOG_END_DONE,status);
+        passport.getCallback().status(passport,HBCICallback.STATUS_DIALOG_END_DONE,status);
 
         if (!status.isOK()) {
             HBCIUtils.log("dialog end failed: "+status.getErrorString(),HBCIUtils.LOG_ERR);
@@ -135,7 +135,7 @@ public final class HBCIUser
             if (!passport.hasMySigKey()) {
                 // es gibt noch gar keine Nutzerschluessel
                 
-                HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_SEND_KEYS,null);
+                passport.getCallback().status(passport,HBCICallback.STATUS_SEND_KEYS,null);
 
                 // sigid updated
                 passport.setSigId(new Long(1));
@@ -188,7 +188,7 @@ public final class HBCIUser
                 passport.postInitResponseHook(ret, passport.isAnonymous());
                 Properties result=ret.getData();
                 
-                HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_SEND_KEYS_DONE,ret);
+                passport.getCallback().status(passport,HBCICallback.STATUS_SEND_KEYS_DONE,ret);
 
                 if (!ret.isOK()) {
                     if (!ret.hasExceptions()) {
@@ -214,7 +214,7 @@ public final class HBCIUser
             } else {
                 // aendern der aktuellen Nutzerschluessel
                 
-                HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_DIALOG_INIT,null);
+                passport.getCallback().status(passport,HBCICallback.STATUS_DIALOG_INIT,null);
 
                 // als erstes Dialog-Initialisierung
                 HBCIMsgStatus ret=null;
@@ -258,10 +258,10 @@ public final class HBCIUser
                 inst.updateBPD(result);
                 updateUPD(result);
                 passport.saveChanges();
-                HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_DIALOG_INIT_DONE,new Object[] {ret,result.getProperty("MsgHead.dialogid")});
+                passport.getCallback().status(passport,HBCICallback.STATUS_DIALOG_INIT_DONE,new Object[] {ret,result.getProperty("MsgHead.dialogid")});
 
                 // neue Schlüssel senden
-                HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_SEND_KEYS,null);
+                passport.getCallback().status(passport,HBCICallback.STATUS_SEND_KEYS,null);
                 kernel.rawNewMsg("ChangeKeys");
                 kernel.rawSet("MsgHead.dialogid",result.getProperty("MsgHead.dialogid"));
                 kernel.rawSet("MsgHead.msgnum","2");
@@ -332,7 +332,7 @@ public final class HBCIUser
                 passport.saveChanges();
         
                 result=ret.getData();
-                HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_SEND_KEYS_DONE,ret);
+                passport.getCallback().status(passport,HBCICallback.STATUS_SEND_KEYS_DONE,ret);
                 doDialogEnd(result.getProperty("MsgHead.dialogid"),"3",HBCIKernelImpl.SIGNIT,HBCIKernelImpl.CRYPTIT,
                                                                        HBCIKernelImpl.NEED_CRYPT);
             }
@@ -346,7 +346,7 @@ public final class HBCIUser
     private void triggerNewKeysEvent()
     {
         // TODO: hier überprüfen, ob tatsächlich ein INI-brief benötigt wird
-        HBCIUtilsInternal.getCallback().callback(passport,
+        passport.getCallback().callback(passport,
                                          HBCICallback.HAVE_NEW_MY_KEYS,
                                          HBCIUtilsInternal.getLocMsg("CALLB_NEW_USER_KEYS"),
                                          HBCICallback.TYPE_NONE,
@@ -407,7 +407,7 @@ public final class HBCIUser
     public void fetchSysId()
     {
         try {
-            HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_INIT_SYSID,null);
+            passport.getCallback().status(passport,HBCICallback.STATUS_INIT_SYSID,null);
             HBCIUtils.log("fetching new sys-id from institute",HBCIUtils.LOG_INFO);
             
             // autosecmech
@@ -466,7 +466,7 @@ public final class HBCIUser
             passport.setSysId(result.getProperty("SyncRes.sysid"));
             passport.saveChanges();
     
-            HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_INIT_SYSID_DONE,new Object[] {ret,passport.getSysId()});
+            passport.getCallback().status(passport,HBCICallback.STATUS_INIT_SYSID_DONE,new Object[] {ret,passport.getSysId()});
             HBCIUtils.log("new sys-id is "+passport.getSysId(),HBCIUtils.LOG_DEBUG);
             doDialogEnd(result.getProperty("MsgHead.dialogid"),"2",HBCIKernelImpl.SIGNIT,HBCIKernelImpl.CRYPTIT,
                                                                    HBCIKernelImpl.NEED_CRYPT);
@@ -480,7 +480,7 @@ public final class HBCIUser
     public void fetchSigId()
     {
         try {
-            HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_INIT_SIGID,null);
+            passport.getCallback().status(passport,HBCICallback.STATUS_INIT_SIGID,null);
             HBCIUtils.log("syncing signature id",HBCIUtils.LOG_INFO);
             
             // autosecmech
@@ -539,7 +539,7 @@ public final class HBCIUser
             passport.incSigId();
             passport.saveChanges();
     
-            HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_INIT_SIGID_DONE,new Object[] {ret,passport.getSigId()});
+            passport.getCallback().status(passport,HBCICallback.STATUS_INIT_SIGID_DONE,new Object[] {ret,passport.getSigId()});
             HBCIUtils.log("signature id set to "+passport.getSigId(),HBCIUtils.LOG_DEBUG);
             doDialogEnd(result.getProperty("MsgHead.dialogid"),"2",passport.hasMySigKey(),HBCIKernelImpl.CRYPTIT,
                                                                    passport.hasMyEncKey());
@@ -585,14 +585,14 @@ public final class HBCIUser
             passport.setUPD(p);
             
             HBCIUtils.log("installed new UPD [old version: " + oldVersion + ", new version: " + passport.getUPDVersion() + "]",HBCIUtils.LOG_INFO);
-            HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_INIT_UPD_DONE,passport.getUPD());
+            passport.getCallback().status(passport,HBCICallback.STATUS_INIT_UPD_DONE,passport.getUPD());
         }
     }
 
     public void fetchUPD()
     {
         try {
-            HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_INIT_UPD,null);
+            passport.getCallback().status(passport,HBCICallback.STATUS_INIT_UPD,null);
             HBCIUtils.log("fetching UPD (BPD-Version: " + passport.getBPDVersion() + ")",HBCIUtils.LOG_INFO);
             
             // autosecmech
@@ -703,7 +703,7 @@ public final class HBCIUser
         }
         
         try {
-            HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_DIALOG_INIT,null);
+            passport.getCallback().status(passport,HBCICallback.STATUS_DIALOG_INIT,null);
             HBCIUtils.log("locking user keys",HBCIUtils.LOG_INFO);
             
             String blz=passport.getBLZ();
@@ -746,9 +746,9 @@ public final class HBCIUser
                 throw new ProcessException(HBCIUtilsInternal.getLocMsg("EXCMSG_LOCKFAILED"),status);
             
             String dialogid=result.getProperty("MsgHead.dialogid");
-            HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_DIALOG_INIT_DONE,new Object[] {status,dialogid});
+            passport.getCallback().status(passport,HBCICallback.STATUS_DIALOG_INIT_DONE,new Object[] {status,dialogid});
 
-            HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_LOCK_KEYS,null);
+            passport.getCallback().status(passport,HBCICallback.STATUS_LOCK_KEYS,null);
             kernel.rawNewMsg("LockKeys");
             kernel.rawSet("MsgHead.dialogid",dialogid);
             kernel.rawSet("MsgHead.msgnum","2");
@@ -774,7 +774,7 @@ public final class HBCIUser
             passport.setSigId(new Long(1));
             passport.saveChanges();
                 
-            HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_LOCK_KEYS_DONE,status);
+            passport.getCallback().status(passport,HBCICallback.STATUS_LOCK_KEYS_DONE,status);
             doDialogEnd(dialogid,"3",HBCIKernelImpl.DONT_SIGNIT,HBCIKernelImpl.CRYPTIT,HBCIKernelImpl.DONT_NEED_CRYPT);
         } catch (Exception e) {
             throw new HBCI_Exception(HBCIUtilsInternal.getLocMsg("EXCMSG_LOCKFAILED"),e);

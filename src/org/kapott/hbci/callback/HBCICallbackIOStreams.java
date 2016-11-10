@@ -100,7 +100,7 @@ public class HBCICallbackIOStreams
     Eingabe vom <code>inStream</code> gelesen.*/
     public void callback(HBCIPassport passport, int reason, String msg, int datatype, StringBuffer retData) 
     {
-        getOutStream().println(HBCIUtilsInternal.getLocMsg("CALLB_PASS_IDENT",passport.getClientData("init")));
+//        getOutStream().println(HBCIUtilsInternal.getLocMsg("CALLB_PASS_IDENT",passport.getClientData("init")));
         
         try {
             INILetter iniletter;

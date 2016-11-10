@@ -236,7 +236,7 @@ public abstract class AbstractSEPAGV extends HBCIJobImpl
             catch (Exception ex)
             {
                 HBCIUtils.log("ignoring invalid pain version " + urn,HBCIUtils.LOG_WARN);
-                HBCIUtils.log(ex,HBCIUtils.LOG_DEBUG);
+                HBCIUtils.log(ex);
             }
         }
         

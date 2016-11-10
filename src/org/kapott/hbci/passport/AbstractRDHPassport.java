@@ -26,6 +26,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Signature;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Properties;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -33,6 +34,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESedeKeySpec;
 
 import org.kapott.cryptalgs.SignatureParamSpec;
+import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.comm.Comm;
 import org.kapott.hbci.exceptions.HBCI_Exception;
 import org.kapott.hbci.manager.HBCIUtils;
@@ -43,9 +45,12 @@ import org.kapott.hbci.security.Sig;
 public abstract class AbstractRDHPassport 
 	extends AbstractHBCIPassport 
 {
-    protected AbstractRDHPassport(Object init)
+    protected Properties properties;
+
+    protected AbstractRDHPassport(Properties properties, HBCICallback callback, Object init)
     {
-    	super(init);
+        super(properties, callback, init);
+        this.properties = properties;
     }
     
     public String getPassportTypeName()
@@ -366,4 +371,7 @@ public abstract class AbstractRDHPassport
         return result;
     }
 
+    public Properties getProperties() {
+        return properties;
+    }
 }

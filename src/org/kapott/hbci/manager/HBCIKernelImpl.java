@@ -205,7 +205,7 @@ public final class HBCIKernelImpl implements HBCIKernel
             HBCIPassportInternal mainPassport=passports.getMainPassport();
 
             HBCIUtils.log("generating raw message "+currentMsgName,HBCIUtils.LOG_DEBUG);
-            HBCIUtilsInternal.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_CREATE,currentMsgName);
+            mainPassport.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_CREATE,currentMsgName);
 
             // plaintextnachricht erzeugen
             msg=gen.generate(currentMsgName);
@@ -220,7 +220,7 @@ public final class HBCIKernelImpl implements HBCIKernel
             Rewrite.setData("needCrypt",Boolean.valueOf(needCrypt));
 
             // liste der rewriter erzeugen
-            String rewriters_st=HBCIUtils.getParam("kernel.rewriter");
+            String rewriters_st=mainPassport.getProperties().getProperty("kernel.rewriter");
             ArrayList<Rewrite> al=new ArrayList<Rewrite>();
             StringTokenizer tok=new StringTokenizer(rewriters_st,",");
             while (tok.hasMoreTokens()) {
@@ -249,7 +249,7 @@ public final class HBCIKernelImpl implements HBCIKernel
             // wenn nachricht signiert werden soll
             if (signit) {
                 HBCIUtils.log("trying to insert signature",HBCIUtils.LOG_DEBUG);
-                HBCIUtilsInternal.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_SIGN,null);
+                mainPassport.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_SIGN,null);
                 
                 // signatur erzeugen und an nachricht anhängen
                 Sig sig=SigFactory.getInstance().createSig(getParentHandlerData(),msg,passports);
@@ -308,7 +308,7 @@ public final class HBCIKernelImpl implements HBCIKernel
             // soll nachricht verschlüsselt werden?
             if (cryptit) {
                 HBCIUtils.log("trying to encrypt message",HBCIUtils.LOG_DEBUG);
-                HBCIUtilsInternal.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_CRYPT,null);
+                mainPassport.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_CRYPT,null);
                 
                 // nachricht verschlüsseln
                 MSG   old=msg;
@@ -357,7 +357,7 @@ public final class HBCIKernelImpl implements HBCIKernel
             // ist antwortnachricht verschlüsselt?
             boolean crypted=msg.getName().equals("CryptedRes");
             if (crypted) {
-                HBCIUtilsInternal.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_DECRYPT,null);
+                mainPassport.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_DECRYPT,null);
                 
                 // wenn ja, dann nachricht entschlüsseln
                 HBCIUtils.log("acquire crypt instance",HBCIUtils.LOG_DEBUG);
@@ -386,7 +386,7 @@ public final class HBCIKernelImpl implements HBCIKernel
                 
                 // nachricht als plaintextnachricht parsen
                 try {
-                    HBCIUtilsInternal.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_PARSE,currentMsgName+"Res");
+                    mainPassport.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_PARSE,currentMsgName+"Res");
                     HBCIUtils.log("message to pe parsed: "+msg.toString(0),HBCIUtils.LOG_DEBUG2);
                     MSG oldMsg=msg;
                     msg=MSGFactory.getInstance().createMSG(currentMsgName+"Res",newmsgstring,newmsgstring.length(),gen);
@@ -443,7 +443,7 @@ public final class HBCIKernelImpl implements HBCIKernel
             
             // überprüfen der signatur
             HBCIUtils.log("looking for a signature",HBCIUtils.LOG_DEBUG);
-            HBCIUtilsInternal.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_VERIFY,null);
+            mainPassport.getCallback().status(mainPassport,HBCICallback.STATUS_MSG_VERIFY,null);
             boolean sigOk=false;
             Sig     sig=SigFactory.getInstance().createSig(getParentHandlerData(),msg,passports);
             try {
@@ -475,7 +475,7 @@ public final class HBCIKernelImpl implements HBCIKernel
             if (currentMsgName.startsWith("DialogEnd") && 
  	            HBCIUtils.getParam(paramName,"no").equals("yes"))
             {
-                HBCIUtils.log(e,HBCIUtils.LOG_WARN);
+                HBCIUtils.log(e);
                 HBCIUtils.log("error while receiving DialogEnd response - "+
                     "but ignoring it because of special setting",
                     HBCIUtils.LOG_WARN);

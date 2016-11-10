@@ -21,14 +21,6 @@
 
 package org.kapott.hbci.GV_Result;
 
-import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-
 import org.kapott.hbci.exceptions.HBCI_Exception;
 import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.manager.HBCIUtilsInternal;
@@ -37,6 +29,12 @@ import org.kapott.hbci.structures.Konto;
 import org.kapott.hbci.structures.Saldo;
 import org.kapott.hbci.structures.Value;
 import org.kapott.hbci.swift.Swift;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /** <p>Ergebnisse der Abfrage von Kontoumsatzinformationen.
     Ein Objekt dieser Klasse entspricht einen Kontoauszug.
@@ -50,6 +48,9 @@ import org.kapott.hbci.swift.Swift;
 public class GVRKUms
     extends HBCIJobResultImpl
 {
+
+    private static Logger LOG = LoggerFactory.getLogger(GVRKUms.class);
+
     /** Eine "Zeile" des Kontoauszuges (enthält Daten einer Transaktion) */
     public static class UmsLine
         implements Serializable
@@ -337,31 +338,29 @@ public class GVRKUms
         }
 
         if (restMT940!=null && restMT940.length()!=0) {
-            HBCIUtils.log(
+            LOG.warn(
                 where+
                 ": mt940 has not been parsed successfully " +
                 "- probably returned data will be incomplete. "+
                 "check variable 'restMT940' (or set logging level to 4 (=DEBUG)) "+
-                "to see the data that could not be parsed.",
-                HBCIUtils.LOG_WARN);
-            HBCIUtils.log("restMT940: "+restMT940, HBCIUtils.LOG_DEBUG);
+                "to see the data that could not be parsed.");
+            LOG.debug("restMT940: "+restMT940);
         }
 
         if (restMT942!=null && restMT942.length()!=0) {
-            HBCIUtils.log(
+            LOG.warn(
                 where+
                 ": mt942 has not been parsed successfully " +
                 "- probably returned data will be incomplete. "+
                 "check variable 'restMT942' (or set logging level to 4 (=DEBUG)) "+
-                "to see the data that could not be parsed.",
-                HBCIUtils.LOG_WARN);
-            HBCIUtils.log("restMT942: "+restMT942, HBCIUtils.LOG_DEBUG);
+                "to see the data that could not be parsed.");
+            LOG.debug("restMT942: "+restMT942);
         }
     }
 
     private void parseMT94x(StringBuffer buffer, List<BTag> tage, StringBuffer rest)
     {
-        HBCIUtils.log("now parsing MT94x data", HBCIUtils.LOG_DEBUG);
+        LOG.debug("now parsing MT94x data");
         parsed=true;
 
         try {
@@ -644,7 +643,7 @@ public class GVRKUms
                                 int space = acc.blz.indexOf(" ");
                                 if (space != -1)
                                 {
-                                    HBCIUtils.log("blz/bic \"" + acc.blz + "\" contains invalid chars, trimming after first space", HBCIUtils.LOG_DEBUG);
+                                    LOG.debug("blz/bic \"" + acc.blz + "\" contains invalid chars, trimming after first space");
                                     acc.blz = acc.blz.substring(0,space);
                                 }
                             }
@@ -746,8 +745,8 @@ public class GVRKUms
             // remove this debugging output
             // HBCIUtils.log("Parsing of MT940 ok until now; unparsed data: "+buffer,HBCIUtils.LOG_DEBUG2);
         } catch (Exception e) {
-            HBCIUtils.log("There is unparsed MT94x data - an exception occured while parsing",HBCIUtils.LOG_ERR);
-            HBCIUtils.log("current MT94x buffer: "+buffer,HBCIUtils.LOG_DEBUG2);
+            LOG.error("There is unparsed MT94x data - an exception occured while parsing");
+            LOG.debug("current MT94x buffer: "+buffer,HBCIUtils.LOG_DEBUG2);
             throw new HBCI_Exception(e);
         } finally {
             rest.setLength(0);

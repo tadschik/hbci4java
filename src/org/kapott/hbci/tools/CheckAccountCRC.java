@@ -49,8 +49,7 @@ public class CheckAccountCRC
             System.out.println("  CheckAccountCRC <iban>");
             System.exit(1);
         }
-        
-        HBCIUtils.init(null,new HBCICallbackConsole());
+
         
         if (args.length==2) {
         	String blz=args[0];

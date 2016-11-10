@@ -245,10 +245,9 @@ public class HBCIBatch
         InputStream istream=new FileInputStream(args[0]);
         props.load(istream);
         istream.close();
-        HBCIUtils.init(props, new MyCallback(args));
         
         // erzeugen des passport-objektes
-        HBCIPassport passport=AbstractHBCIPassport.getInstance();
+        HBCIPassport passport=AbstractHBCIPassport.getInstance(new MyCallback(args), props);
         
         try {
             // initialisieren des hbci-handlers für das passport

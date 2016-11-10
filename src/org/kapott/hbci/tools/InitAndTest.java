@@ -75,50 +75,6 @@ public final class InitAndTest
     private static HBCIPassport passport;
     private static HBCIHandler  hbciHandle;
     
-    public static void main(String[] args)
-        throws IOException
-    {
-        try {
-            HBCIUtils.init(null,new MyCallback());
-            readBasicParams();
-
-            readPassportParams();
-            passport=AbstractHBCIPassport.getInstance();
-
-            readHBCIVersion();
-            readActions();
-            
-            if (HBCIUtils.getParam("action.resetBPD").equals("1")) {
-            	passport.clearBPD();
-            }
-            if (HBCIUtils.getParam("action.resetUPD").equals("1")) {
-            	passport.clearUPD();
-            }
-            hbciHandle=new HBCIHandler(HBCIUtils.getParam("client.passport.hbciversion.default"),
-                                       passport);
-
-            /* HBCIExecStatus ret=hbciHandle.execute();
-            System.out.println("ExecStatus");
-            System.out.println(ret.toString());
-            System.out.println("ExecStatusEnd");
-            System.out.println("ExecStatusError");
-            System.out.println(ret.getErrorString());
-            System.out.println("ExecStatusErrorEnd"); */
-            
-            printSupportedGVs(hbciHandle);
-            
-            System.out.println();
-            System.out.println("finished.");
-            System.out.println();
-        } finally {
-            if (hbciHandle!=null) {
-                hbciHandle.close();
-            } else if (passport!=null) {
-                passport.close();
-            }
-        }
-    }
-    
     private static void readParam(String paramName,String def,String descr)
         throws IOException
     {

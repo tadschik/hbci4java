@@ -24,6 +24,7 @@ package org.kapott.hbci.passport;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.Properties;
 
 import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.exceptions.HBCI_Exception;
@@ -50,9 +51,9 @@ public class HBCIPassportRDHXFile
     private int      entryIdx;    
     private String   forcedProfileVersion;
     
-    public HBCIPassportRDHXFile(Object init, int dummy)
+    public HBCIPassportRDHXFile(Properties properties, HBCICallback callback, Object init, int dummy)
     {
-        super(init);
+        super(properties, callback,init);
         this.forcedProfileVersion=null;
     }
     
@@ -61,9 +62,9 @@ public class HBCIPassportRDHXFile
         return "RDHXFile";
     }
     
-    public HBCIPassportRDHXFile(Object initObject)
+    public HBCIPassportRDHXFile(Properties properties, HBCICallback callback, Object initObject)
     {
-        this(initObject,0);
+        this(properties, callback,initObject,0);
         setParamHeader("client.passport."+getCompatName());
 
         String fname=HBCIUtils.getParam(getParamHeader()+".filename");

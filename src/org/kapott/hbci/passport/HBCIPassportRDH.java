@@ -35,6 +35,7 @@ import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.spec.PBEParameterSpec;
 
+import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.exceptions.HBCI_Exception;
 import org.kapott.hbci.exceptions.InvalidPassphraseException;
 import org.kapott.hbci.manager.HBCIKey;
@@ -54,15 +55,15 @@ import org.kapott.hbci.manager.HBCIUtils;
 public class HBCIPassportRDH
     extends AbstractRDHSWFileBasedPassport
 {
-    public HBCIPassportRDH(Object init,int dummy)
+    public HBCIPassportRDH(Properties properties, HBCICallback callback, Object init, int dummy)
     {
-        super(init);
+        super(properties, callback,init);
         setParamHeader("client.passport.RDH");
     }
 
-    public HBCIPassportRDH(Object initObject)
+    public HBCIPassportRDH(Properties properties, HBCICallback callback, Object initObject)
     {
-        this(initObject,0);
+        this(properties, callback, initObject,0);
         
         String  header=getParamHeader();
         String  fname=HBCIUtils.getParam(header+".filename");

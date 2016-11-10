@@ -35,16 +35,14 @@ import java.util.ResourceBundle;
 import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.passport.HBCIPassport;
 import org.kapott.hbci.passport.HBCIPassportInternal;
+import org.slf4j.LoggerFactory;
 
 public class HBCIUtilsInternal
 {
 
     public static Properties blzs;
     public static Map<String,BankInfo> banks = null;
-    public static Hashtable<ThreadGroup, HBCICallback>  callbacks;  // threadgroup->callbackObject
-    public static Hashtable<ThreadGroup, ResourceBundle>  locMsgs;    // threadgroup->resourceBundle
-    public static Hashtable<ThreadGroup, Locale>  locales;    // threadgroup->Locale
-    
+
     private static InfoPointConnector infoPointConnector;
 
     public static String bigDecimal2String(BigDecimal value)
@@ -101,24 +99,17 @@ public class HBCIUtilsInternal
             return "";
         return info.getChecksumMethod() != null ? info.getChecksumMethod() : "";
     }
-
-    public static HBCICallback getCallback()
-    {
-        ThreadGroup group=Thread.currentThread().getThreadGroup();
-        return callbacks.get(group);
-    }
     
     public static String getLocMsg(String key)
     {
-        ThreadGroup group=Thread.currentThread().getThreadGroup();
         try
         {
-            return locMsgs.get(group).getString(key);
+            return  ResourceBundle.getBundle("hbci4java-messages", Locale.getDefault()).getString(key);
         }
         catch (MissingResourceException re)
         {
             // tolerieren wir
-            HBCIUtils.log(re,HBCIUtils.LOG_ERR);
+            LoggerFactory.getLogger(HBCIUtilsInternal.class).debug(re.getMessage(), re);
             return key;
         }
     }
@@ -139,8 +130,8 @@ public class HBCIUtilsInternal
         String  paramValue=HBCIUtils.getParam(paramName,"no");
         
         if (paramValue.equals("yes")) {
-            HBCIUtils.log(msg,HBCIUtils.LOG_ERR);
-            HBCIUtils.log("ignoring error because param "+paramName+"=yes",HBCIUtils.LOG_ERR);
+            LoggerFactory.getLogger(HBCIUtilsInternal.class).info(msg,HBCIUtils.LOG_ERR);
+            LoggerFactory.getLogger(HBCIUtilsInternal.class).info("ignoring error because param "+paramName+"=yes",HBCIUtils.LOG_ERR);
             ret=true;
         } else if (paramValue.equals("callback")) {
             StringBuffer sb=new StringBuffer();
@@ -150,8 +141,8 @@ public class HBCIUtilsInternal
                                    HBCICallback.TYPE_BOOLEAN,
                                    sb);
             if (sb.length()==0) {
-                HBCIUtils.log(msg,HBCIUtils.LOG_ERR);
-                HBCIUtils.log("ignoring error because param "+paramName+"=callback",HBCIUtils.LOG_ERR);
+                LoggerFactory.getLogger(HBCIUtilsInternal.class).info(msg,HBCIUtils.LOG_ERR);
+                LoggerFactory.getLogger(HBCIUtilsInternal.class).info("ignoring error because param "+paramName+"=callback",HBCIUtils.LOG_ERR);
                 ret=true;
             }
         }
@@ -283,5 +274,9 @@ public class HBCIUtilsInternal
         if (HBCIUtils.getParam("infoPoint.enabled", "0").equals("1")) {
             getInfoPointConnector().sendPublicKeys(passport, msgData);
         }
+    }
+
+    public static HBCICallback getCallback() {
+        return null;
     }
 }

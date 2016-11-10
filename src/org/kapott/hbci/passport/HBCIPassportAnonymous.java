@@ -40,6 +40,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.comm.Comm;
 import org.kapott.hbci.exceptions.HBCI_Exception;
 import org.kapott.hbci.exceptions.InvalidPassphraseException;
@@ -84,9 +85,9 @@ public class HBCIPassportAnonymous
                                                (byte)0x99,(byte)0xbc,(byte)0xf1,(byte)0x55};
     protected final static int CIPHER_ITERATIONS=987;
 
-    public HBCIPassportAnonymous(Object initObject)
+    public HBCIPassportAnonymous(Properties properties, HBCICallback callback, Object initObject)
     {
-        super(initObject);
+        super(properties, callback, initObject);
 
         String  header="client.passport.Anonymous.";
         String  filename=HBCIUtils.getParam(header+"filename");

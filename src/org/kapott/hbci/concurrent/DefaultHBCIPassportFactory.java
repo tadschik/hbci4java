@@ -1,7 +1,10 @@
 package org.kapott.hbci.concurrent;
 
+import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.passport.AbstractHBCIPassport;
 import org.kapott.hbci.passport.HBCIPassport;
+
+import java.util.Properties;
 
 /**
  * Standard-Implementierung, die das Passport über {@link AbstractHBCIPassport#getInstance(String, Object)}
@@ -32,15 +35,15 @@ public class DefaultHBCIPassportFactory implements HBCIPassportFactory
     }
 
     @Override
-    public HBCIPassport createPassport() throws Exception
+    public HBCIPassport createPassport(HBCICallback callback) throws Exception
     {
         if (name == null)
         {
-            return AbstractHBCIPassport.getInstance(init);
+            return AbstractHBCIPassport.getInstance(callback, new Properties(), init);
         }
         else
         {
-            return AbstractHBCIPassport.getInstance(name, init);
+            return AbstractHBCIPassport.getInstance(callback, new Properties(), name, init);
         }
     }
 

@@ -50,6 +50,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.kapott.cryptalgs.RSAPrivateCrtKey2;
+import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.exceptions.HBCI_Exception;
 import org.kapott.hbci.exceptions.InvalidPassphraseException;
 import org.kapott.hbci.manager.HBCIKey;
@@ -99,14 +100,14 @@ public class HBCIPassportRDHNew
 {
 	private String profileVersion;
 	
-    public HBCIPassportRDHNew(Object init,int dummy)
+    public HBCIPassportRDHNew(Properties properties, HBCICallback callback, Object init, int dummy)
     {
-        super(init);
+        super(properties, callback,init);
     }
     
-    public HBCIPassportRDHNew(Object initObject)
+    public HBCIPassportRDHNew(Properties properties, HBCICallback callback, Object initObject)
     {
-        this(initObject,0);
+        this(properties, callback,initObject,0);
         setParamHeader("client.passport.RDHNew");
 
         String  filename=HBCIUtils.getParam(getParamHeader()+".filename");

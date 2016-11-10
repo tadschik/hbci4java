@@ -21,7 +21,10 @@
 
 package org.kapott.hbci.passport;
 
+import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.manager.HBCIUtils;
+
+import java.util.Properties;
 
 /** Compatibility class for old applications using "RDH2File" passport variant
  * @Deprecated Use RDHXFile instead */
@@ -34,8 +37,8 @@ public class HBCIPassportRDH2File
         return "RDH2File";
     }
 
-    public HBCIPassportRDH2File(Object initObject)
+    public HBCIPassportRDH2File(Properties properties, HBCICallback callback, Object initObject)
     {
-        super(initObject);
+        super(properties, callback, initObject);
     }
 }

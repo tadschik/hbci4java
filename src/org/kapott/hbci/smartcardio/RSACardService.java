@@ -178,7 +178,7 @@ public class RSACardService extends HBCICardService {
                 }
             }
         } catch (HBCI_Exception e) {
-            HBCIUtils.log(e, HBCIUtils.LOG_DEBUG);
+            HBCIUtils.log(e);
             // properly there are no information about customer id on this card
             customerIdData = null;
         }

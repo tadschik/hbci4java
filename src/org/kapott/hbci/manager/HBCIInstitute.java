@@ -90,7 +90,7 @@ public final class HBCIInstitute
             p.setProperty(BPD_KEY_LASTUPDATE,String.valueOf(System.currentTimeMillis()));
             passport.setBPD(p);
             HBCIUtils.log("installed new BPD with version "+passport.getBPDVersion(),HBCIUtils.LOG_INFO);
-            HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_INST_BPD_INIT_DONE,passport.getBPD());
+            passport.getCallback().status(passport,HBCICallback.STATUS_INST_BPD_INIT_DONE,passport.getBPD());
             
             // send information about successfully received BPD to InfoPoint server
             HBCIUtilsInternal.infoPointSendBPD(passport, result);
@@ -341,7 +341,7 @@ public final class HBCIInstitute
                   if (he.isFatal())
                     throw he;
                 }
-                HBCIUtils.log(e,HBCIUtils.LOG_INFO);
+                HBCIUtils.log(e);
                 // Viele Kreditinstitute unterstützen den anonymen Login nicht. Dass sollte nicht als Fehler den Anwender beunruhigen
                 HBCIUtils.log("FAILED! - maybe this institute does not support anonymous logins",HBCIUtils.LOG_INFO);
                 HBCIUtils.log("we will nevertheless go on",HBCIUtils.LOG_INFO);

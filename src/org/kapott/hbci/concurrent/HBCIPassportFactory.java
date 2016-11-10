@@ -1,5 +1,6 @@
 package org.kapott.hbci.concurrent;
 
+import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.passport.HBCIPassport;
 
 /**
@@ -13,6 +14,6 @@ public interface HBCIPassportFactory {
     /**
      * Gibt ein neues Passport entsprechend der Implementierung zurück.
      */
-    HBCIPassport createPassport() throws Exception;
+    HBCIPassport createPassport(HBCICallback callback) throws Exception;
 
 }

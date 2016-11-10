@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Properties;
 
+import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.callback.HBCICallbackConsole;
 import org.kapott.hbci.manager.HBCIInstitute;
 import org.kapott.hbci.manager.HBCIKernelFactory;
@@ -92,26 +93,7 @@ public class CollectHashCodes
         }
     }
     
-    public static void main(String[] args)
-        throws Exception
-    {
-        HBCIUtils.init(null,new MyCallback());
-        
-        Properties blzs=new Properties();
-        InputStream fin=new FileInputStream("src/blz.properties");
-        blzs.load(fin);
-        fin.close();
-        
-        for (Enumeration e=blzs.propertyNames();e.hasMoreElements();) {
-            String blz=(String)e.nextElement();
-            String host=HBCIUtils.getHBCIHostForBLZ(blz);
-            if (host!=null && host.length()!=0) {
-                addHashValue(blzs,blz);
-            }
-        }
-    }
-    
-    private static void addHashValue(Properties blzs, String blz)
+    private static void addHashValue(HBCICallback callback, Properties blzs, String blz)
     {
         System.out.println();
         System.out.println(blz+": "+HBCIUtils.getNameForBLZ(blz));
@@ -124,7 +106,7 @@ public class CollectHashCodes
         data.setProperty("blz",blz);
         data.setProperty("host",HBCIUtils.getHBCIHostForBLZ(blz));
         
-        HBCIPassportInternal passport=(HBCIPassportInternal)AbstractHBCIPassport.getInstance("RDHNew",data);
+        HBCIPassportInternal passport=(HBCIPassportInternal)AbstractHBCIPassport.getInstance(callback, data, "RDHNew",data);
         HBCIKernelImpl       kernel=(HBCIKernelImpl)HBCIKernelFactory.getKernel(null,"210");
         HBCIInstitute inst=new HBCIInstitute(kernel,passport,true);
         

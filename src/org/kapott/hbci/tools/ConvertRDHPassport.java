@@ -24,6 +24,7 @@ package org.kapott.hbci.tools;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Properties;
 
 import org.kapott.hbci.callback.HBCICallbackConsole;
 import org.kapott.hbci.manager.HBCIUtils;
@@ -65,46 +66,6 @@ import org.kapott.hbci.passport.HBCIPassportRDHNew;
     <p>Die alte Passport-Datei sollte ab sofort nicht mehr verwendet werden.</p>*/
 public class ConvertRDHPassport
 {
-    public static void main(String[] args) 
-        throws IOException
-    {
-        HBCIUtils.init(null,new HBCICallbackConsole());
-        
-        String nameOld=readParam(args,0,"Filename of old RDH passport file");
-        HBCIUtils.setParam("client.passport.RDH.filename",nameOld);
-        HBCIUtils.setParam("client.passport.RDH.init","1");
-        HBCIPassportInternal passportOld=(HBCIPassportInternal)AbstractHBCIPassport.getInstance("RDH");
-        
-        String nameNew=readParam(args,1,"Filename of new RDHNew passport file");
-        HBCIUtils.setParam("client.passport.RDHNew.filename",nameNew);
-        HBCIUtils.setParam("client.passport.RDHNew.init","0");
-        HBCIPassportInternal passportNew=(HBCIPassportInternal)AbstractHBCIPassport.getInstance("RDHNew");
-
-        passportNew.setCountry(passportOld.getCountry());
-        passportNew.setBLZ(passportOld.getBLZ());
-        passportNew.setHost(passportOld.getHost());
-        passportNew.setPort(passportOld.getPort());
-        passportNew.setUserId(passportOld.getUserId());
-        passportNew.setCustomerId(passportOld.getCustomerId());
-        passportNew.setSysId(passportOld.getSysId());
-        passportNew.setSigId(passportOld.getSigId());
-        passportNew.setProfileVersion(passportOld.getProfileVersion());
-        passportNew.setHBCIVersion(passportOld.getHBCIVersion());
-        passportNew.setBPD(passportOld.getBPD());
-        passportNew.setUPD(passportOld.getUPD());
-        
-        ((HBCIPassportRDHNew)passportNew).setInstSigKey(((AbstractRDHSWPassport)passportOld).getInstSigKey());
-        ((HBCIPassportRDHNew)passportNew).setInstEncKey(((AbstractRDHSWPassport)passportOld).getInstEncKey());
-        ((HBCIPassportRDHNew)passportNew).setMyPublicSigKey(((AbstractRDHSWPassport)passportOld).getMyPublicSigKey());
-        ((HBCIPassportRDHNew)passportNew).setMyPrivateSigKey(((AbstractRDHSWPassport)passportOld).getMyPrivateSigKey());
-        ((HBCIPassportRDHNew)passportNew).setMyPublicEncKey(((AbstractRDHSWPassport)passportOld).getMyPublicEncKey());
-        ((HBCIPassportRDHNew)passportNew).setMyPrivateEncKey(((AbstractRDHSWPassport)passportOld).getMyPrivateEncKey());
-        
-        passportNew.saveChanges();
-        
-        passportOld.close();
-        passportNew.close();            
-    }
 
     private static String readParam(String[] args,int idx,String st)
         throws IOException

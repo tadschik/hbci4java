@@ -22,6 +22,7 @@
 package org.kapott.hbci.passport;
 
 import java.io.File;
+import java.util.Properties;
 
 import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.exceptions.HBCI_Exception;
@@ -52,14 +53,14 @@ public class HBCIPassportSIZRDHFile
     
     private String passphrase;
         
-    public HBCIPassportSIZRDHFile(Object init,int dummy)
+    public HBCIPassportSIZRDHFile(Properties properties, HBCICallback callback, Object init, int dummy)
     {
-        super(init);
+        super(properties, callback, init);
     }
     
-    public HBCIPassportSIZRDHFile(Object initObject)
+    public HBCIPassportSIZRDHFile(Properties properties, HBCICallback callback, Object initObject)
     {
-        this(initObject,0);
+        this(properties, callback,initObject,0);
         setParamHeader("client.passport.SIZRDHFile");
 
         String  filename=HBCIUtils.getParam(getParamHeader()+".filename");

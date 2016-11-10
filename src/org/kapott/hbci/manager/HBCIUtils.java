@@ -21,33 +21,9 @@
 
 package org.kapott.hbci.manager;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.security.Security;
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.ResourceBundle;
-
-import org.kapott.cryptalgs.CryptAlgs4JavaProvider;
+import com.sun.javafx.scene.control.behavior.OptionalBoolean;
 import org.kapott.hbci.GV_Result.GVRKUms;
+import org.kapott.hbci.callback.AbstractHBCICallback;
 import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.comm.Comm;
 import org.kapott.hbci.exceptions.HBCI_Exception;
@@ -55,12 +31,18 @@ import org.kapott.hbci.exceptions.InvalidArgumentException;
 import org.kapott.hbci.exceptions.InvalidUserDataException;
 import org.kapott.hbci.structures.Konto;
 import org.kapott.hbci.swift.Swift;
+import org.slf4j.LoggerFactory;
+
+import java.io.*;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.text.*;
+import java.util.*;
+import java.util.Map.Entry;
 
 /** <p>Hilfsklasse für diverse Tools. Diese Klasse definiert nur statische
     Methoden und Konstanten. Sie kann nicht instanziiert werden. </p>
-    <p>Die wichtigsten Methoden dieser Klasse sind die Methoden zum Initialisieren des HBCI-Kernel
-    ({@link #init(Properties,org.kapott.hbci.callback.HBCICallback)}) sowie zum 
-    Setzen von HBCI-Kernel-Parametern ({@link #setParam(String,String)}).</p>
     <p>Kernel-Parameter können zu jedem beliebigen Zeitpunkt der Laufzeit einer Anwendung gesetzt werden.
     Das Setzen eines Kernel-Parameters geschieht mit der Methode <code>setParam()</code>. Dieser Methode
     werden der Name eines Kernel-Parameters sowie der neue Wert für diesen Parameter übergeben. Alternativ
@@ -313,21 +295,6 @@ import org.kapott.hbci.swift.Swift;
           alle erzeugten Log-Ausgaben protokollieren
           und zusammen mit einer Beschreibung des Problems an den 
           <a href="mailto:hbci4java@kapott.org">Autor</a> schicken.</p></li>
-      <li><code>log.filter</code>
-          <p>Alle Meldungen, die via {@link #log(String,int)} erzeugt werden, durchlaufen
-          einen Log-Filter, um sensible Daten aus den Logs zu entfernen. Mit diesem
-          Kernel-Parameter wird eingestellt, wie stark der Filter filtert. Mögliche
-          Werte für <code>log.filter</code> sind:</p>
-          <ul>
-            <li>0 - Es wird gar nicht gefiltert. Alle Daten erscheinen unbeschnitten im Log.</li>
-            <li>1 - Es werden nur "geheime" Daten gefiltert (Passwörter, PINs, TANs, ...)</li>
-            <li>2 - Es werden zusätzlich alle Daten gefiltert, anhand derer eine Identifikation
-                    möglich wäre (Kontonummern, Namen, User-IDs, Kunden-IDs)</li>
-            <li>3 - Es werden auch weniger sensible Daten gefiltert (Bankleitzahlen,
-                    Verwendungszweck, Geldbeträge, ...)</li>
-          </ul>
-          <p>Die Standard-Einstellung dieses Wertes ist 2 - es werden also alle
-          "identifizierenden" Daten und alle "geheimen" Daten gefiltert.</p></li>
       <li><code>log.ssl.enable</code>
           <p>Dieser Parameter kann die Werte 0 und 1 annehmen. Ist er auf 1 gesetzt,
           wird sämtliche Kommunikation, die bei Verwendung von HBCI-PIN/TAN über
@@ -346,15 +313,6 @@ import org.kapott.hbci.swift.Swift;
           <em>HBCI4Java</em> eine Warnung aus und erzeugt Log-Meldungen über den
           <em>HBCI4Java</em>-Log-Mechanismus (Callback-Methode <code>log()</code>)
           mit Log-Level <code>LOG_DEBUG2</code>.</p></li>
-      <li><code>kernel.locale.language</code>, <code>kernel.locale.country</code>,
-          <code>kernel.locale.variant</code>
-          <p>Mit diesen Kernel-Parameter kann die von <em>HBCI4Java</em> intern
-          verwendete Locale gesetzt werden. Nach dem Ändern dieser Werte muss die
-          Methode {@link #initLocale()} aufgerufen werden, damit diese Änderungen
-          wirksam werden. Die <em>HBCI4Java</em>-Locale hat Einfluss auf die
-          Sprache der erzeugten Callback-Messages, Exception-Texte sowie die
-          Arbeit von Konvertierungs-Funktionen wie {@link #date2StringLocal(Date)}
-          u.ä. </p></li>
       <li><code>infoPoint.enabled</code>
           <p>Der <em>HBCI4Java-InfoPoint-Server</em> ist ein Versuch, die richtigen
           HBCI-Konfigurations-Einstellungen für alle Banken zentral zu sammeln
@@ -392,7 +350,7 @@ import org.kapott.hbci.swift.Swift;
           Rewriter-Module fest, welche eingehende und ausgehende Nachrichten 
           durchlaufen sollen. Wird dieser Parameter nicht gesetzt, so
           verwendet <em>HBCI4Java</em> eine default-Liste von aktivierten
-          Rewriter-Modulen (kann mit {@link #getParam(String)} ermittelt werden).
+          Rewriter-Modulen (kann mit etParam(String) ermittelt werden).
           Wird dieser Parameter gesetzt, so wird die default-Einstellung
           überschrieben. Es können mehrere zu durchlaufende Rewriter-Module
           angegeben werden, indem sie durch Komma voneinander getrennt werden.</p></li>
@@ -500,28 +458,28 @@ public final class HBCIUtils
     public static final int LOG_DEBUG2=5;
     /** Loglevel für devel-Debugging - nicht benutzen! */
     public static final int LOG_INTERN=6;
-    
-    private static Hashtable<ThreadGroup, Properties>  configs;  // threadgroup->hashtable(paramname->paramvalue)
+
     private static char[] base64table={'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P',
                                        'Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f',
                                        'g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v',
                                        'w','x','y','z','0','1','2','3','4','5','6','7','8','9','+','/'};
+
+    private Properties properties;
+    private AbstractHBCICallback callback;
     static {
         initDataStructures();
     }
     
     private static void initDataStructures()
     {
-        configs=new Hashtable<ThreadGroup, Properties>();
-        HBCIUtilsInternal.callbacks=new Hashtable<ThreadGroup, HBCICallback>();
         HBCIUtilsInternal.blzs=new Properties();
-        HBCIUtilsInternal.banks=new HashMap<String,BankInfo>();
-        HBCIUtilsInternal.locMsgs=new Hashtable<ThreadGroup, ResourceBundle>();
-        HBCIUtilsInternal.locales=new Hashtable<ThreadGroup, Locale>();
+        HBCIUtilsInternal.banks= new HashMap<>();
     }
     
-    private HBCIUtils()
+    public HBCIUtils(Properties properties, AbstractHBCICallback callback)
     {
+        this.properties = properties;
+        this.callback = callback;
     }
     
     /** Lädt ein Properties-File, welches über ClassLoader.getRessourceAsStream()
@@ -582,325 +540,6 @@ public final class HBCIUtils
         }
 
         return props;
-    }
-
-    /**
-     * <p>
-     * Initialisieren der <em>HBCI4Java</em>-Umgebung. Diese Methode muss
-     * <em>vor allen anderen</em> HBCI-Methoden aufgerufen werden. Hiermit
-     * wird die <em>HBCI4Java</em>-Laufzeitumgebung initialisiert. Dazu
-     * gehören das Laden verschiedener Dateien aus dem <em>HBCI4Java</em>-Classpath
-     * (Dateien für die Lokalisierung von Nachrichten, Verzeichnis der Banken
-     * usw.) sowie das Initialisieren einiger interner Datenstrukturen.
-     * <p>
-     * Zusätzlich wird in dieser Methode die Methode
-     * {@link #initThread(Properties,HBCICallback)} aufgerufen, um alle
-     * Datenstrukturen, die <code>ThreadGroup</code>-weise verwaltet werden,
-     * für die aktuelle <code>ThreadGroup</code> zu initialisieren. Siehe dazu
-     * auch die Dokumentation zu {@link #initThread(Properties,HBCICallback)}
-     * sowie die Datei <code>README.MultiThread</code>.
-     * </p>
-     * 
-     * @param props
-     *            <code>Properties</code>-Objekt mit Initialisierungs-Werten
-     *            für die Kernel-Parameter. Darf <code>null</code> sein.
-     * @param callback
-     *            das zu verwendende Callback-Objekt. Beim Aufruf dieser Methode
-     *            darf <code>callback</code> niemals <code>null</code> sein
-     *            (im Gegensatz zum Aufruf von <code>initThread</code>, um
-     *            weitere <code>ThreadGroups</code> zu initialisieren).
-     */
-    public static synchronized void init(Properties props, HBCICallback callback)
-    {
-        try {
-            initThread(props,callback);
-            HBCIUtils.log("This is "+version(), HBCIUtils.LOG_INFO );
-            
-            refreshBLZList(HBCIUtils.class.getClassLoader());
-
-            if (Security.getProvider("CryptAlgs4Java")==null)
-                Security.addProvider(new CryptAlgs4JavaProvider());
-        } catch (Exception e) {
-            throw new HBCI_Exception("*** error while initializing HBCI4Java", e);
-        }
-    }
-    
-    /** Wrapper für {@link #init(Properties,HBCICallback)}. Siehe auch
-     * {@link #initThread(ClassLoader, String, HBCICallback)}.
-     * @param cl
-     *            der ClassLoader, der zum Laden von <code>configfile</code>
-     *            verwendet werden soll.
-     * @param configfile
-     *            der Name des zu ladenden Property-Files.
-     * @param callback
-     *            das zu verwendende Callback-Objekt. Beim Aufruf dieser Methode
-     *            darf <code>callback</code> niemals <code>null</code> sein
-     *            (im Gegensatz zum Aufruf von <code>initThread</code>, um
-     *            weitere <code>ThreadGroups</code> zu initialisieren).
-     * @deprecated */
-    public static synchronized void init(ClassLoader cl,String configfile,HBCICallback callback)
-    {
-        init(loadPropertiesFile(cl,configfile),callback);
-    }
-
-    /** Entspricht {@link #initThread(ClassLoader,String,HBCICallback) initThread(cl,configfile,null)}
-     *  @deprecated */
-    public static synchronized void initThread(ClassLoader cl,String configfile)
-    {
-        initThread(cl,configfile,null);
-    }
-    
-    /**
-     * Initialisieren der <em>HBCI4Java</em>-Umgebung für eine neue
-     * <code>ThreadGroup</code>. Soll <em>HBCI4Java</em> in einer
-     * multi-threaded Anwendung verwendet werden, bei der mehrere Threads
-     * gleichzeitig <em>HBCI4Java</em> benutzen, so muss für jeden solchen
-     * Thread eine separate <code>ThreadGroup</code> angelegt werden. Jede
-     * dieser <code>ThreadGroup</code>s muss mit dieser Methode für die
-     * Benutzung von <em>HBCI4Java</em> initialisiert werden. Alle
-     * HBCI-Kernel-Parameter sowie die HBCI-Callbacks werden für jede
-     * <code>ThreadGroup</code> separat verwaltet, so dass jede
-     * <code>ThreadGroup</code> also einen eigenen Satz dieser Daten benutzt.
-     * <p>
-     * Der Thread, in dem die Methode <code>HBCIUtils.init()</code> aufgerufen
-     * wird, muss <em>nicht</em> zusätzlich mit <code>initThread()</code>
-     * initialisiert werden, das wird automatisch von der Methode
-     * <code>init()</code> übernommen.
-     * </p>
-     * <p>
-     * Siehe dazu auch die Datei <code>README.MultiThreading</code> in den
-     * <em>HBCI4Java</em>-Archiven.
-     * </p>
-     * <p>
-     * Ist der Parameter <code>props</code> ungleich <code>null</code>,
-     * so werden die Kernel-Parameter für die aktuelle <code>ThreadGroup</code>
-     * mit den darin angegebenen Werten initialisiert. 
-     * </p>
-     * <p>
-     * Außerdem wird mit dieser Methode ein Callback-Objekt registriert, welches
-     * von <em>HBCI4Java</em> für die Kommunikation mit der Anwendung
-     * verwendet wird.
-     * </p>
-     * 
-     * @param props
-     *            <code>Property</code>-Objekt mit initialisierungs-Werten für die 
-     *            Kernel-Parameter. Darf auch <code>null</code> sein.
-     * @param callback
-     *            ein Objekt einer <code>HBCICallback</code>-Klasse, das
-     *            benutzt wird, um Anfragen des Kernels (benötigte Daten,
-     *            benötige Chipkarte, wichtige Informationen während der
-     *            Dialog-Ausführung etc.) an die Anwendung weiterzuleiten. Siehe
-     *            dazu {@link org.kapott.hbci.callback.HBCICallback}. Jede
-     *            <code>ThreadGroup</code> kann ein eigenes Callback-Objekt
-     *            registrieren, welches dann für alle HBCI-Prozesse innerhalb
-     *            dieser <code>ThreadGroup</code> verwendet wird. Wird beim
-     *            Initialisieren einer <code>ThreadGroup</code> kein
-     *            <code>callback</code>-Objekt angegeben (<code>callback==null</code>),
-     *            dann wird für diese <code>ThreadGroup</code> das
-     *            Callback-Objekt der "Eltern-<code>ThreadGroup</code>"
-     *            verwendet. Die "initiale" <code>ThreadGroup</code>, die mit
-     *            {@link #init(Properties,HBCICallback)} initialisiert
-     *            wird, muss ein <cod>callback!=null</code> spezifizieren.
-     */
-    public static synchronized void initThread(Properties props,HBCICallback callback)
-    {
-        ThreadGroup threadgroup=Thread.currentThread().getThreadGroup();
-        
-        if (HBCIUtilsInternal.callbacks.get(threadgroup)!=null) {
-            HBCIUtils.log("will not initialize this threadgroup because it is already initialized",HBCIUtils.LOG_WARN);
-        } else {
-            try {
-                // initialize kernel params
-                Properties config=new Properties();
-                if (props!=null) {
-                    config.putAll(props);
-                }
-                
-                synchronized (configs) {
-                    configs.put(threadgroup,config);
-                }
-                if (getParam("kernel.rewriter")==null) {
-                    setParam("kernel.rewriter","InvalidSegment,WrongStatusSegOrder,WrongSequenceNumbers,MissingMsgRef,HBCIVersion,SigIdLeadingZero,InvalidSuppHBCIVersion,SecTypeTAN,KUmsDelimiters,KUmsEmptyBDateSets");
-                }
-                
-                // initialize callback
-                if (callback==null) {
-                    ThreadGroup parent=Thread.currentThread().getThreadGroup().getParent();
-                    callback=HBCIUtilsInternal.callbacks.get(parent);
-                    if (callback==null) {
-                        throw new NullPointerException("no callback specified");
-                    }
-                }
-                HBCIUtilsInternal.callbacks.put(threadgroup,callback);
-                
-                // configure Locale
-                initLocale();
-                
-                HBCIUtils.log("initialized HBCI4Java for thread group "+threadgroup.getName(),
-                        HBCIUtils.LOG_DEBUG);
-
-            } catch (Exception ex) {
-                throw new HBCI_Exception("*** could not init HBCI4Java for thread group "+threadgroup.getName(),ex);
-            }
-        }
-    }
-
-    /**
-     * Wrapper für {@link #initThread(Properties,HBCICallback)}.
-     * <p>
-     * Ist der Parameter <code>configfile</code> ungleich <code>null</code>,
-     * so wird versucht, ein Property-File mit default-Einstellungen für die
-     * HBCI-Kernel-Parameter für die aktuelle <code>ThreadGroup</code> zu
-     * laden. Der Name des Property-Files wird durch den Parameter
-     * <code>configfile</code> bestimmt. Wie dieser Name interpretiert wird,
-     * um das Property-File tatsächlich zu finden, hängt von dem zum Laden
-     * benutzten ClassLoader ab. Im Parameter <code>cl</code> kann dazu eine
-     * ClassLoader-Instanz übergeben werden, deren <code>getRessource</code>-Methode
-     * benutzt wird, um das Property-File zu lokalisieren und zu laden. Wird
-     * kein ClassLoader angegeben (<code>cl==null</code>), so wird zum Laden
-     * des Property-Files der ClassLoader benutzt, der auch zum Laden der
-     * aufrufenden Klasse benutzt wurde.
-     * </p>
-     * <p>
-     * <b>Achtung</b>: Dieser Default-ClassLoader ist in den meisten Fällen ein
-     * ClassLoader, der in einem JAR-File bzw. im aktuellen CLASSPATH nach
-     * Ressourcen sucht. Soll ein Property-File von einer bestimmten Stelle im
-     * Filesystem geladen werden, so sollte hier statt dessen der ClassLoader
-     * {@link org.kapott.hbci.manager.FileSystemClassLoader} benutzt werden. In
-     * diesem Fall wird der angegebene Dateiname als relativer Pfad von der
-     * <em>Wurzel</em> des Dateisystems aus interpretiert. Eine Demonstration
-     * befindet sich im Tool
-     * {@link org.kapott.hbci.tools.AnalyzeReportOfTransactions}.
-     * </p>
-     * 
-     * @param cl
-     *            der ClassLoader, der verwendet werden soll, um das
-     *            Property-File <code>configfile</code> zu laden (mit der
-     *            Methode <code>ClassLoader.getRessource()</code>). Ist
-     *            dieser Parameter <code>null</code>, so wird der ClassLoader
-     *            verwendet, der auch zum Laden <em>der</em> Klasse benutzt
-     *            wurde, die die aufrufende Methode enthält.
-     * @param configfile
-     *            der Name des zu ladenden Property-Files. Ist dieser Parameter
-     *            <code>null</code>, kein Property-File geladen.
-     * @deprecated use {@link #initThread(Properties, HBCICallback)} instead
-     */
-    public static synchronized void initThread(ClassLoader cl,String configfile,HBCICallback callback)
-    {
-        initThread(loadPropertiesFile(cl,configfile), callback);
-    }
-    
-    /** Aufräumen der Datenstrukturen für aktuelle <code>ThreadGroup</code>. Alle
-     * <code>ThreadGroups</code>, die via {@link #initThread(Properties,HBCICallback)}
-     * initialisiert wurden, sollten kurz vor deren Ende mit dieser Methode wieder
-     * "aufgeräumt" werden, damit <em>HBCI4Java</em> die entsprechenden Datenstrukturen
-     * für diese <code>ThreadGroup</code> wieder freigeben kann. */
-    public static synchronized void doneThread()
-    {
-        HBCIUtils.log("removing all data for current thread",HBCIUtils.LOG_DEBUG);
-        
-        ThreadGroup group=Thread.currentThread().getThreadGroup();
-        HBCIUtilsInternal.callbacks.remove(group);
-        configs.remove(group);
-        HBCIUtilsInternal.locMsgs.remove(group);
-        HBCIUtilsInternal.locales.remove(group);
-    }
-    
-    /** Bereinigen aller <em>HBCI4Java</em>-Datenstrukturen. Nach Aufruf dieser
-     * Methode kann keine andere <em>HBCI4Java</em>-Funktion mehr benutzt
-     * werden. Durch erneuten Aufruf von {@link #init(Properties,HBCICallback)}
-     * kann <em>HBCI4Java</em> wieder re-initialisiert werden. */
-    public static synchronized void done()
-    {
-        HBCIUtils.log("destroying all HBCI4Java resources",HBCIUtils.LOG_DEBUG);
-        initDataStructures();
-    }
-
-    /** Aktualisieren der von <em>HBCI4Java</em> verwendeten Locale innerhalb
-     * der aktuellen ThreadGroup. Wenn die Kernel-Parameter <code>kernel.locale.*</code>
-     * geändert wurden, muss anschließend diese Methode aufgerufen werden, damit
-     * die Werte für diese Kernel-Parameter geprüft und die entsprechende 
-     * Locale für die aktuelle ThreadGroup aktiviert wird. Beim Aufruf von
-     * {@link #init(Properties, HBCICallback)} bzw. {@link #initThread(Properties, HBCICallback)}
-     * wird diese Methode automatisch aufgerufen - ein manueller Aufruf ist also
-     * nur notwendig, wenn die Kernel-Parameter <code>kernel.locale.*</code> <em>nach</em>
-     * dem Initialisieren des aktuellen Threads geändert werden. */
-    public static void initLocale()
-    {
-        String localeLang=getParam("kernel.locale.language", "");
-        String localeCountry=getParam("kernel.locale.country", "");
-        String localeVariant=getParam("kernel.locale.variant", "");
-        Locale locale;
-        
-        if (localeLang.trim().length()==0) {
-            locale=Locale.getDefault();
-            log("using default system locale "+locale.toString(), HBCIUtils.LOG_DEBUG);
-            
-        } else {
-            locale=new Locale(
-                    localeLang.trim(),
-                    localeCountry.trim(), 
-                    localeVariant.trim());
-            log("using specified locale "+locale.toString(), HBCIUtils.LOG_DEBUG);
-        }
-        
-        ThreadGroup threadgroup=Thread.currentThread().getThreadGroup();
-        synchronized (HBCIUtilsInternal.locales) {
-            HBCIUtilsInternal.locales.put(threadgroup,locale);
-        }
-        synchronized (HBCIUtilsInternal.locMsgs) {
-            HBCIUtilsInternal.locMsgs.put(
-                    threadgroup,
-                    ResourceBundle.getBundle("hbci4java-messages",locale));
-        }
-    }
-    
-    /** Gibt die Locale zurück, die von <em>HBCI4Java</em> innerhalb der aktuellen
-     * ThreadGroup verwendet wird. Siehe auch Kernel-Parameter <code>kernel.locale.*</code>
-     * sowie {@link #initLocale()}. */
-    public static Locale getLocale()
-    {
-        ThreadGroup group=Thread.currentThread().getThreadGroup();
-        return HBCIUtilsInternal.locales.get(group);
-    }
-
-    /** Gibt den aktuellen Wert eines bestimmten HBCI-Parameters zurück. 
-        Für jede {@link java.lang.ThreadGroup} wird ein separater
-        Satz von HBCI-Parametern verwaltet.
-        @param st Name des HBCI-Parameters
-        @param def default-Wert, falls dieser Parameter nicht definiert ist
-        @return den Wert des angegebenen HBCI-Parameters */
-    public static String getParam(String st,String def)
-    {
-        ThreadGroup group=Thread.currentThread().getThreadGroup();
-        Properties config=getParams();
-        if (config==null)
-            throw new HBCI_Exception(HBCIUtilsInternal.getLocMsg("EXCMSG_THREAD_NOTINIT",group.getName())); 
-        return config.getProperty(st,def);
-    }
-    
-    /** Gibt eine Map aller in der aktuellen ThreadGroup gesetzten Kernel-Parameter
-     * zurück. */
-    public static Properties getParams()
-    {
-        Properties  params;
-        ThreadGroup threadgroup=Thread.currentThread().getThreadGroup();
-        
-        synchronized (configs) {
-            params=configs.get(threadgroup);
-        }
-        
-        return params;
-    }
-
-    /** Gibt den aktuellen Wert eines bestimmten HBCI-Parameters zurück.
-        Für jede {@link java.lang.ThreadGroup} wird ein separater
-        Satz von HBCI-Parametern verwaltet.
-        @param st Name des HBCI-Parameters
-        @return den Wert des angegebenen HBCI-Parameters */
-    public static String getParam(String st)
-    {
-        return getParam(st,null);
     }
     
     /** Ermittelt zu einer gegebenen Bankleitzahl den Namen des Institutes.
@@ -1123,65 +762,6 @@ public final class HBCIUtils
             return "";
         return info.getPinTanVersion() != null ? info.getPinTanVersion().getId() : "";
     }
-
-    /** Setzt den Wert eines HBCI-Parameters. Eine Beschreibung aller vom Kernel ausgewerteten Parameter
-        befindet sich in der {@link org.kapott.hbci.manager.HBCIUtils Klassenbeschreibung} zur dieser Klasse.
-        Für jede {@link java.lang.ThreadGroup} wird ein separater
-        Satz von HBCI-Parametern verwaltet.
-        @param key Name des HBCI-Parameters.
-        @param value neuer Wert des zu setzenden HBCI-Parameters */
-    public static void setParam(String key,String value)
-    {
-        ThreadGroup group=Thread.currentThread().getThreadGroup();
-        Properties config=getParams();
-        if (config==null)
-            throw new HBCI_Exception(HBCIUtilsInternal.getLocMsg("EXCMSG_THREAD_NOTINIT",group.getName())); 
-        
-        synchronized (config) {
-            if (value!=null) {
-                config.setProperty(key,value);
-            } else {
-                config.remove(key);
-            }
-        }
-    }
-
-    /** Ausgabe eines Log-Strings über den Log-Mechanismus des HBCI-Kernels.
-        @param st der auszugebende String
-        @param level die "Wichtigkeit" dieser Meldung. mögliche Werte:
-               <ul>
-                 <li><code>LOG_ERR</code></li>
-                 <li><code>LOG_WARN</code></li>
-                 <li><code>LOG_INFO</code></li>
-                 <li><code>LOG_DEBUG</code></li>
-                 <li><code>LOG_CHIPCARD</code> (wird nur intern benutzt)</li>
-               </ul> */
-    public static synchronized void log(String st,int level)
-    {
-        if (level<=Integer.parseInt(getParam("log.loglevel.default","2"))) {
-            StackTraceElement trace=null;
-            try {
-                throw new Exception("");
-            } catch (Exception e) {
-                trace=e.getStackTrace()[1];
-            }
-            
-            int filterLevel=Integer.parseInt(HBCIUtils.getParam("log.filter","2"));
-            if (filterLevel!=0) {
-            	st=LogFilter.getInstance().filterLine(st,filterLevel);
-            }
-            
-            HBCIUtilsInternal.getCallback().log(st,level,new Date(),trace);
-        }
-    }
-    
-    /** Ausgabe der Meldungen einer Exception-Kette mit dem Level <code>LOG_ERR</code>.
-        @param e die Exception, deren <code>getMessage()</code>-Meldungen geloggt
-               werden sollen */
-    public static synchronized void log(Exception e)
-    {
-        log(e,LOG_ERR);
-    }
     
     /** Gibt den StackTrace einer Exception zurück. 
      *  @param e Exception
@@ -1216,19 +796,6 @@ public final class HBCIUtils
         
         return st.toString().trim();
     }
-    
-    /** Ausgabe der Meldungen einer Exception-Kette über den Log-Mechanismus
-        des HBCI-Kernels. Es werden auch alle <code>getCause()</code>-Exceptions
-        verfolgt und deren Meldung ausgegeben. Enthält keine der Exceptions dieser
-        Kette eine Message, so wird statt dessen ein Stacktrace ausgegeben.
-        @param e die Exception, deren <code>getMessage()</code>-Meldungen ausgegeben
-               werden sollen. 
-        @param level der Log-Level, mit dem die Meldungen geloggt werden sollen.
-               Siehe dazu auch {@link #log(String,int)} */
-    public static synchronized void log(Exception e,int level)
-    {
-        log(exception2String(e),level);
-    }
 
     /** Wandelt ein Byte-Array in eine entsprechende hex-Darstellung um.
         @param data das Byte-Array, für das eine Hex-Darstellung erzeugt werden soll
@@ -1262,7 +829,7 @@ public final class HBCIUtils
         String ret;
         
         try {
-            ret=DateFormat.getDateInstance(DateFormat.SHORT, HBCIUtils.getLocale()).format(date);
+            ret=DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault()).format(date);
         } catch (Exception e) {
             throw new InvalidArgumentException(date.toString());
         }
@@ -1280,7 +847,7 @@ public final class HBCIUtils
         Date ret;
         
         try {
-            ret=DateFormat.getDateInstance(DateFormat.SHORT, HBCIUtils.getLocale()).parse(date);
+            ret=DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault()).parse(date);
         } catch (Exception e) {
             throw new InvalidArgumentException(date);
         }
@@ -1298,7 +865,7 @@ public final class HBCIUtils
         String ret;
         
         try {
-            ret=DateFormat.getTimeInstance(DateFormat.SHORT, HBCIUtils.getLocale()).format(date);
+            ret=DateFormat.getTimeInstance(DateFormat.SHORT, Locale.getDefault()).format(date);
         } catch (Exception e) {
             throw new InvalidArgumentException(date.toString());
         }
@@ -1316,7 +883,7 @@ public final class HBCIUtils
         Date ret;
         
         try {
-            ret=DateFormat.getTimeInstance(DateFormat.SHORT, HBCIUtils.getLocale()).parse(date);
+            ret=DateFormat.getTimeInstance(DateFormat.SHORT, Locale.getDefault()).parse(date);
         } catch (Exception e) {
             throw new InvalidArgumentException(date);
         }
@@ -1334,7 +901,7 @@ public final class HBCIUtils
         String ret;
         
         try {
-            ret=DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, HBCIUtils.getLocale()).format(date);
+            ret=DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.getDefault()).format(date);
         } catch (Exception e) {
             throw new InvalidArgumentException(date.toString());
         }
@@ -1355,9 +922,9 @@ public final class HBCIUtils
         
         try {
             if (time!=null)
-                ret=DateFormat.getDateTimeInstance(DateFormat.SHORT,DateFormat.SHORT,HBCIUtils.getLocale()).parse(date+" "+time);
+                ret=DateFormat.getDateTimeInstance(DateFormat.SHORT,DateFormat.SHORT,Locale.getDefault()).parse(date+" "+time);
             else
-                ret=DateFormat.getDateInstance(DateFormat.SHORT,HBCIUtils.getLocale()).parse(date);
+                ret=DateFormat.getDateInstance(DateFormat.SHORT,Locale.getDefault()).parse(date);
         } catch (Exception e) {
             throw new InvalidArgumentException(date+" / "+time);
         }
@@ -1435,8 +1002,8 @@ public final class HBCIUtils
     
     private static void errDeprecated(String method)
     {
-        HBCIUtils.log("programming error: the method "+method+"() has been deprecated, is very dangerous and will be removed soon.", HBCIUtils.LOG_ERR);
-        HBCIUtils.log("programming error: please check your application to replace calls to "+method+"() with calls to either "+method+"Local() or "+method+"ISO()", HBCIUtils.LOG_ERR);
+        LoggerFactory.getLogger(HBCIUtils.class).info("programming error: the method "+method+"() has been deprecated, is very dangerous and will be removed soon.", HBCIUtils.LOG_ERR);
+        LoggerFactory.getLogger(HBCIUtils.class).info("programming error: please check your application to replace calls to "+method+"() with calls to either "+method+"Local() or "+method+"ISO()", HBCIUtils.LOG_ERR);
     }
     
     /** Wrapper für {@link #date2StringLocal(Date)}. 
@@ -1635,7 +1202,7 @@ public final class HBCIUtils
             cl=AccountCRCAlgs.class;
             method=cl.getMethod("alg_"+alg,new Class[] {int[].class, int[].class});
         } catch (Exception e) {
-            log("CRC algorithm "+alg+" not yet implemented", LOG_WARN);
+            LoggerFactory.getLogger(HBCIUtils.class).warn("CRC algorithm "+alg+" not yet implemented");
         }
         
         return method;
@@ -1686,11 +1253,11 @@ public final class HBCIUtils
 
         // Im Zweifel lassen wir die Bankverbindung lieber durch
         if (alg == null || alg.length() != 2) {
-            HBCIUtils.log("no crc information about "+blz+" in database", HBCIUtils.LOG_WARN);
+            LoggerFactory.getLogger(HBCIUtils.class).warn("no crc information about "+blz+" in database");
             return true;
         }
 
-        HBCIUtils.log("crc-checking "+blz+"/"+number, HBCIUtils.LOG_DEBUG);
+        LoggerFactory.getLogger(HBCIUtils.class).debug("crc-checking "+blz+"/"+number);
         return checkAccountCRCByAlg(alg,blz,number);
     }
     
@@ -1738,18 +1305,14 @@ public final class HBCIUtils
 
                     Object[] args=new Object[] {blz_digits, number_digits};
                     ret=((Boolean)method.invoke(null,args)).booleanValue();
-                    
-                    HBCIUtils.log(
-                        "CRC check for "+blz+"/"+number+" with alg "+alg+": "+ret,
-                        HBCIUtils.LOG_DEBUG);
+
+                    LoggerFactory.getLogger(HBCIUtils.class).debug("\"CRC check for \"+blz+\"/\"+number+\" with alg \"+alg+\": \"+ret");
                 } catch (Exception e) {
                     throw new HBCI_Exception(e);
                 }
             }
         } else {
-            HBCIUtils.log(
-                    "can not check account numbers with more than 10 digits ("+number+")- skipping CRC check",
-                    HBCIUtils.LOG_WARN);
+            LoggerFactory.getLogger(HBCIUtils.class).warn("can not check account numbers with more than 10 digits ("+number+")- skipping CRC check");
         }
         
         return ret;
@@ -1783,15 +1346,14 @@ public final class HBCIUtils
         return AccountCRCAlgs.checkCreditorId(creditorId);
     }
 
-    private static void refreshBLZList(ClassLoader cl)
+    private static void refreshBLZList(String blzpath)
         throws IOException
     {
-        String blzpath=HBCIUtils.getParam("kernel.kernel.blzpath");
         if (blzpath==null) {
             blzpath="";
         }
         blzpath+="blz.properties";
-        InputStream f=cl.getResourceAsStream(blzpath);
+        InputStream f=new FileInputStream(blzpath);
         
         if (f==null)
             throw new InvalidUserDataException(HBCIUtilsInternal.getLocMsg("EXCMSG_BLZLOAD",blzpath));
@@ -1811,10 +1373,10 @@ public final class HBCIUtils
      *           werden soll 
      * @throws IOException
      **/
-    public static synchronized void refreshBLZList(InputStream in)
+    public static void refreshBLZList(InputStream in)
         throws IOException
     {
-        HBCIUtils.log("trying to load BLZ data",HBCIUtils.LOG_DEBUG);
+        LoggerFactory.getLogger(HBCIUtils.class).debug("trying to load BLZ data");
         HBCIUtilsInternal.blzs.clear();
         HBCIUtilsInternal.blzs.load(in);
         
@@ -1901,5 +1463,51 @@ public final class HBCIUtils
         GVRKUms result=new GVRKUms();
         result.appendMT940Data(Swift.decodeUmlauts(mt940));
         return result;
+    }
+
+    public static void log(String s, int logDebug) {
+        switch (logDebug) {
+            case LOG_INTERN:
+            case LOG_NONE:
+                System.out.println(s);
+                break;
+            case LOG_ERR:
+                LoggerFactory.getLogger(HBCIUtils.class).error(s);
+                break;
+            case LOG_WARN:
+                LoggerFactory.getLogger(HBCIUtils.class).warn(s);
+                break;
+            case LOG_INFO:
+                LoggerFactory.getLogger(HBCIUtils.class).info(s);
+                break;
+            case LOG_DEBUG:
+            case LOG_DEBUG2:
+                LoggerFactory.getLogger(HBCIUtils.class).debug(s);
+                break;
+        }
+
+    }
+
+    public static void log(Exception e) {
+        LoggerFactory.getLogger(HBCIUtils.class).error(e.getMessage(), e);
+    }
+
+    public static String getParam(String s, String s1) {
+        return s1;
+    }
+
+    public static HBCICallback getCallback() {
+        return null;
+    }
+
+    public static String getParam(String s) {
+        return getParam(s, null);
+    }
+
+    public static void setParam(String s, Object o) {
+    }
+
+    public static Locale getLocale() {
+        return Locale.getDefault();
     }
 }

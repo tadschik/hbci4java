@@ -31,6 +31,7 @@ import java.security.Signature;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Arrays;
+import java.util.Properties;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -39,6 +40,7 @@ import javax.crypto.spec.DESedeKeySpec;
 import javax.crypto.spec.IvParameterSpec;
 
 import org.kapott.cryptalgs.RSAPrivateCrtKey2;
+import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.exceptions.HBCI_Exception;
 import org.kapott.hbci.manager.HBCIKey;
 import org.kapott.hbci.manager.HBCIUtils;
@@ -49,9 +51,9 @@ public abstract class AbstractRDHSWPassport
 {
     protected HBCIKey[][] keys;
 
-    protected AbstractRDHSWPassport(Object init)
+    protected AbstractRDHSWPassport(Properties properties, HBCICallback callback, Object init)
     {
-    	super(init);
+    	super(properties, callback, init);
     	
         keys=new HBCIKey[3][];
         for (int i=0;i<3;i++) {

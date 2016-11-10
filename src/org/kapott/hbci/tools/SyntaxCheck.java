@@ -69,7 +69,6 @@ public final class SyntaxCheck
         
         Properties props=new Properties();
         props.setProperty("log.loglevel.default", "6");
-        HBCIUtils.init(props,new HBCICallbackConsole());
         
         FileInputStream fi=new FileInputStream(ifilename);
         byte[]          buffer=new byte[1024];

@@ -23,6 +23,7 @@ package org.kapott.hbci.passport;
 
 import java.util.Properties;
 
+import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.comm.Comm;
 import org.kapott.hbci.comm.Filter;
 import org.kapott.hbci.manager.HBCIDialog;
@@ -147,4 +148,8 @@ public interface HBCIPassportInternal
      * oder nicht.
      */
     public int getMaxGVSegsPerMsg();
+
+    public Properties getProperties();
+
+    public HBCICallback getCallback();
 }

@@ -26,6 +26,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.manager.HBCIUtilsInternal;
@@ -107,8 +108,8 @@ public final class GVRWPDepotList
                         if (lockeduntil!=null) {
                             DateFormat df=DateFormat.getDateTimeInstance(
                                     DateFormat.SHORT, 
-                                    DateFormat.SHORT, 
-                                    HBCIUtils.getLocale());
+                                    DateFormat.SHORT,
+                                    Locale.getDefault());
                             ret.append(" until ").append(df.format(lockeduntil));
                         }
                     } else {

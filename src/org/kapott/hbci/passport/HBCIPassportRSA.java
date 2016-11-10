@@ -77,9 +77,9 @@ public class HBCIPassportRSA extends AbstractRDHPassport implements HBCIPassport
      * @param init
      * @param dummy
      */
-    public HBCIPassportRSA(Object init, int dummy)
+    public HBCIPassportRSA(Properties properties, HBCICallback callback, Object init, int dummy)
     {
-        super(init);
+        super(properties, callback, init);
         
         setParamHeader("client.passport.RSA");
         
@@ -95,9 +95,9 @@ public class HBCIPassportRSA extends AbstractRDHPassport implements HBCIPassport
      * ct.
      * @param init
      */
-    public HBCIPassportRSA(Object init)
+    public HBCIPassportRSA(Properties properties, HBCICallback callback, Object init)
     {
-        this(init, 0);
+        this(properties, callback, init, 0);
         
         ObjectInputStream is = null;
         

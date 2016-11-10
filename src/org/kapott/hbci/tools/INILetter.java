@@ -77,30 +77,5 @@ public final class INILetter
         
         return ret;
     }
-    
-    public static void main(String[] args)
-        throws IOException
-    {
-        String rdhtype=getArg(args,0,"Passport-Typ (RDH, RDHNew, SIZRDHFile oder RDHXFile)");
-        String pfilename=getArg(args,1,"Dateiname der Passport-Datei");
-        String ifilename=getArg(args,2,"Dateiname für INI-Brief (noch nicht existierende Text-Datei)");
-        
-        String header="client.passport."+rdhtype;
-        
-        HBCIUtils.init(null,new HBCICallbackConsole());
-        HBCIUtils.setParam(header+".filename",pfilename);
-        HBCIUtils.setParam(header+".init","1");
 
-        if (rdhtype.equals("SIZRDHFile")) {
-            String libname=getArg(args,3,"Dateiname der SIZ-RDH-Bibliothek");
-            HBCIUtils.setParam(header+".libname",libname);
-        }
-
-        passport=AbstractHBCIPassport.getInstance(rdhtype);
-        org.kapott.hbci.passport.INILetter iniletter=new org.kapott.hbci.passport.INILetter(passport,org.kapott.hbci.passport.INILetter.TYPE_USER);
-        
-        PrintWriter out=new PrintWriter(new FileWriter(ifilename));
-        out.print(iniletter.toString());
-        out.close();
-    }
 }
