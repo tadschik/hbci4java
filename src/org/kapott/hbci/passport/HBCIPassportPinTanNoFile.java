@@ -3,11 +3,7 @@ package org.kapott.hbci.passport;
 import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.manager.BankInfo;
 import org.kapott.hbci.manager.HBCIUtils;
-import org.kapott.hbci.manager.HBCIUtilsInternal;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
 import java.net.URL;
 import java.util.Properties;
 
@@ -47,7 +43,6 @@ public class HBCIPassportPinTanNoFile extends HBCIPassportPinTan {
     public void saveChanges() {}
 
     public static void main(String[] args) throws Exception{
-        ObjectInputStream o=new ObjectInputStream(new FileInputStream(new File("/Users/alexg/tools/hbci4java-stable/pintan_hbci4java")));
-        System.out.println(o.readObject());
+        //...
     }
 }
