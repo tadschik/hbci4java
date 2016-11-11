@@ -41,8 +41,4 @@ public class HBCIPassportPinTanNoFile extends HBCIPassportPinTan {
 
     @Override
     public void saveChanges() {}
-
-    public static void main(String[] args) throws Exception{
-        //...
-    }
 }
