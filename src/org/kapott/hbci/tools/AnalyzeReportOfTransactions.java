@@ -21,28 +21,10 @@
 
 package org.kapott.hbci.tools;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
 import org.kapott.hbci.GV.HBCIJob;
 import org.kapott.hbci.GV_Result.GVRKUms;
 import org.kapott.hbci.GV_Result.GVRKUms.UmsLine;
-import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.callback.HBCICallbackConsole;
-import org.kapott.hbci.callback.HBCICallbackUnsupported;
-import org.kapott.hbci.concurrent.DefaultHBCIPassportFactory;
-import org.kapott.hbci.concurrent.HBCIPassportFactory;
-import org.kapott.hbci.concurrent.HBCIRunnable;
-import org.kapott.hbci.concurrent.HBCIThreadFactory;
-import org.kapott.hbci.exceptions.HBCI_Exception;
-import org.kapott.hbci.exceptions.InvalidUserDataException;
-import org.kapott.hbci.manager.FileSystemClassLoader;
 import org.kapott.hbci.manager.HBCIHandler;
 import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.passport.AbstractHBCIPassport;
@@ -50,6 +32,10 @@ import org.kapott.hbci.passport.HBCIPassport;
 import org.kapott.hbci.passport.HBCIPassportPinTan;
 import org.kapott.hbci.status.HBCIExecStatus;
 import org.kapott.hbci.structures.Konto;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * <p>Tool zum Abholen und Auswerten von Kontoauszügen, gleichzeitig
@@ -99,14 +85,6 @@ import org.kapott.hbci.structures.Konto;
  * entsprechende Überprüfungen vornimmt).</p>
  */
 public final class AnalyzeReportOfTransactions {
-    private static class MyHBCICallback
-            extends HBCICallbackConsole {
-        public void callback(HBCIPassport passport, int reason, String msg, int dataType, StringBuffer retData) {
-//            System.out.println("Callback für folgendes Passport: "+passport.getClientData("init").toString());
-            super.callback(passport, reason, msg, dataType, retData);
-        }
-    }
-
     public static void main(String[] args)
             throws Exception {
 
@@ -120,23 +98,24 @@ public final class AnalyzeReportOfTransactions {
         properties.put("client.passport.PinTan.checkcert", "1");
         properties.put("client.passport.PinTan.init", "1");
 
+        // Initialize Bank Data
         properties.put("client.passport.country", "DE");
         properties.put("client.passport.blz", "blz");
-        properties.put("client.passport.customerId", "konto");
+        properties.put("client.passport.customerId", "account");
 
-        // Nutzer-Passport initialisieren
-        HBCIPassportPinTan passport = (HBCIPassportPinTan)AbstractHBCIPassport.getInstance(new MyHBCICallback(), properties);
-        passport.setPIN("PIN");
+        // Initialize User Passport
+        HBCIPassportPinTan passport = (HBCIPassportPinTan)AbstractHBCIPassport
+                .getInstance(new HBCICallbackConsole(), properties);
 
-        // HBCI Objekte
+        passport.setPIN("pin");
+
+        // Initialize and use HBCI handle
         HBCIHandler hbciHandle = null;
-
         try {
-            // ein HBCI-Handle für einen Nutzer erzeugen
             String version = passport.getHBCIVersion();
             hbciHandle = new HBCIHandler((version.length() != 0) ? version : "300", passport);
 
-            // Kontoauszüge auflisten
+            // Read bank account statement
             analyzeReportOfTransactions(passport, hbciHandle);
 
         } finally {
@@ -148,81 +127,59 @@ public final class AnalyzeReportOfTransactions {
         }
     }
 
-    public static void main_multithreaded(String[] args)
-            throws Exception {
-
-        // Da im main-Thread keine HBCI Aktionen laufen sollen, reicht es hier, die Umgebung
-        // nur "notdürftig" zu initialisieren. Leere Konfiguration, und keine Callback-Unterstützung.
-//        HBCIUtils.init(new Properties(), new HBCICallbackUnsupported());
-
-        // Die Verwendung der HBCIThreadFactory ist für die korrekte Funktionsweise von HBCI4Java zwingend erforderlich
-        // (Alternativ müsste manuell sichergestellt werden, dass jeder Thread in einer eigenen Thread-Gruppe läuft.)
-        ExecutorService executor = Executors.newCachedThreadPool(new HBCIThreadFactory());
-
-        // Einstellungen für die Aufgabe erstellen
-        Properties properties = loadPropertiesFile("/Users/alexg/tools/hbci4java.properties");
-        HBCICallback callback = new MyHBCICallback();
-        HBCIPassportFactory passportFactory = new DefaultHBCIPassportFactory((Object) "Passport für Kontoauszugs-Demo");
-
-//        analyzeReportOfTransactions(passport, handler);
-
-
-    }
-
     private static void analyzeReportOfTransactions(HBCIPassport hbciPassport, HBCIHandler hbciHandle) {
-        // auszuwertendes Konto automatisch ermitteln (das erste verfügbare HBCI-Konto)
+        // Use first available HBCI account
+        // If this does not work, use: Konto myaccount=new Konto("DE","86055592","1234567890");
         Konto myaccount = hbciPassport.getAccounts()[0];
-        // wenn der obige Aufruf nicht funktioniert, muss die abzufragende
-        // Kontoverbindung manuell gesetzt werden:
-        // Konto myaccount=new Konto("DE","86055592","1234567890");
 
-        // Job zur Abholung der Kontoauszüge erzeugen
-        HBCIJob auszug = hbciHandle.newJob("KUmsAll");
-        auszug.setParam("my", myaccount);
-        // evtl. Datum setzen, ab welchem die Auszüge geholt werden sollen
-        // job.setParam("startdate","21.5.2003");
-        auszug.addToQueue();
+        // Create HBCI job
+        HBCIJob bankAccountStatementJob = hbciHandle.newJob("KUmsAll");
+        bankAccountStatementJob.setParam("my", myaccount);
 
-        // alle Jobs in der Job-Warteschlange ausführen
+        // Set bank account statement retrieval date
+        // bankAccountStatementJob.setParam("startdate","21.5.2003");
+
+        bankAccountStatementJob.addToQueue();
+
+        // Execute all jobs
         HBCIExecStatus ret = hbciHandle.execute();
 
-        GVRKUms result = (GVRKUms) auszug.getJobResult();
-        // wenn der Job "Kontoauszüge abholen" erfolgreich ausgeführt wurde
-        if (result.isOK()) {
-            // kompletten kontoauszug als string ausgeben:
-            System.out.println(result.toString());
+        // GVRKUms = Geschäfts Vorfall Result Konto Umsatz
+        GVRKUms result = (GVRKUms) bankAccountStatementJob.getJobResult();
 
-            // kontoauszug durchlaufen, jeden eintrag einmal anfassen:
+        if (result.isOK()) {
+            // Log bank account statement result
+            System.out.println("************************** RESULT of **************************");
+            System.out.println("****************  AnalyzeReportOfTransactions  ****************\n");
+            System.out.println(result.toString());
+            System.out.println("***************************************************************");
 
             List<UmsLine> lines = result.getFlatData();
-            // int  numof_lines=lines.size();
 
-            for (Iterator<UmsLine> j = lines.iterator(); j.hasNext(); ) { // alle Umsatzeinträge durchlaufen
+            // Iterate revenue entries
+            for (Iterator<UmsLine> j = lines.iterator(); j.hasNext(); ) {
                 UmsLine entry = j.next();
 
-                // für jeden Eintrag ein Feld mit allen Verwendungszweckzeilen extrahieren
                 List<String> usages = entry.usage;
-                // int  numof_usagelines=usages.size();
 
-                for (Iterator<String> k = usages.iterator(); k.hasNext(); ) { // alle Verwendungszweckzeilen durchlaufen
+                // Iterate intended purpose (usage) entries
+                for (Iterator<String> k = usages.iterator(); k.hasNext(); ) {
                     String usageline = k.next();
 
-                    // ist eine bestimmte Rechnungsnummer gefunden (oder welche
-                    // Kriterien hier auch immer anzuwenden sind), ...
+                    // Check for content
                     if (usageline.equals("Rechnung 12345")) {
-                        // hier diesen Umsatzeintrag (<entry>) auswerten
+                        // Evaluate revenue entry (<entry>)
 
-                        // entry.bdate enthält Buchungsdatum
-                        // entry.value enthält gebuchten Betrag
-                        // entry.usage enthält die Verwendungszweck-zeilen
-                        // mehr Informationen sie Dokumentation zu
-                        //   org.kapott.hbci.GV_Result.GVRKUms
+                        // entry.bdate contains booking date
+                        // entry.value contains booked Sum
+                        // entry.usage contains die usage-lines
+                        // for more information, see documentation ->
+                        // org.kapott.hbci.GV_Result.GVRKUms
                     }
                 }
             }
-
         } else {
-            // Fehlermeldungen ausgeben
+            // Log error messages
             System.out.println("Job-Error");
             System.out.println(result.getJobStatus().getErrorString());
             System.out.println("Global Error");
@@ -230,34 +187,6 @@ public final class AnalyzeReportOfTransactions {
         }
     }
 
-    /**
-     * Lädt ein Properties-File, welches über ClassLoader.getRessourceAsStream()
-     * gefunden wird. Der Name des Property-Files wird durch den Parameter
-     * <code>configfile</code> bestimmt. Wie dieser Name interpretiert wird,
-     * um das Property-File tatsächlich zu finden, hängt von dem zum Laden
-     * benutzten ClassLoader ab. Im Parameter <code>cl</code> kann dazu eine
-     * ClassLoader-Instanz übergeben werden, deren <code>getRessource</code>-Methode
-     * benutzt wird, um das Property-File zu lokalisieren und zu laden. Wird
-     * kein ClassLoader angegeben (<code>cl==null</code>), so wird zum Laden
-     * des Property-Files der ClassLoader benutzt, der auch zum Laden der
-     * aufrufenden Klasse benutzt wurde.
-     *
-     * @param cl         ClassLoader, der zum Laden des Property-Files verwendet werden soll
-     * @param configfile Name des zu ladenden Property-Files (kann <code>null</code>
-     *                   sein - in dem Fall gibt diese Methode auch <code>null</code> zurück).
-     * @return Properties-Objekt
-     */
-    public static Properties loadPropertiesFile(String configfile) {
-        Properties props = null;
-
-        try (InputStream f = new FileInputStream(configfile)) {
-            props = new Properties();
-            props.load(f);
-        } catch (Exception e) {
-            throw new HBCI_Exception("*** can not load config file " + configfile, e);
-        }
-
-        return props;
-    }
-
+    @Deprecated
+    public final void main_multithreaded(String[] str){};
 }
