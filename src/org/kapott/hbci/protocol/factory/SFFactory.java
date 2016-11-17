@@ -33,7 +33,7 @@ public class SFFactory
 {
     private static SFFactory instance;
     
-    public static synchronized SFFactory getInstance()
+    public static SFFactory getInstance()
     {
         if (instance==null) {
             instance=new SFFactory();

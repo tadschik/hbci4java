@@ -86,7 +86,7 @@ public class HBCICallbackIOStreams
     Format "<code>yyyy.MM.dd HH:mm:ss.SSS</code>", die Namen der ThreadGroup und des Threads, aus dem 
     heraus die Log-Message erzeugt wurde, der Klassenname der Klasse, welche die Log-Ausgabe
     erzeugt hat sowie die eigentliche Log-Message */
-    public synchronized void log(String msg, int level, Date date, StackTraceElement trace) 
+    public void log(String msg, int level, Date date, StackTraceElement trace)
     {
     	String line=createDefaultLogLine(msg,level,date,trace);
         getOutStream().println(line);
@@ -251,7 +251,7 @@ public class HBCICallbackIOStreams
                     String newiban=getInStream().readLine();
                     if (newiban.length()!=0 && !newiban.equals(iban)) {
                     	retData.replace(0,retData.length(),newiban);
-                    	logfilter.addSecretData(newiban,"X",LogFilter.FILTER_IDS);
+                    	logfilter.addSecretData(newiban,"X", LogFilter.FILTER_IDS);
                     }
                     break;
     
@@ -346,7 +346,7 @@ public class HBCICallbackIOStreams
     /** Wird diese Methode von <em>HBCI4Java</em> aufgerufen, so wird der aktuelle
     Bearbeitungsschritt (mit evtl. vorhandenen zusätzlichen Informationen)
     auf <code>outStream</code> ausgegeben. */
-    public synchronized void status(HBCIPassport passport, int statusTag, Object[] o) {
+    public void status(HBCIPassport passport, int statusTag, Object[] o) {
         switch (statusTag) {
             case STATUS_INST_BPD_INIT:
                 getOutStream().println(HBCIUtilsInternal.getLocMsg("STATUS_REC_INST_DATA"));

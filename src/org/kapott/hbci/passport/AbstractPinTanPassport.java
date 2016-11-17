@@ -1092,7 +1092,7 @@ public abstract class AbstractPinTanPassport
                             if (secmechInfo.getProperty("needchallengeklass","N").equals("J"))
                             {
                                 HBCIUtils.log("we are in PV #1, and a challenge klass is required",HBCIUtils.LOG_DEBUG);
-                                ChallengeInfo cinfo = ChallengeInfo.getInstance();
+                                ChallengeInfo cinfo = new ChallengeInfo();
                                 cinfo.applyParams(task,hktan,secmechInfo);
                             }
 

@@ -254,7 +254,7 @@ public class HBCIUtilsInternal
     	return ret;
     }
     
-    private static synchronized InfoPointConnector getInfoPointConnector()
+    private static InfoPointConnector getInfoPointConnector()
     {
         if (infoPointConnector==null) {
             infoPointConnector=new InfoPointConnector();

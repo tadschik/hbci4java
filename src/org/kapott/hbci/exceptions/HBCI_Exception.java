@@ -56,7 +56,7 @@ public class HBCI_Exception
         try {
             int filterLevel=Integer.parseInt(HBCIUtils.getParam("log.filter","2"));
             if (filterLevel!=0) {
-                st=LogFilter.getInstance().filterLine(st,filterLevel);
+                st= LogFilter.getInstance().filterLine(st,filterLevel);
             }
         } catch (Exception e) {
             System.out.println("strange exception: "+e);

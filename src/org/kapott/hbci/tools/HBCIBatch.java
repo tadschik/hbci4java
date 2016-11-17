@@ -153,7 +153,7 @@ public class HBCIBatch
         
         // modifizierte callback-methode, die daten-anfragen "automatisch"
         // beantwortet
-        public synchronized void callback(HBCIPassport passport,int reason,String msg,int datatype,StringBuffer retData)
+        public void callback(HBCIPassport passport,int reason,String msg,int datatype,StringBuffer retData)
         {
             switch (reason) {
                 case NEED_CHIPCARD:
@@ -228,7 +228,7 @@ public class HBCIBatch
         }
         
         // ausgabe der status-meldungen komplett unterbinden
-        public synchronized void status(HBCIPassport passport,int statusTag,
+        public void status(HBCIPassport passport,int statusTag,
                                         Object[] objs)
         {
         }

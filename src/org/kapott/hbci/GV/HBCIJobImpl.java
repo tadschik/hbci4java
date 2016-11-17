@@ -43,7 +43,6 @@ import org.kapott.hbci.exceptions.JobNotSupportedException;
 import org.kapott.hbci.manager.HBCIHandler;
 import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.manager.HBCIUtilsInternal;
-import org.kapott.hbci.manager.LogFilter;
 import org.kapott.hbci.manager.MsgGen;
 import org.kapott.hbci.passport.HBCIPassport;
 import org.kapott.hbci.passport.HBCIPassportInternal;
@@ -247,7 +246,7 @@ public abstract class HBCIJobImpl
      * verwendet wurde, ebenfalls beruecksichtigt werden.
      * @param version die neue Versionsnummer.
      */
-    public synchronized void setSegVersion(String version)
+    public void setSegVersion(String version)
     {
       if (version == null || version.length() == 0)
       {
@@ -685,9 +684,6 @@ public abstract class HBCIJobImpl
     	// wenn der Parameter einen LogFilter-Level gesetzt hat, dann den
     	// betreffenden Wert zum Logfilter hinzufügen
     	Integer logFilterLevel=logFilterLevels.get(paramName);
-    	if (logFilterLevel!=null && logFilterLevel.intValue()!=0) {
-    		LogFilter.getInstance().addSecretData(value,"X",logFilterLevel.intValue());
-    	}
 
         String[][]           destinations=constraints.get(paramName);
         HBCIPassportInternal passport=getMainPassport();

@@ -129,18 +129,6 @@ public abstract class MultipleSyntaxElements
                     child.setParent(this);
             }
         } catch (RuntimeException e) {
-            for (Iterator<SyntaxElement> i=getElements().iterator();i.hasNext();) {
-                Object o=i.next();
-                if (o instanceof SF) {
-                    SFFactory.getInstance().unuseObject(o);
-                } else if (o instanceof SEG) {
-                    SEGFactory.getInstance().unuseObject(o);
-                } else if (o instanceof DEG) {
-                    DEGFactory.getInstance().unuseObject(o);
-                } else {
-                    DEFactory.getInstance().unuseObject(o);
-                }
-            }
             throw e;
         }
     }
@@ -501,18 +489,6 @@ public abstract class MultipleSyntaxElements
                 }
             }
         } catch (RuntimeException e) {
-            for (Iterator<SyntaxElement> i=getElements().iterator();i.hasNext();) {
-                SyntaxElement o=i.next();
-                if (o instanceof SF) {
-                    SFFactory.getInstance().unuseObject(o);
-                } else if (o instanceof SEG) {
-                    SEGFactory.getInstance().unuseObject(o);
-                } else if (o instanceof DEG) {
-                    DEGFactory.getInstance().unuseObject(o);
-                } else {
-                    DEFactory.getInstance().unuseObject(o);
-                }
-            }
             throw e;
         }
     }

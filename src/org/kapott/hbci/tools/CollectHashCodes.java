@@ -87,7 +87,7 @@ public class CollectHashCodes
                     break;
             }
         }
-        public synchronized void status(HBCIPassport passport,int statusTag,
+        public void status(HBCIPassport passport,int statusTag,
                                         Object[] o)
         {
         }

@@ -97,7 +97,7 @@ public class HBCIPassportRDHXFile
                             HBCICallback.TYPE_SECRET,
                             retData);
                     // TODO: passwort-bedingungen nach spez. prüfen
-                    LogFilter.getInstance().addSecretData(retData.toString(),"X",LogFilter.FILTER_SECRETS);
+                    LogFilter.getInstance().addSecretData(retData.toString(),"X", LogFilter.FILTER_SECRETS);
                     setPassphrase(retData.toString().getBytes());
                 }
             	

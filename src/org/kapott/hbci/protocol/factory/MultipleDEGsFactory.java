@@ -33,7 +33,7 @@ public class MultipleDEGsFactory
 {
     private static MultipleDEGsFactory instance;
     
-    public static synchronized MultipleDEGsFactory getInstance()
+    public static MultipleDEGsFactory getInstance()
     {
         if (instance==null) {
             instance=new MultipleDEGsFactory();

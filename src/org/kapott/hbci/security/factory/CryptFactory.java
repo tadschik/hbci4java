@@ -32,7 +32,7 @@ public class CryptFactory
 {
     private static CryptFactory instance;
     
-    public static synchronized CryptFactory getInstance()
+    public static CryptFactory getInstance()
     {
         if (instance==null) {
             HBCIUtils.log("creating new crypt factory",HBCIUtils.LOG_DEBUG);

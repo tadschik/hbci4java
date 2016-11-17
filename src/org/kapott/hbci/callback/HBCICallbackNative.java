@@ -146,7 +146,7 @@ public final class HBCICallbackNative
     public native void nativeStatus(HBCIPassport passport,int statusTag,Object[] o);
 
     /** Ruft {@link #nativeLog(String, int, Date, StackTraceElement)} auf. */
-    public synchronized void log(String msg,int level,Date date,StackTraceElement trace)
+    public void log(String msg,int level,Date date,StackTraceElement trace)
     {
         nativeLog(msg,level,date,trace);
     }
@@ -158,7 +158,7 @@ public final class HBCICallbackNative
     }
     
     /** Ruft {@link #nativeStatus(HBCIPassport, int, Object[])} auf. */
-    public synchronized void status(HBCIPassport passport,int statusTag,Object[] o)
+    public void status(HBCIPassport passport,int statusTag,Object[] o)
     {
         nativeStatus(passport,statusTag,o);
     }

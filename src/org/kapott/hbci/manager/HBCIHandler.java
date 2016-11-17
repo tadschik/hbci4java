@@ -110,7 +110,7 @@ public final class HBCIHandler
                  <li>"<code>300</code>" für FinTS 3.0</li>
                </ul>
         @param passport das zu benutzende Passport. Dieses muss vorher mit
-               {@link org.kapott.hbci.passport.AbstractHBCIPassport#getInstance()}
+               {@link org.kapott.hbci.passport.AbstractHBCIPassport#}
                erzeugt worden sein */
     public HBCIHandler(String hbciversion,HBCIPassport passport)
     {
@@ -535,139 +535,6 @@ public final class HBCIHandler
                 HBCIUtils.log(e);
             }
         }
-    }
-    
-    /** <p>Entspricht {@link #execute()}, allerdings können Callbacks hier auch synchron
-     * behandelt werden. Bei einem Aufruf von <code>executeThreaded()</code>
-     * anstelle von <code>execute()</code> wird der eigentliche HBCI-Dialog in einem
-     * separaten Thread geführt. Bei evtl. auftretenden Callbacks wird geprüft,
-     * ob diese synchron oder asynchron zu behandeln sind. Im asynchronen Fall
-     * wird der Callback wie gewohnt durch Aufruf der <code>callback()</code>-Methode
-     * des registrierten "normalen" Callback-Objektes behandelt. Soll ein Callback
-     * synchron behandelt werden, terminiert diese Methode.</p>
-     * <p>Das zurückgegebene Status-Objekt zeigt an, ob diese Methode terminierte,
-     * weil ein synchron zu behandelnder Callback aufgetreten ist oder weil die
-     * Ausführung aller HBCI-Dialoge abgeschlossen ist.</p>
-     * <p>Mehr Informationen dazu in der Datei <code>README.ThreadedCallbacks</code>.</p>*/
-    public HBCIExecThreadedStatus executeThreaded()
-    {
-        HBCIUtils.log("main thread: starting new threaded execute",HBCIUtils.LOG_DEBUG);
-        
-        final ThreadSyncer sync_main=new ThreadSyncer("sync_main");
-        passport.setPersistentData("thread_syncer_main",sync_main);
-        
-        new Thread() { public void run() {
-            try {
-                HBCIUtils.log("hbci thread: starting execute()",HBCIUtils.LOG_DEBUG);
-                
-                HBCIExecStatus execStatus=execute();
-                sync_main.setData("execStatus",execStatus);
-            } catch (Exception e) {
-                // im fehlerfall (der eigentlich nie auftreten sollte, weil execute()
-                // selbst alle exceptions catcht) muss sicherheitshalber ein noch
-                // im sync-objekt enthaltenes altes execStatus-objekt entfernt
-                // werden
-                sync_main.setData("execStatus",null);
-            } finally {
-                // die existenz von "thread_syncer" im passport entscheidet
-                // in CallbackThreaded darüber, ob der threaded callback mechanimus
-                // verwendet werden soll oder das standard-callback.
-                // der threaded mechanismus wird allerdings *nur* für hbci.execute()
-                // verwendet, deshalb muss das thread_syncer-Objekt wieder entfernt
-                // werden, wenn hbci.execute() beendet ist.
-                passport.setPersistentData("thread_syncer_main",null);
-                
-                // egal, wie der hbci-thread beendet wird (fehlerhaft oder nicht),
-                // am ende muss auf jeden fall ein evtl. noch wartender main-thread
-                // wieder aufgeweckt werden (das kann entweder executeThreaded()
-                // oder continueThreaded() sein)
-                HBCIUtils.log("hbci thread: awaking main thread with hbci result data",HBCIUtils.LOG_DEBUG);
-                sync_main.setData("callbackData",null);
-                sync_main.stopWaiting();
-                
-                HBCIUtils.log("hbci thread: thread finished",HBCIUtils.LOG_DEBUG);
-            }
-        }}.start();
-        
-        // für dieses wait() brauche ich kein timeout, weil der hbci-thread auf
-        // jeden fall ein notify() macht, sobald er beendet wird oder sobald der
-        // hbci-thread callback-daten braucht. die sichere beendigung des 
-        // hbci-threads wiederum wird dadurch abgesichert, dass die waits() aus
-        // dem hbci-thread (warten auf callback-daten) mit timeouts versehen sind
-        HBCIUtils.log("main thread: waiting for hbci result or callback data from hbci thread",HBCIUtils.LOG_DEBUG);
-        sync_main.startWaiting(Integer.parseInt(HBCIUtils.getParam("kernel.threaded.maxwaittime","300")), "no response from hbci thread - timeout");
-        
-        HBCIExecThreadedStatus threadStatus=new HBCIExecThreadedStatus();
-        threadStatus.setCallbackData((Hashtable<String, Object>)sync_main.getData("callbackData"));
-        threadStatus.setExecStatus((HBCIExecStatus)sync_main.getData("execStatus"));
-        
-        HBCIUtils.log(
-            "main thread: received answer from hbci thread, returning status "+
-            "(isCallback="+threadStatus.isCallback()+
-            ", isFinished="+threadStatus.isFinished()+")",
-            HBCIUtils.LOG_DEBUG);
-
-        return threadStatus;
-    }
-    
-    /** <p>Setzt bei Verwendung des threaded-callback-Mechanismus einen noch 
-     * aktiven HBCI-Dialog fort. Trat bei der Ausführung eines HBCI-Dialoges
-     * via {@link #executeThreaded()} ein synchroner Callback auf, so dass
-     * <code>executeThreaded()</code> terminierte und der Rückgabewert anzeigte,
-     * dass Callback-Daten benötigt werden 
-     * ({@link HBCIExecThreadedStatus#isCallback()}<code>==true</code>), dann
-     * müssen die benötigten Callback-Daten mit 
-     * <code>continueThreaded(String)</code> an den HBCI-Kernel übergeben 
-     * werden.</p>
-     * <p>Das führt dazu, dass der HBCI-Kernel die übergebenen Callback-Daten
-     * an den wartenden HBCI-Thread übergibt (der immer noch mit der Ausführung
-     * des HBCI-Dialoges beschäftigt ist und auf Daten von der Anwendung 
-     * wartet).</p>
-     * <p>Der Rückgabewert von <code>continueThreaded(String)</code> ist wieder
-     * ein <code>HBCIExecThreadedStatus</code>-Objekt (analog zu
-     * <code>executeThreaded()</code>), welches anzeigt, ob weitere Callback-
-     * Daten benötigt werden oder ob der HBCI-Dialog nun beendet ist. Falls
-     * weitere Callback-Daten benötigt werden, sind diese wiederum via
-     * <code>continueThreaded(String)</code> an den HBCI-Kernel zu übergeben,
-     * und zwar so lange, bis der HBCI-Dialog tatsächlich beendet ist.</p>
-     * <p>Mehr Informationen zu threaded callbacks in der Datei
-     * <code>README.ThreadedCallbacks</code>. */
-    public HBCIExecThreadedStatus continueThreaded(String retData)
-    {
-        HBCIUtils.log("main thread: continuing hbci dialog with callback retData",HBCIUtils.LOG_DEBUG);
-        
-        // diese sync-objekte gibt es immer (bei richtiger verwendung des API),
-        // weil continueThreaded() nur nach einem initialen executeThreaded()
-        // ausgeführt werden darf und auch nur dann, wenn bei beiden methoden
-        // noch kein endgültiges hbci-exec-status zurückgegeben wurde
-
-        // damit wird das wait() im threaded callback wieder aufgeweckt
-        ThreadSyncer sync_hbci=(ThreadSyncer)passport.getPersistentData("thread_syncer_hbci");
-        sync_hbci.setData("retData",retData);
-        
-        HBCIUtils.log("main thread: awaking hbci thread with callback data from application",HBCIUtils.LOG_DEBUG);
-        sync_hbci.stopWaiting();
-        
-        // für dieses wait() brauche ich kein timeout, weil der hbci-thread auf
-        // jeden fall ein notify() macht, sobald er beendet wird oder sobald der
-        // hbci-thread callback-daten braucht. die sichere beendigung des 
-        // hbci-threads wiederum wird dadurch abgesichert, dass die waits() aus
-        // dem hbci-thread (warten auf callback-daten) mit timeouts versehen sind
-        ThreadSyncer sync_main=(ThreadSyncer)passport.getPersistentData("thread_syncer_main");
-        HBCIUtils.log("main thread: waiting for hbci result or new callback data from hbci thread",HBCIUtils.LOG_DEBUG);
-        sync_main.startWaiting(Integer.parseInt(HBCIUtils.getParam("kernel.threaded.maxwaittime","300")), "no response from hbci thread - timeout");
-        
-        HBCIExecThreadedStatus threadStatus=new HBCIExecThreadedStatus();
-        threadStatus.setCallbackData((Hashtable<String, Object>)sync_main.getData("callbackData"));
-        threadStatus.setExecStatus((HBCIExecStatus)sync_main.getData("execStatus"));
-        
-        HBCIUtils.log(
-            "main thread: received answer from hbci thread, returning status "+
-            "(isCallback="+threadStatus.isCallback()+
-            ", isFinished="+threadStatus.isFinished()+")",
-            HBCIUtils.LOG_DEBUG);
-
-        return threadStatus;
     }
     
     /** <p>Sperren der Nutzerschlüssel. Das ist nur dann sinnvoll, wenn zwei Bedinungen erfüllt sind:</p>

@@ -33,7 +33,7 @@ public class DEGFactory
 {
     private static DEGFactory instance;
     
-    public static synchronized DEGFactory getInstance()
+    public static DEGFactory getInstance()
     {
         if (instance==null) {
             instance=new DEGFactory();

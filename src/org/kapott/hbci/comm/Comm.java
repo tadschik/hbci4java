@@ -23,6 +23,7 @@ package org.kapott.hbci.comm;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.StringTokenizer;
 
 import org.kapott.hbci.callback.HBCICallback;
@@ -61,7 +62,7 @@ public abstract class Comm
 //                HBCIUtilsInternal.getLocMsg("CALLB_NEED_CONN"),HBCICallback.TYPE_NONE,new StringBuffer());
     }
 
-    public MSG pingpong(String msgName, MSG msg)
+    public MSG pingpong(Hashtable<String, Object> kernelData, String msgName, MSG msg)
     {
         IHandlerData handler=getParentPassport().getParentHandlerData();
         MsgGen       gen=handler.getMsgGen();
@@ -91,6 +92,7 @@ public abstract class Comm
                                                                         rewriterName);
                     Constructor con=cl.getConstructor((Class[])null);
                     Rewrite rewriter=(Rewrite)(con.newInstance((Object[])null));
+                    rewriter.setKernelData(kernelData);
                     al.add(rewriter);
                 }
             }

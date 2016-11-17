@@ -34,7 +34,7 @@ public class MultipleSEGsFactory
 {
     private static MultipleSEGsFactory instance;
     
-    public static synchronized MultipleSEGsFactory getInstance()
+    public static MultipleSEGsFactory getInstance()
     {
         if (instance==null) {
             instance=new MultipleSEGsFactory();

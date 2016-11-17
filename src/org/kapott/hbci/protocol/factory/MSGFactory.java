@@ -33,7 +33,7 @@ public class MSGFactory
 {
     private static MSGFactory instance;
     
-    public static synchronized MSGFactory getInstance()
+    public static MSGFactory getInstance()
     {
         if (instance==null) {
             instance=new MSGFactory();

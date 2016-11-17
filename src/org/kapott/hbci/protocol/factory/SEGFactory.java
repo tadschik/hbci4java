@@ -33,7 +33,7 @@ public class SEGFactory
 {
     private static SEGFactory instance;
     
-    public static synchronized SEGFactory getInstance()
+    public static SEGFactory getInstance()
     {
         if (instance==null) {
             instance=new SEGFactory();

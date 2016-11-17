@@ -31,22 +31,11 @@ import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
-import javax.crypto.CipherOutputStream;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.PBEParameterSpec;
-
-import org.kapott.hbci.callback.AbstractHBCICallback;
 import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.exceptions.HBCI_Exception;
 import org.kapott.hbci.exceptions.InvalidPassphraseException;
-import org.kapott.hbci.manager.FlickerCode;
-import org.kapott.hbci.manager.HBCIUtils;
-import org.kapott.hbci.manager.HBCIUtilsInternal;
-import org.kapott.hbci.manager.HHDVersion;
+import org.kapott.hbci.manager.*;
 import org.kapott.hbci.manager.HHDVersion.Type;
-import org.kapott.hbci.manager.LogFilter;
 import org.kapott.hbci.security.Sig;
 
 /** <p>Passport-Klasse für HBCI mit PIN/TAN. Dieses Sicherheitsverfahren wird erst
@@ -348,7 +337,7 @@ public class HBCIPassportPinTan
 //                if (s.length()==0) {
 //                    throw new HBCI_Exception(HBCIUtilsInternal.getLocMsg("EXCMSG_PINZERO"));
 //                }
-                LogFilter.getInstance().addSecretData(getPIN(),"X",LogFilter.FILTER_SECRETS);
+                LogFilter.getInstance().addSecretData(getPIN(),"X", LogFilter.FILTER_SECRETS);
             }
             
             String tan="";

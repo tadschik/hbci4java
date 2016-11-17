@@ -34,7 +34,7 @@ public class MultipleDEsFactory
 {
     private static MultipleDEsFactory instance;
     
-    public static synchronized MultipleDEsFactory getInstance()
+    public static MultipleDEsFactory getInstance()
     {
         if (instance==null) {
             instance=new MultipleDEsFactory();

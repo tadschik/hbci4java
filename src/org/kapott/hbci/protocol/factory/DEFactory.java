@@ -33,7 +33,7 @@ public class DEFactory
 {
     private static DEFactory instance;
     
-    public static synchronized DEFactory getInstance()
+    public static DEFactory getInstance()
     {
         if (instance==null) {
             instance=new DEFactory();

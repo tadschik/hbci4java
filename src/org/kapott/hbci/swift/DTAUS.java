@@ -113,7 +113,7 @@ public class DTAUS
         /** Hinzufügen einer Verwendungszweckzeile zu diesem Auftrag. */
         public void addUsage(String st)
         {
-        	LogFilter.getInstance().addSecretData(st,"X",LogFilter.FILTER_MOST);
+        	LogFilter.getInstance().addSecretData(st,"X", LogFilter.FILTER_MOST);
             usage.add(st);
         }
         

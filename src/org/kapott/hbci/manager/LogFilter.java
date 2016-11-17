@@ -60,83 +60,10 @@ public class LogFilter
 	
 	public synchronized void addSecretData(String secret, String replacement, int level)
 	{
-	    if (secret!=null && secret.length()!=0) {
-	        // liste der secrets im gewählten level holen bzw. erzeugen
-	        List<String[]> secretData= secretDataByLevel.get(new Integer(level));
-	        if (secretData==null) {
-	            secretData=new ArrayList<String[]>();
-	            secretDataByLevel.put(new Integer(level),secretData);
-	        }
-
-	        // duplikats-check für "secret"
-	        boolean found=false;
-	        for (Iterator<String[]> i=secretData.iterator();i.hasNext();) {
-	            String[] entry= i.next();
-	            if (entry[0].equals(secret)) {
-	                found=true;
-	                break;
-	            }
-	        }
-
-	        if (!found) {
-	            // secret noch nicht in filterliste
-
-	            if (replacement==null || replacement.length()<2) {
-	                // wenn der replacement-string kein vollständiger String ist,
-	                // diesen mit einem Filler auf die länge des secrets bringen 
-	                char filler;
-
-	                if (replacement!=null && replacement.length()==1) {
-	                    // der replacement-string besteht aus genau einem zeichen,
-	                    // also dieses zeichen als filler verwenden
-	                    filler=replacement.charAt(0);
-	                } else {
-	                    // ansonsten default-filler "X" verwenden
-	                    filler='X';
-	                }
-
-	                char[] ca=new char[secret.length()];
-	                Arrays.fill(ca,filler);
-	                replacement=new String(ca);
-	            }
-
-	            secretData.add(new String[] {secret,replacement});
-	        }
-	    }
 	}
 	
 	public synchronized String filterLine(String line, int filterLevel)
 	{
-		String ret=null;
-		if (line!=null) {
-			StringBuffer line2=new StringBuffer(line);
-
-			for (int level=filterLevel; level>0; level--) {
-				List<String[]> secretData= secretDataByLevel.get(new Integer(level));
-				if (secretData==null) {
-					continue;
-				}
-				
-				for (Iterator<String[]> i = secretData.iterator(); i.hasNext();) {
-					String[] entry = i.next();
-
-					String secret=entry[0];
-					String replacement=entry[1];
-
-					if (secret.isEmpty()) {
-						continue;
-					}
-
-					int posi=0;
-					while ((posi=line2.indexOf(secret,posi))!=-1) {
-						line2.replace(posi,posi+secret.length(),replacement);
-						posi+=replacement.length();
-					}
-				}
-			}
-		
-			ret=line2.toString();
-		}
-		return ret;
+		return line;
 	}
 }

@@ -58,7 +58,7 @@ extends Authenticator
                     HBCICallback.TYPE_TEXT,
                     retData);
             user=retData.toString();
-            LogFilter.getInstance().addSecretData(user,"X",LogFilter.FILTER_IDS);
+            LogFilter.getInstance().addSecretData(user,"X", LogFilter.FILTER_IDS);
         } else {
             HBCIUtils.log("returning proxyuser from client.passport.PinTan.proxyuser", HBCIUtils.LOG_DEBUG);
         }

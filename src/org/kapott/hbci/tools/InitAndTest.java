@@ -64,7 +64,7 @@ public final class InitAndTest
         extends HBCICallbackConsole
     {
         @Override
-        public synchronized void status(HBCIPassport passport, int statusTag,
+        public void status(HBCIPassport passport, int statusTag,
                                         Object[] o)
         {
             // disable status output

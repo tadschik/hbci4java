@@ -26,7 +26,6 @@ import java.util.Hashtable;
 import java.util.Properties;
 
 import org.kapott.hbci.manager.HBCIUtils;
-import org.kapott.hbci.manager.ThreadSyncer;
 import org.kapott.hbci.passport.HBCIPassport;
 import org.kapott.hbci.passport.HBCIPassportInternal;
 
@@ -73,65 +72,7 @@ public final class HBCICallbackThreaded
                          int datatype,StringBuffer retData)
     {
         HBCIUtils.log("hbci thread: threaded callback received", HBCIUtils.LOG_DEBUG);
-        
-        ThreadSyncer sync_main=(ThreadSyncer)((HBCIPassportInternal)passport).getPersistentData("thread_syncer_main");
-        
-        if (sync_main==null) {
-            // das kommt dann vor, wenn der callback nicht von execute() aus 
-            // erzeugt wurde, sondern z.B. via "new HBCIHandler()"
-            // der threading-mechanismus ist im moment *nur* für hbci.execute()
-            // verfügbar
-            
-            HBCIUtils.log("hbci-thread: non-execute-callback, calling real callback",HBCIUtils.LOG_DEBUG);
-            realCallback.callback(passport,reason,msg,datatype,retData);
-        } else {
-            HBCIUtils.log("hbci-thread: this callback is triggered in HBCIHandler.execute()",HBCIUtils.LOG_DEBUG);
-            
-            if (realCallback.useThreadedCallback(passport,reason,msg,datatype,retData)) {
-                // wenn makeThreadedCallback "true" zurückgibt, dann den threaded
-                // callback mechanismus benutzen 
-                
-                Hashtable<String, Object> callbackData=new Hashtable<String, Object>();
-                callbackData.put("method","callback");
-                callbackData.put("passport",passport);
-                callbackData.put("reason",new Integer(reason));
-                callbackData.put("msg",msg);
-                callbackData.put("dataType",new Integer(datatype));
-                callbackData.put("retData",retData);
-                
-                sync_main.setData("callbackData",callbackData);
-                sync_main.setData("execStatus",null);
-                
-                // damit wird der main-thread wieder angestoßen, um 
-                // hbci.executeThreaded() oder hbci.continueThreaded() zu beenden,
-                // damit die applikation die callback-daten später via 
-                // hbci.continueThreaded() übergeben kann
-                HBCIUtils.log("hbci thread: callback: awaking main thread with callbackData",HBCIUtils.LOG_DEBUG);
-                sync_main.stopWaiting();
-                
-                // neues sync-objekt für das empfangen von callback-antworten erzeugen
-                ThreadSyncer sync_hbci=new ThreadSyncer("sync_hbci");
-                ((HBCIPassportInternal)passport).setPersistentData("thread_syncer_hbci",sync_hbci);
-                
-                // im normalfall dient dieses wait() dazu, auf die callback-daten von
-                // der anwendung zu warten (via hbci.continueThreaded())
-                HBCIUtils.log("hbci thread: callback: waiting for callback response from main thread;",HBCIUtils.LOG_DEBUG);
-                sync_hbci.startWaiting(Integer.parseInt(HBCIUtils.getParam("kernel.threaded.maxwaittime","300")), "no callback data received from main thread - timeout");
-                HBCIUtils.log("hbci thread: callback: got response from main thread - returning callback answer to kernel",HBCIUtils.LOG_DEBUG);
-                
-                if (retData!=null) {
-                    retData.setLength(0);
-                    String retValue=(String)sync_hbci.getData("retData");
-                    if (retValue!=null) {
-                        retData.append(retValue);
-                    }
-                }
-            } else {
-                // wenn makeThreadedCallback "false" zurückgibt, dann den
-                // standard-callback-mechanismus benutzen
-                realCallback.callback(passport,reason,msg,datatype,retData);
-            }
-        }
+        realCallback.callback(passport,reason,msg,datatype,retData);
     }
 
     /** Aufruf wird an das "normale" Callback-Objekt weitergereicht. */

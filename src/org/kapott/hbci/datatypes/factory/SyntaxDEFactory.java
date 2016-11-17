@@ -35,53 +35,38 @@ import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.manager.HBCIUtilsInternal;
 import org.kapott.hbci.tools.ObjectFactory;
 
-public class SyntaxDEFactory 
-{
+public class SyntaxDEFactory {
     private static SyntaxDEFactory instance;
-    
-    private Hashtable<String, ObjectFactory> factories;
-    
-    public static synchronized SyntaxDEFactory getInstance()
-    {
-        if (instance==null) {
-            instance=new SyntaxDEFactory();
+
+
+    public static SyntaxDEFactory getInstance() {
+        if (instance == null) {
+            instance = new SyntaxDEFactory();
         }
         return instance;
     }
-    
-    private SyntaxDEFactory()
-    {
-        factories=new Hashtable<String, ObjectFactory>();
-    }
-    
-    public SyntaxDE createSyntaxDE(String dataType,String path,String value,int minsize,int maxsize)
-    {
-        SyntaxDE ret=null;
-        ObjectFactory factory;
-        
-        synchronized(this) {
-        	factory=factories.get(dataType);
 
-        	if (factory==null) {
-        		factory=new ObjectFactory(Integer.parseInt(HBCIUtils.getParam("kernel.objpool.Syntax","1024")));
-        		factories.put(dataType,factory);
-        	}
-        }
-        
-        ret=(SyntaxDE)factory.getFreeObject();
-        if (ret==null) {
+    private SyntaxDEFactory() {
+    }
+
+    public SyntaxDE createSyntaxDE(String dataType, String path, String value, int minsize, int maxsize) {
+        SyntaxDE ret = null;
+        ObjectFactory factory = new ObjectFactory(Integer.parseInt(HBCIUtils.getParam("kernel.objpool.Syntax", "1024")));
+
+        ret = (SyntaxDE) factory.getFreeObject();
+        if (ret == null) {
             // laden der klasse, die die syntax des de enthaelt
             Class c;
             try {
-                c=Class.forName("org.kapott.hbci.datatypes.Syntax"+dataType,false,this.getClass().getClassLoader());
+                c = Class.forName("org.kapott.hbci.datatypes.Syntax" + dataType, false, this.getClass().getClassLoader());
             } catch (ClassNotFoundException e) {
-                throw new NoSuchSyntaxException(dataType,path);
+                throw new NoSuchSyntaxException(dataType, path);
             }
 
             // holen des constructors fuer diese klasse
             Constructor con;
             try {
-                con=c.getConstructor(new Class[]{String.class, int.class, int.class});
+                con = c.getConstructor(new Class[]{String.class, int.class, int.class});
             } catch (NoSuchMethodException e) {
                 throw new NoSuchConstructorException(dataType);
             }
@@ -89,57 +74,47 @@ public class SyntaxDEFactory
             /* anlegen einer neuen instanz der syntaxklasse und initialisieren
              mit dem uebergebenen wert */
             try {
-                ret=(SyntaxDE)(con.newInstance(new Object[]{value, new Integer(minsize), new Integer(maxsize)}));
+                ret = (SyntaxDE) (con.newInstance(new Object[]{value, new Integer(minsize), new Integer(maxsize)}));
             } catch (InstantiationException e) {
             } catch (IllegalAccessException e) {
             } catch (InvocationTargetException e) {
-                throw new InitializingException((Exception)e.getCause(),path);
+                throw new InitializingException((Exception) e.getCause(), path);
             }
-            
-            if (ret!=null) {
+
+            if (ret != null) {
                 factory.addToUsedPool(ret);
             }
         } else {
             try {
-                ret.init(value,minsize,maxsize);
+                ret.init(value, minsize, maxsize);
                 factory.addToUsedPool(ret);
             } catch (RuntimeException e) {
                 factory.addToFreePool(ret);
-                throw new InitializingException(e,path);
+                throw new InitializingException(e, path);
             }
         }
-        
+
         return ret;
     }
 
-    public SyntaxDE createSyntaxDE(String dataType,String path,StringBuffer res,int minsize,int maxsize)
-    {
-        SyntaxDE      ret=null;
-        ObjectFactory factory;
-        
-        synchronized(this) {
-        	factory=factories.get(dataType);
+    public SyntaxDE createSyntaxDE(String dataType, String path, StringBuffer res, int minsize, int maxsize) {
+        SyntaxDE ret = null;
+        ObjectFactory factory = new ObjectFactory(Integer.parseInt(HBCIUtils.getParam("kernel.objpool.Syntax", "1024")));
 
-        	if (factory==null) {
-        		factory=new ObjectFactory(Integer.parseInt(HBCIUtils.getParam("kernel.objpool.Syntax","1024")));
-        		factories.put(dataType,factory);
-        	}
-        }
-        
-        ret=(SyntaxDE)factory.getFreeObject();
-        if (ret==null) {
+        ret = (SyntaxDE) factory.getFreeObject();
+        if (ret == null) {
             // laden der klasse, die die syntax des de enthaelt
             Class c;
             try {
-                c=Class.forName("org.kapott.hbci.datatypes.Syntax"+dataType,false,this.getClass().getClassLoader());
+                c = Class.forName("org.kapott.hbci.datatypes.Syntax" + dataType, false, this.getClass().getClassLoader());
             } catch (ClassNotFoundException e) {
-                throw new NoSuchSyntaxException(dataType,path);
+                throw new NoSuchSyntaxException(dataType, path);
             }
 
             // holen des constructors fuer diese klasse
             Constructor con;
             try {
-                con=c.getConstructor(new Class[]{StringBuffer.class, int.class, int.class});
+                con = c.getConstructor(new Class[]{StringBuffer.class, int.class, int.class});
             } catch (NoSuchMethodException e) {
                 throw new NoSuchConstructorException(dataType);
             }
@@ -147,49 +122,29 @@ public class SyntaxDEFactory
             /* anlegen einer neuen instanz der syntaxklasse und initialisieren
              mit dem uebergebenen wert */
             try {
-                ret=(SyntaxDE)(con.newInstance(new Object[]{res, new Integer(minsize), new Integer(maxsize)}));
+                ret = (SyntaxDE) (con.newInstance(new Object[]{res, new Integer(minsize), new Integer(maxsize)}));
             } catch (InstantiationException e) {
             } catch (IllegalAccessException e) {
             } catch (InvocationTargetException e) {
-                throw new ParseErrorException(HBCIUtilsInternal.getLocMsg("EXCMSG_PROT_ERRSYNDE",path),(Exception)e.getCause());
+                throw new ParseErrorException(HBCIUtilsInternal.getLocMsg("EXCMSG_PROT_ERRSYNDE", path), (Exception) e.getCause());
             }
-            
-            if (ret!=null) {
+
+            if (ret != null) {
                 factory.addToUsedPool(ret);
             }
         } else {
             try {
-                ret.init(res,minsize,maxsize);
+                ret.init(res, minsize, maxsize);
                 factory.addToUsedPool(ret);
             } catch (RuntimeException e) {
                 factory.addToFreePool(ret);
-                throw new ParseErrorException(HBCIUtilsInternal.getLocMsg("EXCMSG_PROT_ERRSYNDE",path),(Exception)e.getCause());
+                throw new ParseErrorException(HBCIUtilsInternal.getLocMsg("EXCMSG_PROT_ERRSYNDE", path), (Exception) e.getCause());
             }
         }
-        
+
         return ret;
     }
-    
-    public void unuseObject(SyntaxDE sde,String type)
-    {
-        if (sde!=null) {
-            sde.destroy();
-            ObjectFactory fac=factories.get(type);
-            fac.unuseObject(sde);
-        }
-    }
-    
-    public String toString()
-    {
-        StringBuffer ret=new StringBuffer();
-        
-        for (Enumeration<String> e=factories.keys();e.hasMoreElements();) {
-            String        type=e.nextElement();
-            ObjectFactory fac=factories.get(type);
-            
-            ret.append(type).append(": ").append(fac.toString()).append(System.getProperty("line.separator"));
-        }
-        
-        return ret.toString().trim();
+
+    public void unuseObject(SyntaxDE sde, String type) {
     }
 }

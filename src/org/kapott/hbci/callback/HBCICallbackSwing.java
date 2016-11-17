@@ -77,7 +77,7 @@ public class HBCICallbackSwing
     {
         private boolean stopCalled=false;
         
-        public synchronized void startWaiting()
+        public void startWaiting()
         {
             if (!stopCalled) {
                 try {
@@ -88,7 +88,7 @@ public class HBCICallbackSwing
             }
         }
 
-        public synchronized void stopWaiting()
+        public void stopWaiting()
         {
             stopCalled=true;
             notify();

@@ -28,27 +28,25 @@ import org.kapott.hbci.protocol.MSG;
 
 public abstract class Rewrite
 {
-    private static Hashtable<String,Object> kernelData;
-    
-    static {
-        kernelData=new Hashtable<String, Object>();
-    }
+    private Hashtable<String,Object> kernelData=new Hashtable<String, Object>();
+
     
     protected Rewrite()
     {
     }
-    
-    public static synchronized void setData(String name,Object value)
-    {
-        ThreadGroup threadgroup=Thread.currentThread().getThreadGroup();
-        kernelData.put(threadgroup.getName()+"_"+name,
-                       value);
+
+    public void setKernelData(Hashtable<String, Object> kernelData) {
+        this.kernelData = kernelData;
     }
 
-    public static synchronized Object getData(String name)
+    public void setData(String name,Object value)
     {
-        ThreadGroup threadgroup=Thread.currentThread().getThreadGroup();
-        return kernelData.get(threadgroup.getName()+"_"+name);
+        kernelData.put(name, value);
+    }
+
+    public Object getData(String name)
+    {
+        return kernelData.get(name);
     }
 
     public MSG outgoingClearText(MSG msg,MsgGen gen)

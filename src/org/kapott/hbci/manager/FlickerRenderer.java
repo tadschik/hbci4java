@@ -147,7 +147,7 @@ public class FlickerRenderer
    * System.out.println("Code uebertragen");
    * 
    */
-  public final synchronized void start()
+  public synchronized void start()
   {
     // ggf. laufenden Thread beenden
     stop();

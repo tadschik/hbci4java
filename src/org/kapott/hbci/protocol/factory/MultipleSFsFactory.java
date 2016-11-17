@@ -34,7 +34,7 @@ public class MultipleSFsFactory
 {
     private static MultipleSFsFactory instance;
     
-    public static synchronized MultipleSFsFactory getInstance()
+    public static MultipleSFsFactory getInstance()
     {
         if (instance==null) {
             instance=new MultipleSFsFactory();

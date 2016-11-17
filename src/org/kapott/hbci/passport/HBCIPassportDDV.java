@@ -341,7 +341,7 @@ public class HBCIPassportDDV
 
     public void setSoftPin(byte[] softPin)
     {
-    	LogFilter.getInstance().addSecretData(new String(softPin),"X",LogFilter.FILTER_SECRETS);
+    	LogFilter.getInstance().addSecretData(new String(softPin),"X", LogFilter.FILTER_SECRETS);
         this.softPin=softPin;
     }
     

@@ -95,11 +95,6 @@ public final class MultipleSFs
     
     public void destroy()
     {
-        List<SyntaxElement> children=getElements();
-        for (Iterator<SyntaxElement> i=children.iterator();i.hasNext();) {
-            SFFactory.getInstance().unuseObject(i.next());
-        }
-        
         super.destroy();
     }
 }

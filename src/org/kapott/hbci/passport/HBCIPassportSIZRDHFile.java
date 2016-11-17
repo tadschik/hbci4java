@@ -99,7 +99,7 @@ public class HBCIPassportSIZRDHFile
                                                      HBCIUtilsInternal.getLocMsg("CALLB_NEED_PASS"),
                                                      HBCICallback.TYPE_SECRET,
                                                      retData);
-                    LogFilter.getInstance().addSecretData(retData.toString(),"X",LogFilter.FILTER_SECRETS);
+                    LogFilter.getInstance().addSecretData(retData.toString(),"X", LogFilter.FILTER_SECRETS);
                     setPassphrase(retData.toString());
                 }
 
