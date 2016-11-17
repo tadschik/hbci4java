@@ -41,5 +41,4 @@ public class HBCIPassportPinTanNoFile extends HBCIPassportPinTan {
 
     @Override
     public void saveChanges() {}
-
 }
