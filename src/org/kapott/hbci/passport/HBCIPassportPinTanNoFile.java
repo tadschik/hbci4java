@@ -31,7 +31,6 @@ public class HBCIPassportPinTanNoFile extends HBCIPassportPinTan {
 
         try {
             URL url = new URL(bankInfo.getPinTanAddress());
-            //fints.bankingonline.de/fints/FinTs30PinTanHttpGate
             setHost(url.getHost()+url.getPath());
             setPort(url.getDefaultPort());
         } catch (Exception e) {

@@ -748,7 +748,7 @@ public abstract class AbstractHBCIPassport
         if (passportName==null)
             throw new InvalidUserDataException(HBCIUtilsInternal.getLocMsg("EXCMSG_NODEFPASS"));
 
-        return getInstance(callback, properties, passportName,init);
+        return getInstance(callback, properties, passportName, init);
     }
 
     public static HBCIPassport getInstance(HBCICallback callback, Properties properties, String name)

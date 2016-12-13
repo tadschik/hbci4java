@@ -21,7 +21,6 @@
 
 package org.kapott.hbci.manager;
 
-import com.sun.javafx.scene.control.behavior.OptionalBoolean;
 import org.kapott.hbci.GV_Result.GVRKUms;
 import org.kapott.hbci.callback.AbstractHBCICallback;
 import org.kapott.hbci.callback.HBCICallback;
