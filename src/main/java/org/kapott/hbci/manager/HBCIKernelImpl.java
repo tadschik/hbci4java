@@ -208,7 +208,7 @@ public final class HBCIKernelImpl implements HBCIKernel {
                             rewriterName);
                     Constructor con = cl.getConstructor((Class[]) null);
                     Rewrite rewriter = (Rewrite) (con.newInstance((Object[]) null));
-                    // alle daten für den rewriter setzen
+                    // alle daten fÃ¼r den rewriter setzen
                     rewriter.setKernelData(kernelData);
                     al.add(rewriter);
                 }
@@ -231,7 +231,7 @@ public final class HBCIKernelImpl implements HBCIKernel {
                 HBCIUtils.log("trying to insert signature", HBCIUtils.LOG_DEBUG);
                 mainPassport.getCallback().status(mainPassport, HBCICallback.STATUS_MSG_SIGN, null);
 
-                // signatur erzeugen und an nachricht anhängen
+                // signatur erzeugen und an nachricht anhÃ¤ngen
                 Sig sig = SigFactory.getInstance().createSig(getParentHandlerData(), msg, passports);
                 try {
                     if (!sig.signIt()) {
@@ -244,7 +244,7 @@ public final class HBCIKernelImpl implements HBCIKernel {
                     SigFactory.getInstance().unuseObject(sig);
                 }
 
-                // alle rewrites erledigen, die *nach* dem hinzufügen der signatur stattfinden müssen
+                // alle rewrites erledigen, die *nach* dem hinzufÃ¼gen der signatur stattfinden mÃ¼ssen
                 for (int i = 0; i < rewriters.length; i++) {
                     MSG old = msg;
                     msg = rewriters[i].outgoingSigned(old, gen);
@@ -260,7 +260,7 @@ public final class HBCIKernelImpl implements HBCIKernel {
             msg.getElementPaths(paths, null, null, null);
             ret.addData(paths);
             
-            /* für alle Elemente (Pfadnamen) die aktuellen Werte speichern,
+            /* fÃ¼r alle Elemente (Pfadnamen) die aktuellen Werte speichern,
                wie sie bei der ausgehenden Nachricht versandt werden */
             Hashtable<String, String> current = new Hashtable<String, String>();
             msg.extractValues(current);
@@ -276,7 +276,7 @@ public final class HBCIKernelImpl implements HBCIKernel {
             String outstring = msg.toString(0);
             HBCIUtils.log("sending message: " + outstring, HBCIUtils.LOG_DEBUG2);
 
-            // max. nachrichtengröße aus BPD überprüfen
+            // max. nachrichtengrÃ¶ÃŸe aus BPD Ã¼berprÃ¼fen
             int maxmsgsize = mainPassport.getMaxMsgSizeKB();
             if (maxmsgsize != 0 && (outstring.length() >> 10) > maxmsgsize) {
                 String errmsg = HBCIUtilsInternal.getLocMsg("EXCMSG_MSGTOOLARGE",
@@ -285,12 +285,12 @@ public final class HBCIKernelImpl implements HBCIKernel {
                     throw new HBCI_Exception(errmsg);
             }
 
-            // soll nachricht verschlüsselt werden?
+            // soll nachricht verschlÃ¼sselt werden?
             if (cryptit) {
                 HBCIUtils.log("trying to encrypt message", HBCIUtils.LOG_DEBUG);
                 mainPassport.getCallback().status(mainPassport, HBCICallback.STATUS_MSG_CRYPT, null);
 
-                // nachricht verschlüsseln
+                // nachricht verschlÃ¼sseln
                 MSG old = msg;
                 Crypt crypt = CryptFactory.getInstance().createCrypt(getParentHandlerData(), old);
                 try {
@@ -308,7 +308,7 @@ public final class HBCIKernelImpl implements HBCIKernel {
                         throw new HBCI_Exception(errmsg);
                 }
 
-                // verschlüsselte nachricht patchen
+                // verschlÃ¼sselte nachricht patchen
                 for (int i = 0; i < rewriters.length; i++) {
                     MSG oldMsg = msg;
                     msg = rewriters[i].outgoingCrypted(oldMsg, gen);
@@ -334,12 +334,12 @@ public final class HBCIKernelImpl implements HBCIKernel {
                 MSGFactory.getInstance().unuseObject(old);
             }
 
-            // ist antwortnachricht verschlüsselt?
+            // ist antwortnachricht verschlÃ¼sselt?
             boolean crypted = msg.getName().equals("CryptedRes");
             if (crypted) {
                 mainPassport.getCallback().status(mainPassport, HBCICallback.STATUS_MSG_DECRYPT, null);
 
-                // wenn ja, dann nachricht entschlüsseln
+                // wenn ja, dann nachricht entschlÃ¼sseln
                 HBCIUtils.log("acquire crypt instance", HBCIUtils.LOG_DEBUG);
                 Crypt crypt = CryptFactory.getInstance().createCrypt(getParentHandlerData(), msg);
                 String newmsgstring;
@@ -354,7 +354,7 @@ public final class HBCIKernelImpl implements HBCIKernel {
                 }
                 gen.set("_origSignedMsg", newmsgstring);
 
-                // alle patches für die unverschlüsselte nachricht durchlaufen
+                // alle patches fÃ¼r die unverschlÃ¼sselte nachricht durchlaufen
                 HBCIUtils.log("rewriting message", HBCIUtils.LOG_DEBUG);
                 for (int i = 0; i < rewriters.length; i++) {
                     HBCIUtils.log("applying rewriter " + rewriters[i].getClass().getSimpleName(), HBCIUtils.LOG_DEBUG);
@@ -380,7 +380,7 @@ public final class HBCIKernelImpl implements HBCIKernel {
 
             HBCIUtils.log("received message after decryption: " + msg.toString(0), HBCIUtils.LOG_DEBUG2);
 
-            // alle patches für die plaintextnachricht durchlaufen
+            // alle patches fÃ¼r die plaintextnachricht durchlaufen
             for (int i = 0; i < rewriters.length; i++) {
                 MSG oldMsg = msg;
                 msg = rewriters[i].incomingData(oldMsg, gen);
@@ -395,7 +395,7 @@ public final class HBCIKernelImpl implements HBCIKernel {
             p.setProperty("_msg", gen.get("_origSignedMsg"));
             ret.addData(p);
 
-            // überprüfen einiger constraints, die in einer antwortnachricht eingehalten werden müssen
+            // Ã¼berprÃ¼fen einiger constraints, die in einer antwortnachricht eingehalten werden mÃ¼ssen
             msgPath = msg.getPath();
             try {
                 String hbciversion2 = msg.getValueOfDE(msgPath + ".MsgHead.hbciversion");
@@ -421,7 +421,7 @@ public final class HBCIKernelImpl implements HBCIKernel {
                     throw e;
             }
 
-            // überprüfen der signatur
+            // Ã¼berprÃ¼fen der signatur
             HBCIUtils.log("looking for a signature", HBCIUtils.LOG_DEBUG);
             mainPassport.getCallback().status(mainPassport, HBCICallback.STATUS_MSG_VERIFY, null);
             boolean sigOk = false;
@@ -435,7 +435,7 @@ public final class HBCIKernelImpl implements HBCIKernel {
             // fehlermeldungen erzeugen, wenn irgendwelche fehler aufgetreten sind
             HBCIUtils.log("looking if message is encrypted", HBCIUtils.LOG_DEBUG);
 
-            // fehler wegen falscher verschlüsselung
+            // fehler wegen falscher verschlÃ¼sselung
             if (needCrypt && !crypted) {
                 String errmsg = HBCIUtilsInternal.getLocMsg("EXCMSG_NOTCRYPTED");
                 if (!HBCIUtilsInternal.ignoreError(null, "client.errors.ignoreCryptErrors", errmsg))

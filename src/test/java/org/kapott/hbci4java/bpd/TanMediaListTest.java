@@ -42,7 +42,7 @@ public class TanMediaListTest extends AbstractTest {
 	    
 	    MsgGen gen = kernel.getMsgGen();
 	    
-      // alle patches f�r die unverschl�sselte nachricht durchlaufen
+      // alle patches fï¿½r die unverschlï¿½sselte nachricht durchlaufen
 	    String newmsgstring = data;
 	    
 	    

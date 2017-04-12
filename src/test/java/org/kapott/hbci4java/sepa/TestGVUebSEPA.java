@@ -39,28 +39,28 @@ import org.kapott.hbci.status.HBCIExecStatus;
 import org.kapott.hbci.structures.Value;
 
 /**
- * Testet das Erstellen von SEPA-Basis-�berweisung
+ * Testet das Erstellen von SEPA-Basis-ï¿½berweisung
  * 
- * Erforderliche Angaben f�r das Nachrichtenformat pain.001 (SEPA-�berweisung) 
-	Folgende Angaben sind f�r das Nachrichtenformat f�r SEPA-�berweisungen (pain.001) erforderlich: 
+ * Erforderliche Angaben fï¿½r das Nachrichtenformat pain.001 (SEPA-ï¿½berweisung) 
+	Folgende Angaben sind fï¿½r das Nachrichtenformat fï¿½r SEPA-ï¿½berweisungen (pain.001) erforderlich: 
 	- Name des Zahlungspflichtigen (<Dbtr><Nm>) 
 	- IBAN des Zahlungskontos des Zahlungspflichtigen (<DbtrAcct>) 
 	- BIC des Kreditinstituts des Zahlungspflichtigen (<DbtrAgt>) 
-	- �berweisungsbetrag in Euro (<InstdAmt>) 
+	- ï¿½berweisungsbetrag in Euro (<InstdAmt>) 
 	- Angaben zum Verwendungszweck (<RmtInf>) 
-	- Name des Zahlungsempf�ngers (<Cdtr><Nm>) 
-	- IBAN des Zahlungskontos des Zahlungsempf�ngers (<CdtrAcct>) 
-	- BIC des Kreditinstituts des Zahlungsempf�ngers (<CdtrAgt>) 
-	- Gegebenenfalls Identifikationscode des Zahlungsempf�ngers (<Cdtr><Id>) 
-	- Gegebenenfalls Name der Referenzpartei des Zahlungsempf�ngers(<UltmtCdtr>) 
-	- Gegebenenfalls Zweck der �berweisung (<Purp>) 
+	- Name des Zahlungsempfï¿½ngers (<Cdtr><Nm>) 
+	- IBAN des Zahlungskontos des Zahlungsempfï¿½ngers (<CdtrAcct>) 
+	- BIC des Kreditinstituts des Zahlungsempfï¿½ngers (<CdtrAgt>) 
+	- Gegebenenfalls Identifikationscode des Zahlungsempfï¿½ngers (<Cdtr><Id>) 
+	- Gegebenenfalls Name der Referenzpartei des Zahlungsempfï¿½ngers(<UltmtCdtr>) 
+	- Gegebenenfalls Zweck der ï¿½berweisung (<Purp>) 
  */
 public class TestGVUebSEPA extends AbstractTest
 {
   private final static int LOGLEVEL = HBCIUtils.LOG_INFO;
   private final static Map<Integer,String> settings = new HashMap<Integer,String>()
   {{
-	//TODO: Ein bisschen Geld auf folgendes Konto �berweisen ;) 
+	//TODO: Ein bisschen Geld auf folgendes Konto ï¿½berweisen ;) 
     put(HBCICallback.NEED_COUNTRY,         "DE");
     put(HBCICallback.NEED_BLZ,             "12030000");
     put(HBCICallback.NEED_CUSTOMERID,      "1007318833");
@@ -103,7 +103,7 @@ public class TestGVUebSEPA extends AbstractTest
     job.setParam("usage","Hello SEPA Ueberweisung");
 
     
-    System.out.println("---------F�r Job zur Queue");
+    System.out.println("---------Fï¿½r Job zur Queue");
     job.addToQueue();
 
     

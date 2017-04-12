@@ -44,51 +44,51 @@ import org.kapott.hbci.status.HBCIExecStatus;
 import org.kapott.hbci.status.HBCIMsgStatus;
 import org.kapott.hbci.structures.Konto;
 
-/** <p>Tool zum Abholen und Auswerten von Kontoausz�gen, gleichzeitig
-    Beispielprogramm f�r die Verwendung von <em>HBCI4Java</em>. Dieses Tool sollte nicht 
+/** <p>Tool zum Abholen und Auswerten von Kontoauszï¿½gen, gleichzeitig
+    Beispielprogramm fï¿½r die Verwendung von <em>HBCI4Java</em>. Dieses Tool sollte nicht 
     out-of-the-box benutzt werden, da erst einige Anpassungen im Quelltext
-    vorgenommen werden m�ssen. Es dient eher als Vorlage, wie <em>HBCI4Java</em>
+    vorgenommen werden mï¿½ssen. Es dient eher als Vorlage, wie <em>HBCI4Java</em>
     im konkreten Anwendungsfall eingesetzt werden kann.</p>
     <p>Die Methode {@link #main(String[])} zeigt die Verwendung mit einem einzelnen Haupt-
     Thread. die Methode {@link #main_multithreaded(String[])} skizziert die Implementierung
-    f�r Anwendungen mit mehreren Threads.</p>
-    <p>Im Quelltext m�ssen folgende Stellen angepasst werden:</p>
+    fï¿½r Anwendungen mit mehreren Threads.</p>
+    <p>Im Quelltext mï¿½ssen folgende Stellen angepasst werden:</p>
     <ul>
       <li><p>Beim Aufruf der Methode <code>HBCIUtils.init()</code> wird
-          der Name eines Property-Files angegeben, in welchem alle ben�tigten
+          der Name eines Property-Files angegeben, in welchem alle benï¿½tigten
           Kernel-Parameter aufgelistet sind. Diese Datei muss erst erzeugt
           (Kopieren und Anpassen von <code>hbci.props.template</code>)
           und der Dateiname beim Aufruf angepasst werden.</p></li>
       <li><p>Zum Festlegen des abzufragenden Kontos wird zurzeit automatisch das
-          erste Konto benutzt, auf welches �ber HBCI zugegriffen werden kann. Ist
-          diese Information nicht verf�gbar (einige Banken senden keine Informationen
-          �ber die verf�gbaren Konten), oder soll eine andere Kontoverbindung
-          benutzt werden, so sind entsprechende �nderungen bei der Initialisierung
+          erste Konto benutzt, auf welches ï¿½ber HBCI zugegriffen werden kann. Ist
+          diese Information nicht verfï¿½gbar (einige Banken senden keine Informationen
+          ï¿½ber die verfï¿½gbaren Konten), oder soll eine andere Kontoverbindung
+          benutzt werden, so sind entsprechende ï¿½nderungen bei der Initialisierung
           der Variablen <code>myaccount</code> vorzunehmen.</p></li>
       <li><p>Soll der Kontoauszug nur ab einem bestimmten Zeitpunkt (und nicht alle
-          verf�gbaren Daten) abgeholt werden, so ist beim Erzeugen des entsprechenden
+          verfï¿½gbaren Daten) abgeholt werden, so ist beim Erzeugen des entsprechenden
           Auftrages das Startdatum einzustellen (im Quelltext zur Zeit auskommentiert).</p></li>
-      <li><p>Au�erdem ist im Quelltext Code zur eigentlichen Auswertung der Ausz�ge
+      <li><p>Auï¿½erdem ist im Quelltext Code zur eigentlichen Auswertung der Auszï¿½ge
           zu implementieren. In dieser Vorlage wird nur nach einer fest codierten
           Rechnungsnummer im Verwendungszweck gesucht. Der entsprechende Abschnitt im
-          Quelltext ist den eigenen Bed�rfnissen anzupassen.</p></li>
+          Quelltext ist den eigenen Bedï¿½rfnissen anzupassen.</p></li>
     </ul>
-    <p>Anschlie�end kann der Quelltext compiliert und mit
+    <p>Anschlieï¿½end kann der Quelltext compiliert und mit
     <pre>java&nbsp;-cp&nbsp;...&nbsp;org.kapott.hbci.tools.AnalyzeReportOfTransactions</pre>
     gestartet werden.</p>
     <p>Der Quellcode dieser Klasse zeigt die prinzipielle Benutzung von <em>HBCI4Java</em>.
        Wurde der HBCI-Zugang, der mit diesem Programm benutzt werden soll, noch nie verwendet,
-       so werden alle ben�tigten Schritte zur Initialisierung der Zugangsdaten und
-       Sicherheitsmedien automatisch von <em>HBCI4Java</em> durchgef�hrt. Es ist nicht
-       n�tigt, f�r die Initialisierung von "frischen" Sicherheitsmedien speziellen
+       so werden alle benï¿½tigten Schritte zur Initialisierung der Zugangsdaten und
+       Sicherheitsmedien automatisch von <em>HBCI4Java</em> durchgefï¿½hrt. Es ist nicht
+       nï¿½tigt, fï¿½r die Initialisierung von "frischen" Sicherheitsmedien speziellen
        Code in die HBCI-Anwendung einzubauen -- die entsprechenden Aktionen werden
-       automatisch und v�llig transparent von <em>HBCI4Java</em> durchgef�hrt. Das hat
+       automatisch und vï¿½llig transparent von <em>HBCI4Java</em> durchgefï¿½hrt. Das hat
        den Vorteil, dass jede beliebige Anwendung, die <em>HBCI4Java</em> als HBCI-Bibliothek
        benutzt, gleichzeitig zum Initialisieren von HBCI-Sicherheitsmedien benutzt
-       werden kann, ohne dass daf�r spezieller Programmcode n�tig w�re. Au�erdem wird dadurch
+       werden kann, ohne dass dafï¿½r spezieller Programmcode nï¿½tig wï¿½re. Auï¿½erdem wird dadurch
        sichergestellt, dass nur initialisierte und funktionierende HBCI-Sicherheitsmedien
        benutzt werden (weil <em>HBCI4Java</em> beim Laden eines Sicherheitsmediums automatisch
-       entsprechende �berpr�fungen vornimmt).</p>*/
+       entsprechende ï¿½berprï¿½fungen vornimmt).</p>*/
 // Angepasste Version von AnalyzeReportOfTransactions
 // Kurzanleitung:
 // 1. .properties-Datei erstellen mit folgendem Inhalt:
@@ -121,7 +121,7 @@ public final class DepotAbrufTest
             if (reason == HBCICallback.CLOSE_CONNECTION || reason == HBCICallback.NEED_CONNECTION)
                 return;
             
-//            System.out.println("Callback f�r folgendes Passport: "+passport.getClientData("init").toString() + ", reason=" + reason);
+//            System.out.println("Callback fï¿½r folgendes Passport: "+passport.getClientData("init").toString() + ", reason=" + reason);
             super.callback(passport,reason,msg,dataType,retData);
         }
     }
@@ -138,18 +138,18 @@ public final class DepotAbrufTest
 //                       new MyHBCICallback());
 
         // Nutzer-Passport initialisieren
-        Object passportDescription="Passport f�r Kontoauszugs-Demo";
+        Object passportDescription="Passport fï¿½r Kontoauszugs-Demo";
         passport=AbstractHBCIPassport.getInstance(new MyHBCICallback(), new Properties(), passportDescription);
         //passport.clearBPD();
 
         try {
-            // ein HBCI-Handle f�r einen Nutzer erzeugen
+            // ein HBCI-Handle fï¿½r einen Nutzer erzeugen
             String version=passport.getHBCIVersion();
             //hbciHandle=new HBCIHandler("300", passport);
             hbciHandle=new HBCIHandler((version.length()!=0)?version:"plus",passport);
 
-            System.out.println("Alle Gesch�ftsvorf�lle in HBCI4Java: " + hbciHandle.getKernel().getAllLowlevelJobs().toString());
-            System.out.println("Unterst�tzte Gesch�ftsvorf�lle der Bank: " + hbciHandle.getSupportedLowlevelJobs().toString());
+            System.out.println("Alle Geschï¿½ftsvorfï¿½lle in HBCI4Java: " + hbciHandle.getKernel().getAllLowlevelJobs().toString());
+            System.out.println("Unterstï¿½tzte Geschï¿½ftsvorfï¿½lle der Bank: " + hbciHandle.getSupportedLowlevelJobs().toString());
             
             //"Trockentest" des Umsatzparsers mit vorgebenen Daten
             //test_ums(hbciHandle, "/home/jonas/java/hbci/msg536.txt");
@@ -167,7 +167,7 @@ public final class DepotAbrufTest
             String line;
             int umsatzkto=-1, depotkto=-1;
             
-            System.out.print("Bitte Konto f�r Umsatzliste eingeben (-1, um zu �berspringen): ");
+            System.out.print("Bitte Konto fï¿½r Umsatzliste eingeben (-1, um zu ï¿½berspringen): ");
             do {
                 line = rd.readLine();
                 try {
@@ -175,13 +175,13 @@ public final class DepotAbrufTest
                     if (umsatzkto >= -1 && umsatzkto < konten.length) {
                         break;
                     } else {
-                        System.out.println("Ung�ltiges Konto: " + line);
+                        System.out.println("Ungï¿½ltiges Konto: " + line);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             } while (line != null);
-            System.out.print("Bitte Konto f�r Depotliste eingeben (-1, um zu �berspringen): ");
+            System.out.print("Bitte Konto fï¿½r Depotliste eingeben (-1, um zu ï¿½berspringen): ");
             do {
                 line = rd.readLine();
                 try {
@@ -189,14 +189,14 @@ public final class DepotAbrufTest
                     if (depotkto >= -1 && depotkto < konten.length) {
                         break;
                     } else {
-                        System.out.println("Ung�ltiges Konto: " + line);
+                        System.out.println("Ungï¿½ltiges Konto: " + line);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             } while (line != null);
             
-            // Ums�tze auflisten (als Demo, dass es grunds�tzlich funktioniert)
+            // Umsï¿½tze auflisten (als Demo, dass es grundsï¿½tzlich funktioniert)
             if (umsatzkto >= 0)
                 analyzeReportOfTransactions(passport, hbciHandle, konten[umsatzkto]);
             
@@ -214,23 +214,23 @@ public final class DepotAbrufTest
     }
 
     private static void analyzeReportOfTransactions(HBCIPassport hbciPassport, HBCIHandler hbciHandle, Konto myaccount) {
-        // auszuwertendes Konto automatisch ermitteln (das erste verf�gbare HBCI-Konto)
+        // auszuwertendes Konto automatisch ermitteln (das erste verfï¿½gbare HBCI-Konto)
         // wenn der obige Aufruf nicht funktioniert, muss die abzufragende
         // Kontoverbindung manuell gesetzt werden:
         // Konto myaccount=new Konto("DE","86055592","1234567890");
 
-        // Job zur Abholung der Kontoausz�ge erzeugen
+        // Job zur Abholung der Kontoauszï¿½ge erzeugen
         HBCIJob auszug=hbciHandle.newJob("KUmsAll");
         auszug.setParam("my",myaccount);
-        // evtl. Datum setzen, ab welchem die Ausz�ge geholt werden sollen
+        // evtl. Datum setzen, ab welchem die Auszï¿½ge geholt werden sollen
         // job.setParam("startdate","21.5.2003");
         auszug.addToQueue();
 
-        // alle Jobs in der Job-Warteschlange ausf�hren
+        // alle Jobs in der Job-Warteschlange ausfï¿½hren
         HBCIExecStatus ret=hbciHandle.execute();
 
         GVRKUms result=(GVRKUms)auszug.getJobResult();
-        // wenn der Job "Kontoausz�ge abholen" erfolgreich ausgef�hrt wurde
+        // wenn der Job "Kontoauszï¿½ge abholen" erfolgreich ausgefï¿½hrt wurde
         if (result.isOK()) {
             // kompletten kontoauszug als string ausgeben:
             System.out.println("##############################");
@@ -243,10 +243,10 @@ public final class DepotAbrufTest
 //            List<UmsLine> lines=result.getFlatData();
 //            // int  numof_lines=lines.size();
 //
-//            for (Iterator<UmsLine> j=lines.iterator(); j.hasNext(); ) { // alle Umsatzeintr�ge durchlaufen
+//            for (Iterator<UmsLine> j=lines.iterator(); j.hasNext(); ) { // alle Umsatzeintrï¿½ge durchlaufen
 //                UmsLine entry= j.next();
 //
-//                // f�r jeden Eintrag ein Feld mit allen Verwendungszweckzeilen extrahieren
+//                // fï¿½r jeden Eintrag ein Feld mit allen Verwendungszweckzeilen extrahieren
 //                List<String> usages=entry.usage;
 //                // int  numof_usagelines=usages.size();
 //
@@ -258,9 +258,9 @@ public final class DepotAbrufTest
 //                    if (usageline.equals("Rechnung 12345")) {
 //                        // hier diesen Umsatzeintrag (<entry>) auswerten
 //
-//                        // entry.bdate enth�lt Buchungsdatum
-//                        // entry.value enth�lt gebuchten Betrag
-//                        // entry.usage enth�lt die Verwendungszweck-zeilen
+//                        // entry.bdate enthï¿½lt Buchungsdatum
+//                        // entry.value enthï¿½lt gebuchten Betrag
+//                        // entry.usage enthï¿½lt die Verwendungszweck-zeilen
 //                        // mehr Informationen sie Dokumentation zu
 //                        //   org.kapott.hbci.GV_Result.GVRKUms
 //                    }
@@ -284,11 +284,11 @@ public final class DepotAbrufTest
         auszug.setParam("my",myaccount);
         auszug.addToQueue();
 
-        // alle Jobs in der Job-Warteschlange ausf�hren
+        // alle Jobs in der Job-Warteschlange ausfï¿½hren
         HBCIExecStatus ret=hbciHandle.execute();
 
         GVRWPDepotList result=(GVRWPDepotList)auszug.getJobResult();
-        // wenn der Job "Depotbestand abholen" erfolgreich ausgef�hrt wurde
+        // wenn der Job "Depotbestand abholen" erfolgreich ausgefï¿½hrt wurde
         if (result.isOK()) {
             // kompletten Depotbestand als string ausgeben:
             System.out.println("##############################");
@@ -305,26 +305,26 @@ public final class DepotAbrufTest
             System.out.println(ret.getErrorString());
         }
         
-        // Pr�fen, ob Depotumsatzabruf unterst�tzt wird
+        // Prï¿½fen, ob Depotumsatzabruf unterstï¿½tzt wird
         if (!hbciHandle.getSupportedLowlevelJobs().containsKey("WPDepotUms")) {
-            System.out.println("Abruf der Depotums�tze nicht unterst�tzt!");
+            System.out.println("Abruf der Depotumsï¿½tze nicht unterstï¿½tzt!");
         } else {
-            // Job zur Abholung der Depotums�tze erzeugen
+            // Job zur Abholung der Depotumsï¿½tze erzeugen
             HBCIJob ums=hbciHandle.newJob("WPDepotUms");
             ums.setParam("my",myaccount);
-            // evtl. Datum setzen, ab welchem die Ums�tze geholt werden sollen
+            // evtl. Datum setzen, ab welchem die Umsï¿½tze geholt werden sollen
             // job.setParam("startdate","21.5.2003");
             ums.addToQueue();
 
-            // alle Jobs in der Job-Warteschlange ausf�hren
+            // alle Jobs in der Job-Warteschlange ausfï¿½hren
             ret=hbciHandle.execute();
 
             GVRWPDepotUms umsRes =(GVRWPDepotUms)ums.getJobResult();
-            // wenn der Job "Depotums�tze abholen" erfolgreich ausgef�hrt wurde
+            // wenn der Job "Depotumsï¿½tze abholen" erfolgreich ausgefï¿½hrt wurde
             if (umsRes.isOK()) {
-                // komplette Depotums�tze als string ausgeben:
+                // komplette Depotumsï¿½tze als string ausgeben:
                 System.out.println("################################");
-                System.out.println("#####    Depotums�tze    #######");
+                System.out.println("#####    Depotumsï¿½tze    #######");
                 System.out.println("################################");
                 System.out.println(umsRes.toString());
 
@@ -339,7 +339,7 @@ public final class DepotAbrufTest
         }
     }
 
-    // Testcode f�r Beispielumsatzdaten, die aus einer Textdatei gelesen werden
+    // Testcode fï¿½r Beispielumsatzdaten, die aus einer Textdatei gelesen werden
     private static class MyGVUms extends GVWPDepotUms {
         public MyGVUms(HBCIHandler handler) {
             super(handler);

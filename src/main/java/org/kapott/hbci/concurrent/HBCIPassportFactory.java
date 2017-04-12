@@ -12,7 +12,7 @@ import org.kapott.hbci.passport.HBCIPassport;
 public interface HBCIPassportFactory {
 
     /**
-     * Gibt ein neues Passport entsprechend der Implementierung zur�ck.
+     * Gibt ein neues Passport entsprechend der Implementierung zurÃ¼ck.
      */
     HBCIPassport createPassport(HBCICallback callback) throws Exception;
 

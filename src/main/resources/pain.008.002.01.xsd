@@ -11,12 +11,12 @@
 		<xs:sequence>
 			<xs:element name="OrgnlMndtId" type="RestrictedIdentification1" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>Mandatory if changes occur in ‘Mandate Identification’, otherwise not to be used.</xs:documentation>
+					<xs:documentation>Mandatory if changes occur in âMandate Identificationâ, otherwise not to be used.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="OrgnlCdtrSchmeId" type="PartyIdentificationSDD5" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>Mandatory if changes occur in ‘Creditor Scheme Identification’ (‘Name’ and or ‘Identification’), otherwise not to be used.</xs:documentation>
+					<xs:documentation>Mandatory if changes occur in âCreditor Scheme Identificationâ (âNameâ and or âIdentificationâ), otherwise not to be used.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="OrgnlDbtrAcct" type="CashAccountSDD2" minOccurs="0">
@@ -26,7 +26,7 @@
 			</xs:element>
 			<xs:element name="OrgnlDbtrAgt" type="BranchAndFinancialInstitutionIdentificationSDD2" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>To use ‘Proprietary Identification’ with code ‘SMNDA’ to indicate same mandate with new Debtor Agent. To be used with the ‘FRST’ indicator in the ‘Sequence Type’.</xs:documentation>
+					<xs:documentation>To use âProprietary Identificationâ with code âSMNDAâ to indicate same mandate with new Debtor Agent. To be used with the âFRSTâ indicator in the âSequence Typeâ.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:sequence>
@@ -141,7 +141,7 @@ If the receiving bank validates the check digit and if this validation fails, th
 			<xs:element name="MndtRltdInf" type="MandateRelatedInformationSDD"/>
 			<xs:element name="CdtrSchmeId" type="PartyIdentificationSDD4">
 				<xs:annotation>
-					<xs:documentation>It is recommended that all transactions within the same ‘Payment Information’ block have the same ‘Creditor Scheme Identification’.</xs:documentation>
+					<xs:documentation>It is recommended that all transactions within the same âPayment Informationâ block have the same âCreditor Scheme Identificationâ.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:sequence>
@@ -152,13 +152,13 @@ If the receiving bank validates the check digit and if this validation fails, th
 			<xs:element name="InstdAmt" type="CurrencyAndAmountSDD"/>
 			<xs:element name="ChrgBr" type="ChargeBearerTypeSDDCode" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>It is recommended that this element be specified at ‘Payment Information’ level.</xs:documentation>
+					<xs:documentation>It is recommended that this element be specified at âPayment Informationâ level.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="DrctDbtTx" type="DirectDebitTransactionSDD"/>
 			<xs:element name="UltmtCdtr" type="PartyIdentificationSDD1" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>This data element may be present either at ‘Payment Information’ or at ‘Direct Debit Transaction Information’ level.</xs:documentation>
+					<xs:documentation>This data element may be present either at âPayment Informationâ or at âDirect Debit Transaction Informationâ level.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="DbtrAgt" type="BranchAndFinancialInstitutionIdentificationSDD1"/>
@@ -233,7 +233,7 @@ If the receiving bank validates the check digit and if this validation fails, th
 			<xs:element name="CreDtTm" type="ISODateTime"/>
 			<xs:element name="BtchBookg" type="BatchBookingIndicator" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>If present and contains ‘TRUE’, batch booking is requested. If present and contains ‘FALSE’, booking per transaction is requested. 
+					<xs:documentation>If present and contains âTRUEâ, batch booking is requested. If present and contains âFALSEâ, booking per transaction is requested. 
 If element is not present, pre-agreed customer-to-bank conditions apply.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
@@ -344,7 +344,7 @@ The reason code from the Rulebook is indicated using one of the following messag
 		<xs:sequence>
 			<xs:element name="PrvtId" type="PersonIdentificationSDD2">
 				<xs:annotation>
-					<xs:documentation>‘Identification Type’ under ‘Other Identification’ must specify ‘SEPA’.  ‘Identification’ under ‘Other Identification’ is allowed using an identifier described in General Message Element Specifications, Chapter 1.6.2. of the Implementation Guide.</xs:documentation>
+					<xs:documentation>âIdentification Typeâ under âOther Identificationâ must specify âSEPAâ.  âIdentificationâ under âOther Identificationâ is allowed using an identifier described in General Message Element Specifications, Chapter 1.6.2. of the Implementation Guide.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:sequence>
@@ -385,7 +385,7 @@ The reason code from the Rulebook is indicated using one of the following messag
 		<xs:sequence>
 			<xs:element name="Nm" type="Max70Text" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>If present the new 'Name' must be specified under ‘Creditor’.</xs:documentation>
+					<xs:documentation>If present the new 'Name' must be specified under âCreditorâ.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="Id" type="PartySDD" minOccurs="0"/>
@@ -423,7 +423,7 @@ The reason code from the Rulebook is indicated using one of the following messag
 		<xs:sequence>
 			<xs:element name="PmtInfId" type="RestrictedIdentification1" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>It is recommended to provide ‘Payment Information Identification’.</xs:documentation>
+					<xs:documentation>It is recommended to provide âPayment Information Identificationâ.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="PmtMtd" type="PaymentMethod2Code"/>
@@ -434,12 +434,12 @@ The reason code from the Rulebook is indicated using one of the following messag
 			<xs:element name="CdtrAgt" type="BranchAndFinancialInstitutionIdentificationSDD1"/>
 			<xs:element name="UltmtCdtr" type="PartyIdentificationSDD1" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>This data element may be present either at ‘Payment Information’ or at ‘Direct Debit Transaction Information’ level.</xs:documentation>
+					<xs:documentation>This data element may be present either at âPayment Informationâ or at âDirect Debit Transaction Informationâ level.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="ChrgBr" type="ChargeBearerTypeSDDCode" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>It is recommended that this element be specified at ‘Payment Information’ level.</xs:documentation>
+					<xs:documentation>It is recommended that this element be specified at âPayment Informationâ level.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="DrctDbtTxInf" type="DirectDebitTransactionInformationSDD" maxOccurs="unbounded"/>
@@ -455,7 +455,7 @@ The reason code from the Rulebook is indicated using one of the following messag
 			<xs:element name="SvcLvl" type="ServiceLevelSDD"/>
 			<xs:element name="LclInstrm" type="LocalInstrumentSDD">
 				<xs:annotation>
-					<xs:documentation>Only ‘B2B’ or 'CORE' is allowed. The mixing of Core Direct Debits and Business-to-Business Direct Debits is not allowed in the same message.</xs:documentation>
+					<xs:documentation>Only âB2Bâ or 'CORE' is allowed. The mixing of Core Direct Debits and Business-to-Business Direct Debits is not allowed in the same message.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="SeqTp" type="SequenceType1Code">
@@ -465,7 +465,7 @@ The reason code from the Rulebook is indicated using one of the following messag
 			</xs:element>
 			<xs:element name="CtgyPurp" type="PaymentCategoryPurpose1Code" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>Depending on the agreement between the Creditor and the Creditor Bank, ‘Category Purpose’ may be forwarded to the Debtor Bank.</xs:documentation>
+					<xs:documentation>Depending on the agreement between the Creditor and the Creditor Bank, âCategory Purposeâ may be forwarded to the Debtor Bank.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:sequence>

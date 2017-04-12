@@ -47,16 +47,16 @@ import org.kapott.hbci.manager.HBCIUtilsInternal;
 import org.kapott.hbci.passport.AbstractHBCIPassport;
 import org.kapott.hbci.passport.HBCIPassport;
 
-/** Tool zum Ausf�hren von HBCI-Jobs, die in einer Batch-Datei definiert werden 
- *  k�nnen.
+/** Tool zum AusfÃ¼hren von HBCI-Jobs, die in einer Batch-Datei definiert werden 
+ *  kÃ¶nnen.
  *  <pre>
- *  args[0] - configfile f�r HBCIUtils.init() (Property-File mit Kernel-Parametern
+ *  args[0] - configfile fÃ¼r HBCIUtils.init() (Property-File mit Kernel-Parametern
  *            [siehe API-Doc zu org.kapott.hbci.manager.HBCIUtils])
- *    zus�tzliche parameter:
+ *    zusÃ¤tzliche parameter:
  *      client.passport.default=
  *      default.hbciversion=
  * 
- *  args[1] - Dateiname der Antwortdatei f�r Callbacks
+ *  args[1] - Dateiname der Antwortdatei fÃ¼r Callbacks
  *    country=
  *    blz=
  *    host=
@@ -100,25 +100,25 @@ import org.kapott.hbci.passport.HBCIPassport;
  *  [args[4]] - Dateiname der Log-Datei
  *  </pre>
  *  
- *  <p>Alle Jobs, bei deren Ausf�hrung ein Fehler auftritt, werden nicht in die
+ *  <p>Alle Jobs, bei deren AusfÃ¼hrung ein Fehler auftritt, werden nicht in die
  *  "normale" Ausgabedatei aufgenommen. Statt dessen wird eine zweite Aus-
  *  gabedatei erzeugt, die den gleichen Namen wie die "normale" Ausgabedatei
- *  plus ein Suffix ".err" hat. In dieser Fehlerdatei wird f�r jeden fehler-
+ *  plus ein Suffix ".err" hat. In dieser Fehlerdatei wird fÃ¼r jeden fehler-
  *  haften Job folgende Struktur geschrieben (String in "<>" wird durch die
  *  jeweiligen werte ersetzt):</p>
  *  <pre>
  *    jobid:JOBID 
  *    global status:
- *    allg. fehlermeldung zur hbci-nachricht, in der der job ausgef�hrt werden sollte
+ *    allg. fehlermeldung zur hbci-nachricht, in der der job ausgefÃ¼hrt werden sollte
  *    job status:
  *    fehlermeldung zu dem nachrichten-segment, in welchem der job definiert war
  *  
  *    ...
  *  </pre>
- *  <p>das ist zwar nicht besonders sch�n, reicht aber vielleicht erst mal (?)
- *  Alternativ dazu k�nnte ich anbieten, dass eine vollst�ndige Fehlernachricht
- *  �ber den *kompletten* Batch-Vorgang in eine Fehlerdatei geschrieben wird,
- *  sobald *irgendein* Job nicht sauber ausgef�hrt wurde (das h�tte den Vorteil, 
+ *  <p>das ist zwar nicht besonders schÃ¶n, reicht aber vielleicht erst mal (?)
+ *  Alternativ dazu kÃ¶nnte ich anbieten, dass eine vollstÃ¤ndige Fehlernachricht
+ *  Ã¼ber den *kompletten* Batch-Vorgang in eine Fehlerdatei geschrieben wird,
+ *  sobald *irgendein* Job nicht sauber ausgefÃ¼hrt wurde (das hÃ¤tte den Vorteil, 
  *  dass auch Fehler, die nicht direkt mit einem bestimmten Job in Verbindung
  *  stehen [z.B. Fehler bei der Dialog-Initialisierung] ordentlich geloggt
  *  werden).</p> */
@@ -126,7 +126,7 @@ public class HBCIBatch
 {
     // speziell callback-klasse, um die ausgaben zu reduzieren und um die
     // nutzer-interaktion zu unterbinden, indem alle abgefragten daten auto-
-    // tisch �bergeben werden (aus args[1])
+    // tisch Ã¼bergeben werden (aus args[1])
     private static class MyCallback
         extends HBCICallbackConsole
     {
@@ -142,7 +142,7 @@ public class HBCIBatch
             answerFile.close();
             
             // wenn ein logfile angegeben wurde, dann dieses als ausgabemedium
-            // f�r stdout und stderr verwenden
+            // fÃ¼r stdout und stderr verwenden
             if (args.length>=5) {
                 PrintStream outStream=new PrintStream(new FileOutputStream(args[4]));
                 System.setOut(outStream);
@@ -234,7 +234,7 @@ public class HBCIBatch
         }
     }
     
-    private final static int STATE_NEED_JOBNAME=1;   // state-flags f�r 
+    private final static int STATE_NEED_JOBNAME=1;   // state-flags fÃ¼r 
     private final static int STATE_NEED_JOBPARAMS=2; //   batch-file-parser
     
     public static void main(String[] args)
@@ -250,12 +250,12 @@ public class HBCIBatch
         HBCIPassport passport=AbstractHBCIPassport.getInstance(new MyCallback(args), props);
         
         try {
-            // initialisieren des hbci-handlers f�r das passport
+            // initialisieren des hbci-handlers fÃ¼r das passport
             String version=passport.getHBCIVersion();
             HBCIHandler handler=new HBCIHandler(version.length()!=0?version:HBCIUtils.getParam("default.hbciversion"),passport);
             
             try {
-                // batch-datei �ffnen
+                // batch-datei Ã¶ffnen
                 BufferedReader reader=new BufferedReader(new FileReader(args[2]));
                 String line;
                 
@@ -264,7 +264,7 @@ public class HBCIBatch
                     boolean   lljob=false;           // low- oder high-level-job?
                     HBCIJob   job=null;              // job-objekt
                     String    jobid=null;            // job-bezeichner
-                    String    customerId=null;       // customer-id f�r job
+                    String    customerId=null;       // customer-id fÃ¼r job
                     Hashtable<String, Object> jobs=new Hashtable<String, Object>();  // liste aller jobs
                         
                     // batch-datei zeilenweise einlesen und auswerten
@@ -297,8 +297,8 @@ public class HBCIBatch
                                     job=handler.newLowlevelJob(jobname.substring(1));
                                     lljob=true;
                                     
-                                    // zu einem low-level-job m�ssen zus�tzlich noch
-                                    // eine ID (zum sp�teren wiederfinden des jobs)
+                                    // zu einem low-level-job mÃ¼ssen zusÃ¤tzlich noch
+                                    // eine ID (zum spÃ¤teren wiederfinden des jobs)
                                     // und optional eine kunden-id festgelegt werden
                                     jobid=tok.nextToken().trim();
                                     resultMode="toString";
@@ -310,9 +310,9 @@ public class HBCIBatch
                                     job=handler.newJob(jobname);
                                     lljob=false;
                                     
-                                    // zu einem high-level-job m�ssen zus�tzlich noch
-                                    // eine ID (zum sp�teren wiederfinden des jobs),
-                                    // ein modus f�r die ausgabe der ergebisdaten
+                                    // zu einem high-level-job mÃ¼ssen zusÃ¤tzlich noch
+                                    // eine ID (zum spÃ¤teren wiederfinden des jobs),
+                                    // ein modus fÃ¼r die ausgabe der ergebisdaten
                                     // und optional eine kunden-id festgelegt werden
                                     jobid=tok.nextToken().trim();
                                     resultMode=tok.nextToken().trim();
@@ -321,12 +321,12 @@ public class HBCIBatch
                                 
                                 // job in menge der jobs speichern 
                                 jobs.put(jobid,job);
-                                // ... und ausgabemodus f�r diesen job merken
+                                // ... und ausgabemodus fÃ¼r diesen job merken
                                 jobs.put(jobid+"_resultMode",resultMode);
                                 state=STATE_NEED_JOBPARAMS;
                             }
                         } else if (state==STATE_NEED_JOBPARAMS) {
-                            // bis zur n�chsten leerzeile oder dem dateienende
+                            // bis zur nÃ¤chsten leerzeile oder dem dateienende
                             // werden jetzt alle zeilen als job-parameter
                             // interpretiert
                             
@@ -340,9 +340,9 @@ public class HBCIBatch
                                 }
                                 String paramValue=tok.nextToken().trim();
                                 
-                                // f�r low-level-jobs m�ssen die parameter mit
+                                // fÃ¼r low-level-jobs mÃ¼ssen die parameter mit
                                 // einem "_" beginnen, bei high-level-jobs
-                                // d�rfen sie *nicht* mit einem "_" beginnen
+                                // dÃ¼rfen sie *nicht* mit einem "_" beginnen
                                 if (paramName.startsWith("_")!=lljob) {
                                     if (lljob) {
                                         throw new HBCI_Exception("*** "+jobid+" is a lowlevel job, so parameter names have to start with '_'");
@@ -351,7 +351,7 @@ public class HBCIBatch
                                 }
                                 
                                 // wenn es sich um einen low-level-job, den
-                                // f�hrenden "_" beim parameter-namen entfernen 
+                                // fÃ¼hrenden "_" beim parameter-namen entfernen 
                                 if (lljob) {
                                     paramName=paramName.substring(1);
                                 }
@@ -361,11 +361,11 @@ public class HBCIBatch
                                 // gelesen werden, die nach dem "<" spezifiziert
                                 // ist
                                 if (paramValue.startsWith("<")) {
-                                    // �ffnen der datei
+                                    // Ã¶ffnen der datei
                                     String          filename=paramValue.substring(1);
                                     FileInputStream fin=new FileInputStream(filename);
                                     
-                                    // puffer f�r einlesen der datei
+                                    // puffer fÃ¼r einlesen der datei
                                     byte[]       buffer=new byte[2048];
                                     int          len;
                                     StringBuffer content=new StringBuffer();
@@ -375,19 +375,19 @@ public class HBCIBatch
                                         content.append(new String(buffer,0,len,"ISO-8859-1"));
                                     }
                                     
-                                    // datei schlie�en
+                                    // datei schlieÃen
                                     fin.close();
                                     // parameterwert ist inhalt des stringbuffers
                                     paramValue=content.toString();
                                 }
                                 
-                                // parameter f�r aktuellen job setzen
+                                // parameter fÃ¼r aktuellen job setzen
                                 job.setParam(paramName,paramValue);
                             } else {
                                 // leerzeile gefunden - damit ist die parameter-
-                                // spez. f�r den aktuellen job beendet
+                                // spez. fÃ¼r den aktuellen job beendet
                                 
-                                // aktuellen job zur job-queue hinzuf�gen
+                                // aktuellen job zur job-queue hinzufÃ¼gen
                                 job.addToQueue(customerId);
                                 state=STATE_NEED_JOBNAME;
                             }
@@ -395,15 +395,15 @@ public class HBCIBatch
                     }
                     
                     // wenn noch ein job "in bearbeitung" ist, der noch nicht
-                    // zur job-queue hinzugef�gt wurde, dann das jetzt nachholen
+                    // zur job-queue hinzugefÃ¼gt wurde, dann das jetzt nachholen
                     if (state==STATE_NEED_JOBPARAMS) {
                         job.addToQueue(customerId);
                     }
                     
-                    // alle batch-jobs ausf�hren
+                    // alle batch-jobs ausfÃ¼hren
                     handler.execute();
                     
-                    // ergebnis-writer f�r ok-jobs und f�r fehlerhafte jobs
+                    // ergebnis-writer fÃ¼r ok-jobs und fÃ¼r fehlerhafte jobs
                     // erzeugen
                     PrintWriter writer=new PrintWriter(new FileWriter(args[3]));
                     PrintWriter errWriter=new PrintWriter(new FileWriter(args[3]+".err"));
@@ -415,7 +415,7 @@ public class HBCIBatch
                             if (jobid.endsWith("_resultMode")) {
                                 continue;
                             }
-                            // den dazugeh�rigen job holen
+                            // den dazugehÃ¶rigen job holen
                             job=(HBCIJob)jobs.get(jobid);
                             
                             if (job.getJobResult().isOK()) {
@@ -451,16 +451,16 @@ public class HBCIBatch
                                     }
                                 } else {
                                     // ausgabemodus="toString": job-spezifische
-                                    // toString()-methode f�r formatierung der
+                                    // toString()-methode fÃ¼r formatierung der
                                     // ergebnisdaten aufrufen
                                     writer.println(job.getJobResult());
                                 }
                                 
-                                // leerzeile einf�gen
+                                // leerzeile einfÃ¼gen
                                 writer.println();
                             } else {
                                 // wenn ein job fehler erzeugt hatte, die fehlermeldungen
-                                // an die err-datei anh�ngen
+                                // an die err-datei anhÃ¤ngen
                                 
                                 errWriter.println("jobid:"+jobid);
                                 errWriter.println("global status:");

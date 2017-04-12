@@ -39,26 +39,26 @@ import org.kapott.hbci.structures.Value;
 /**
  * Testet das Erstellen von SEPA-Basis-Lastschriften
  
- Folgende Angaben sind f�r das Nachrichtenformat f�r SEPA-Lastschriften (pain.008) erforderlich: 
+ Folgende Angaben sind fï¿½r das Nachrichtenformat fï¿½r SEPA-Lastschriften (pain.008) erforderlich: 
 - Art des Verfahrens (Basis- oder Firmen-Lastschrift, <LclInstrm>) 
 - Art der Lastschrift (einmalige, erste, wieder-kehrende, letzte Lastschrift, 
 <SeqTp>) 
-- Name des Zahlungsempf�ngers (<Cdtr><Nm>) 
-- Gl�ubiger-Identifikationsnummer des Zahlungsempf�ngers (<CdtrSchmeId>) 
-- IBAN des Zahlungskontos des Zahlungsempf�ngers, auf dem die Gutschrift 
+- Name des Zahlungsempfï¿½ngers (<Cdtr><Nm>) 
+- Glï¿½ubiger-Identifikationsnummer des Zahlungsempfï¿½ngers (<CdtrSchmeId>) 
+- IBAN des Zahlungskontos des Zahlungsempfï¿½ngers, auf dem die Gutschrift 
 vorgenommen werden soll (<CdtrAcct>) 
-- BIC des Kreditinstituts des Zahlungsempf�ngers (<CdtrAgt>) 
+- BIC des Kreditinstituts des Zahlungsempfï¿½ngers (<CdtrAgt>) 
 - Name des Zahlungspflichtigen (<Dbtr><Nm>) 
 - IBAN des Zahlungskontos des Zahlungspflichtigen (<DbtrAcct>) 
 - BIC des Kreditinstituts des Zahlungspflichtigen (<DbtrAgt>) 
 - Eindeutige Mandatsreferenz (<MndtId>) 
-- Datum der Unterschrift des SEPA-Lastschriftmandats, sofern dieses vom Zahlungspflichtigen erteilt wird, bzw. Datum der Mitteilung �ber die Weiternutzung einer Einzugserm�chtigung (<DtOfSgntr>) 
-- H�he des Einzugsbetrags (<InstdAmt>) 
+- Datum der Unterschrift des SEPA-Lastschriftmandats, sofern dieses vom Zahlungspflichtigen erteilt wird, bzw. Datum der Mitteilung ï¿½ber die Weiternutzung einer Einzugsermï¿½chtigung (<DtOfSgntr>) 
+- Hï¿½he des Einzugsbetrags (<InstdAmt>) 
 - Angaben zum Verwendungszweck (<RmtInf>) 
 - Name der Referenzpartei des Zahlungspflichtigen (falls im SEPALastschriftmandat vorhanden, <UltmtDbtr>) 
 - Identifikationscode der Referenzpartei des Zahlungspflichtigen 
 (falls im SEPA-Lastschriftmandat vorhanden, <Dbtr><Id>) 
-- F�lligkeitsdatum des Einzugs (<ReqdColltnDt>) 
+- Fï¿½lligkeitsdatum des Einzugs (<ReqdColltnDt>) 
  
  
  */

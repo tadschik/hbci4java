@@ -56,7 +56,7 @@ public class TestGVTermUebSEPA extends AbstractTestGV {
         job.setParam("usage",params.getProperty("usage"));
         job.setParam("date", params.getProperty("date"));
         
-        System.out.println("---------F�r Job zur Queue");
+        System.out.println("---------Fï¿½r Job zur Queue");
         job.addToQueue();
 
         

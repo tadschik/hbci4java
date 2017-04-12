@@ -87,18 +87,18 @@
 			<xs:element name="PmtId" type="PaymentIdentificationSEPA"/>
 			<xs:element name="PmtTpInf" type="PaymentTypeInformationSCT2" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>If used, it is recommended to be used at ‘Payment Information’ level and not at ‘Credit Transfer Transaction Information’ level.</xs:documentation>
+					<xs:documentation>If used, it is recommended to be used at âPayment Informationâ level and not at âCredit Transfer Transaction Informationâ level.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="Amt" type="AmountTypeSEPA"/>
 			<xs:element name="ChrgBr" type="ChargeBearerTypeSEPACode" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>It is recommended that this element be specified at ‘Payment Information’ level.</xs:documentation>
+					<xs:documentation>It is recommended that this element be specified at âPayment Informationâ level.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="UltmtDbtr" type="PartyIdentificationSEPA1" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>This data element may be present either at ‘Payment Information’ or at ‘Credit Transfer Transaction Information’ level.</xs:documentation>
+					<xs:documentation>This data element may be present either at âPayment Informationâ or at âCredit Transfer Transaction Informationâ level.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="CdtrAgt" type="BranchAndFinancialInstitutionIdentificationSEPA1"/>
@@ -274,13 +274,13 @@ RF Creditor Reference may be used (ISO 11649).</xs:documentation>
 			<xs:choice>
 				<xs:element name="OrgId" type="OrganisationIdentificationSEPAChoice">
 					<xs:annotation>
-						<xs:documentation>Either ‘BIC or BEI’ or one
-occurrence of ‘Other’ is allowed.</xs:documentation>
+						<xs:documentation>Either âBIC or BEIâ or one
+occurrence of âOtherâ is allowed.</xs:documentation>
 					</xs:annotation>
 				</xs:element>
 				<xs:element name="PrvtId" type="PersonIdentificationSEPA1Choice">
 					<xs:annotation>
-						<xs:documentation>Either ‘Date and Place of Birth’ or one occurrence of ‘Other’ is allowed.</xs:documentation>
+						<xs:documentation>Either âDate and Place of Birthâ or one occurrence of âOtherâ is allowed.</xs:documentation>
 					</xs:annotation>
 				</xs:element>
 			</xs:choice>
@@ -290,7 +290,7 @@ occurrence of ‘Other’ is allowed.</xs:documentation>
 		<xs:sequence>
 			<xs:element name="Nm" type="Max70Text" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>‘Name’ is limited to 70 characters
+					<xs:documentation>âNameâ is limited to 70 characters
 in length.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
@@ -301,7 +301,7 @@ in length.</xs:documentation>
 		<xs:sequence>
 			<xs:element name="Nm" type="Max70Text">
 				<xs:annotation>
-					<xs:documentation>‘Name’ is limited to 70 characters
+					<xs:documentation>âNameâ is limited to 70 characters
 in length.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
@@ -320,20 +320,20 @@ in length.</xs:documentation>
 			<xs:element name="PmtInfId" type="RestrictedIdentificationSEPA1"/>
 			<xs:element name="PmtMtd" type="PaymentMethodSCTCode">
 				<xs:annotation>
-					<xs:documentation>Only ‘TRF’ is allowed.</xs:documentation>
+					<xs:documentation>Only âTRFâ is allowed.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="BtchBookg" type="BatchBookingIndicator" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>If present and contains ‘true’, batch booking is requested. If present and contains ‘false’, booking per transaction is requested. If element is not present, pre-agreed customer-to-bank conditions apply.</xs:documentation>
+					<xs:documentation>If present and contains âtrueâ, batch booking is requested. If present and contains âfalseâ, booking per transaction is requested. If element is not present, pre-agreed customer-to-bank conditions apply.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="NbOfTxs" type="Max15NumericText" minOccurs="0"/>
 			<xs:element name="CtrlSum" type="DecimalNumber" minOccurs="0"/>
 			<xs:element name="PmtTpInf" type="PaymentTypeInformationSCT1" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>If used, it is recommended to be used only at ‘Payment Information’ level and not at Credit Transfer Transaction Information’ level.
-When Instruction Priority is to be used, ‘Payment Type Information’ must be present at ‘Payment Information’ level. </xs:documentation>
+					<xs:documentation>If used, it is recommended to be used only at âPayment Informationâ level and not at Credit Transfer Transaction Informationâ level.
+When Instruction Priority is to be used, âPayment Type Informationâ must be present at âPayment Informationâ level. </xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="ReqdExctnDt" type="ISODate"/>
@@ -342,12 +342,12 @@ When Instruction Priority is to be used, ‘Payment Type Information’ must be 
 			<xs:element name="DbtrAgt" type="BranchAndFinancialInstitutionIdentificationSEPA1"/>
 			<xs:element name="UltmtDbtr" type="PartyIdentificationSEPA1" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>This data element may be present either at ‘Payment Information’ or at ‘Credit Transfer Transaction Information’ level.</xs:documentation>
+					<xs:documentation>This data element may be present either at âPayment Informationâ or at âCredit Transfer Transaction Informationâ level.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="ChrgBr" type="ChargeBearerTypeSEPACode" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>It is recommended that this element be specified at ‘Payment Information’ level.</xs:documentation>
+					<xs:documentation>It is recommended that this element be specified at âPayment Informationâ level.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="CdtTrfTxInf" type="CreditTransferTransactionInformationSCT" maxOccurs="unbounded"/>
@@ -368,7 +368,7 @@ When Instruction Priority is to be used, ‘Payment Type Information’ must be 
 			<xs:element name="SvcLvl" type="ServiceLevelSEPA"/>
 			<xs:element name="CtgyPurp" type="CategoryPurposeSEPA" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>Depending on the agreement between the Originator and the Originator Bank, ‘Category Purpose’ may be forwarded to the Beneficiary Bank.</xs:documentation>
+					<xs:documentation>Depending on the agreement between the Originator and the Originator Bank, âCategory Purposeâ may be forwarded to the Beneficiary Bank.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:sequence>
@@ -378,7 +378,7 @@ When Instruction Priority is to be used, ‘Payment Type Information’ must be 
 			<xs:element name="SvcLvl" type="ServiceLevelSEPA"/>
 			<xs:element name="CtgyPurp" type="CategoryPurposeSEPA" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>Depending on the agreement between the Originator and the Originator Bank, ‘Category Purpose’ may be forwarded to the Beneficiary Bank.</xs:documentation>
+					<xs:documentation>Depending on the agreement between the Originator and the Originator Bank, âCategory Purposeâ may be forwarded to the Beneficiary Bank.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:sequence>

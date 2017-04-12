@@ -39,25 +39,25 @@ import org.kapott.hbci.passport.HBCIPassportRDHNew;
     "<code>RDHNew</code>". Siehe dazu auch die Datei <code>README.RDHNew</code>
     im <em>HBCI4Java</em>-Archiv.</p>
     <p>Die Konvertierung von RDH-Passports in RDHNew-Passports kann auch
-    mit dem separat verf�gbaren HBCI4Java Passport Editor durchgef�hrt werden.
-    Mit diesem Editor k�nnen dar�ber hinaus RDHNew-Passports auch wieder
+    mit dem separat verfÃ¼gbaren HBCI4Java Passport Editor durchgefÃ¼hrt werden.
+    Mit diesem Editor kÃ¶nnen darÃ¼ber hinaus RDHNew-Passports auch wieder
     in RDH-Passports konvertiert werden.</p> 
     <p>Bei der <code>RDHNew</code>-Variante hat sich im Vergleich zu <code>RDH</code>
-    das Dateiformat der Schl�sseldateien ge�ndert. Deshalb muss vor Verwendung einer alten
-    <code>RDH</code>-Schl�sseldatei diese erst in das neue Dateiformat konvertiert
+    das Dateiformat der SchlÃ¼sseldateien geÃ¤ndert. Deshalb muss vor Verwendung einer alten
+    <code>RDH</code>-SchlÃ¼sseldatei diese erst in das neue Dateiformat konvertiert
     werden. Das geschieht mit diesem Tool. Vor dessen Anwendung sollte sicherheithalber
-    ein Backup der aktuellen (alten) RDH-Schl�sseldatei angelegt werden
+    ein Backup der aktuellen (alten) RDH-SchlÃ¼sseldatei angelegt werden
     (das sollte aber sowieso vorhanden sein!).</p>
     <p>Aufgerufen wird der Konverter mit
     <pre>java -cp ... org.kapott.hbci.tools.ConvertRDHPassport</pre>
     Es handelt sich um ein interaktives Programm. Nach dem Start wird nach dem
     Dateinamen einer existierenden RDH-Passport-Datei sowie nach dem Passwort
-    f�r deren Entschl�sselung gefragt. Anschlie�end wird nach einem
-    <em>neuen(!)</em> Dateinamen f�r die zu erstellende RDHNew-Passport-Datei
-    sowie nach einem Passwort f�r deren Verschl�sselung gefragt. Nach Beendigung
+    fÃ¼r deren EntschlÃ¼sselung gefragt. AnschlieÃend wird nach einem
+    <em>neuen(!)</em> Dateinamen fÃ¼r die zu erstellende RDHNew-Passport-Datei
+    sowie nach einem Passwort fÃ¼r deren VerschlÃ¼sselung gefragt. Nach Beendigung
     des Programmes existiert die RDHNew-Passport-Datei, welche ab sofort benutzt
     werden kann.</p>
-    <p>Um eine RDHNew-Passport-Datei zu benutzen, m�ssen alle HBCI-Parameter, die
+    <p>Um eine RDHNew-Passport-Datei zu benutzen, mÃ¼ssen alle HBCI-Parameter, die
     vorher mit "<code>client.passport.RDH.*</code>" gesetzt wurden, jetzt mit
     "<code>client.passport.RDHNew.*</code>" gesetzt werden, und als 
     "<code>client.passport.default</code>" bzw. als Argument zu

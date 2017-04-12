@@ -366,7 +366,7 @@ public class PKCS1_PSS
 
     private byte[] pss_sign(PrivateKey key, byte[] msg)
     {
-        // Modulus holen, weil dessen Bitlänge benötigt wird
+        // Modulus holen, weil dessen BitlÃ¤nge benÃ¶tigt wird
         BigInteger bModulus;
         if (key instanceof RSAPrivateKey) {
             bModulus=((RSAPrivateKey)key).getModulus();

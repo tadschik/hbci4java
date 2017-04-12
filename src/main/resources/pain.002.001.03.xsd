@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Von der Deutschen Kreditwirtschaft bereitgestelltes Bank-Kunde-Bank-Schema für den Payment Status Report für SEPA-Überweisungen bzw. -Lastschriften (gemäß Kapitel 2.2.3 der Anlage 3 des DFÜ-Abkommens) -->
-<!-- Version gemäß DFÜ-Abkommen Anlage 3, Version 3.0, gültig ab November 2016 gemäß EPC IG , 
-Namespace analog ISO 20022 Edition 2009, da voll kompatibel, zudem inkl. aller EPC-Vorgaben   Stand März 2016-->
+<!-- Von der Deutschen Kreditwirtschaft bereitgestelltes Bank-Kunde-Bank-Schema fÃ¼r den Payment Status Report fÃ¼r SEPA-Ãberweisungen bzw. -Lastschriften (gemÃ¤Ã Kapitel 2.2.3 der Anlage 3 des DFÃ-Abkommens) -->
+<!-- Version gemÃ¤Ã DFÃ-Abkommen Anlage 3, Version 3.0, gÃ¼ltig ab November 2016 gemÃ¤Ã EPC IG , 
+Namespace analog ISO 20022 Edition 2009, da voll kompatibel, zudem inkl. aller EPC-Vorgaben   Stand MÃ¤rz 2016-->
 <!-- Mit XMLSpy v2008 rel. 2 (http://www.altova.com) von Wenzel (SIZ Bonn) bearbeitet -->
 <xs:schema xmlns="urn:iso:std:iso:20022:tech:xsd:pain.002.001.03" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:iso:std:iso:20022:tech:xsd:pain.002.001.03" elementFormDefault="qualified">
 	<xs:element name="Document" type="Document"/>
@@ -9,7 +9,7 @@ Namespace analog ISO 20022 Edition 2009, da voll kompatibel, zudem inkl. aller E
 		<xs:sequence>
 			<xs:element name="IBAN" type="IBAN2007Identifier">
 				<xs:annotation>
-					<xs:documentation>Angabe nur zulässig im Falle eines Kontowechsels bei gleichbleibender 
+					<xs:documentation>Angabe nur zulÃ¤ssig im Falle eines Kontowechsels bei gleichbleibender 
 Zahlerbank.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
@@ -57,7 +57,7 @@ Zahlerbank.</xs:documentation>
 		<xs:sequence>
 			<xs:element name="OrgnlMndtId" type="Max35Text" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>Mandatory if changes occur in ‘Mandate Identification’, otherwise not to be used.</xs:documentation>
+					<xs:documentation>Mandatory if changes occur in âMandate Identificationâ, otherwise not to be used.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="OrgnlCdtrSchmeId" type="PartyIdentificationSEPA4" minOccurs="0">
@@ -234,7 +234,7 @@ Zahlerbank.</xs:documentation>
 		<xs:sequence>
 			<xs:element name="Id" type="RestrictedSMNDACode">
 				<xs:annotation>
-					<xs:documentation>Zulässiger Code: SMNDA = Same Mandat New Debtor Account - zeigt ein verändertes Zahlerkonto im Mandat an</xs:documentation>
+					<xs:documentation>ZulÃ¤ssiger Code: SMNDA = Same Mandat New Debtor Account - zeigt ein verÃ¤ndertes Zahlerkonto im Mandat an</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:sequence>
@@ -384,12 +384,12 @@ Zahlerbank.</xs:documentation>
 			<xs:element name="OrgnlCtrlSum" type="DecimalNumber" minOccurs="0"/>
 			<xs:element name="GrpSts" type="TransactionGroupStatusCodeSEPA" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>Either ‘Group Status’, ‘Payment Information Status’ or ‘Transaction Status’ must be present with the code ‘RJCT’.</xs:documentation>
+					<xs:documentation>Either âGroup Statusâ, âPayment Information Statusâ or âTransaction Statusâ must be present with the code âRJCTâ.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="StsRsnInf" type="StatusReasonInformationSEPA" minOccurs="0" maxOccurs="unbounded">
 				<xs:annotation>
-					<xs:documentation>‘Status Reason Information’ may be present either in ‘Original Group Information And Status’, ‘Original Payment Information and Status’ or in ‘Transaction Information and Status’.</xs:documentation>
+					<xs:documentation>âStatus Reason Informationâ may be present either in âOriginal Group Information And Statusâ, âOriginal Payment Information and Statusâ or in âTransaction Information and Statusâ.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:sequence>
@@ -401,12 +401,12 @@ Zahlerbank.</xs:documentation>
 			<xs:element name="OrgnlCtrlSum" type="DecimalNumber" minOccurs="0"/>
 			<xs:element name="PmtInfSts" type="TransactionGroupStatusCodeSEPA" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>Either ‘Group Status’, ‘Payment Information Status’ or ‘Transaction Status’ must be present with the code ‘RJCT’.</xs:documentation>
+					<xs:documentation>Either âGroup Statusâ, âPayment Information Statusâ or âTransaction Statusâ must be present with the code âRJCTâ.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="StsRsnInf" type="StatusReasonInformationSEPA" minOccurs="0" maxOccurs="unbounded">
 				<xs:annotation>
-					<xs:documentation>‘Status Reason Information’ may be present either in ‘Original Group Information And Status’, ‘Original Payment Information and Status’ or in ‘Transaction Information and Status’.</xs:documentation>
+					<xs:documentation>âStatus Reason Informationâ may be present either in âOriginal Group Information And Statusâ, âOriginal Payment Information and Statusâ or in âTransaction Information and Statusâ.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="TxInfAndSts" type="PaymentTransactionInformationSEPA" minOccurs="0" maxOccurs="unbounded"/>
@@ -455,13 +455,13 @@ Zahlerbank.</xs:documentation>
 			<xs:choice>
 				<xs:element name="OrgId" type="OrganisationIdentificationSEPAChoice">
 					<xs:annotation>
-						<xs:documentation>Either ‘BIC or BEI’ or one
-occurrence of ‘Other’ is allowed.</xs:documentation>
+						<xs:documentation>Either âBIC or BEIâ or one
+occurrence of âOtherâ is allowed.</xs:documentation>
 					</xs:annotation>
 				</xs:element>
 				<xs:element name="PrvtId" type="PersonIdentificationSEPA1Choice">
 					<xs:annotation>
-						<xs:documentation>Either ‘Date and Place of Birth’ or one occurrence of ‘Other’ is allowed.</xs:documentation>
+						<xs:documentation>Either âDate and Place of Birthâ or one occurrence of âOtherâ is allowed.</xs:documentation>
 					</xs:annotation>
 				</xs:element>
 			</xs:choice>
@@ -494,7 +494,7 @@ person.</xs:documentation>
 		<xs:sequence>
 			<xs:element name="Nm" type="Max70Text" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>‘Name’ is limited to 70 characters in length.</xs:documentation>
+					<xs:documentation>âNameâ is limited to 70 characters in length.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="PstlAdr" type="PostalAddressSEPA" minOccurs="0"/>
@@ -510,7 +510,7 @@ person.</xs:documentation>
 		<xs:sequence>
 			<xs:element name="Nm" type="Max70Text" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>If present the new’ Name’ must be specified under ‘Creditor’.</xs:documentation>
+					<xs:documentation>If present the newâ Nameâ must be specified under âCreditorâ.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="Id" type="PartySEPA2" minOccurs="0"/>
@@ -520,7 +520,7 @@ person.</xs:documentation>
 		<xs:sequence>
 			<xs:element name="Nm" type="Max70Text" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>‘Name’ is limited to 70 characters in length.</xs:documentation>
+					<xs:documentation>âNameâ is limited to 70 characters in length.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="Id" type="PartySEPAChoice" minOccurs="0"/>
@@ -539,17 +539,17 @@ person.</xs:documentation>
 			<xs:element name="OrgnlEndToEndId" type="Max35Text" minOccurs="0"/>
 			<xs:element name="TxSts" type="TransactionIndividualStatusCodeSEPA" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>Either ‘Group Status’, ‘Payment Information Status’ or ‘Transaction Status’ must be present with the code ‘RJCT’.</xs:documentation>
+					<xs:documentation>Either âGroup Statusâ, âPayment Information Statusâ or âTransaction Statusâ must be present with the code âRJCTâ.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="StsRsnInf" type="StatusReasonInformationSEPA" minOccurs="0" maxOccurs="unbounded">
 				<xs:annotation>
-					<xs:documentation>‘Status Reason Information’ may be present either in ‘Original Group Information And Status’, ‘Original Payment Information and Status’ or in ‘Transaction Information and Status’.</xs:documentation>
+					<xs:documentation>âStatus Reason Informationâ may be present either in âOriginal Group Information And Statusâ, âOriginal Payment Information and Statusâ or in âTransaction Information and Statusâ.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="OrgnlTxRef" type="OriginalTransactionReferenceSEPA">
 				<xs:annotation>
-					<xs:documentation>The message elements under ‘Original Transaction Reference’ must be populated with the same value as the message elements of the original instruction, as defined within the following elements.</xs:documentation>
+					<xs:documentation>The message elements under âOriginal Transaction Referenceâ must be populated with the same value as the message elements of the original instruction, as defined within the following elements.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:sequence>
@@ -587,9 +587,9 @@ person.</xs:documentation>
 		<xs:sequence>
 			<xs:element name="Othr" type="RestrictedPersonIdentificationSEPA">
 				<xs:annotation>
-					<xs:documentation>Only one occurrence of ‘Other’ is allowed, and no other sub-elements are allowed.
+					<xs:documentation>Only one occurrence of âOtherâ is allowed, and no other sub-elements are allowed.
 Identification must be used with an identifier described in General Message Element Specifications, Chapter 1.5.2 of the Implementation Guide.
-Scheme Name’ under ‘Other’ must specify ‘SEPA’ under ‘Proprietary</xs:documentation>
+Scheme Nameâ under âOtherâ must specify âSEPAâ under âProprietary</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:sequence>
@@ -654,7 +654,7 @@ Scheme Name’ under ‘Other’ must specify ‘SEPA’ under ‘Proprietary</x
 		<xs:sequence>
 			<xs:element name="Orgtr" type="PartyIdentificationSEPA6Choice" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>Limited to BIC to identify the bank or CSM originating the status or ‘Name’ to
+					<xs:documentation>Limited to BIC to identify the bank or CSM originating the status or âNameâ to
 indicate a CSM when it has no BIC.</xs:documentation>
 				</xs:annotation>
 			</xs:element>

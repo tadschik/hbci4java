@@ -74,12 +74,12 @@ public abstract class AbstractRDHPassport
                 if (method.equals("RDH") && 
                         (noPassportVersion || passportVersion.equals(version))) 
                 {
-                    // ein RDH-Passport gilt dann als "unterst¸tzt", wenn in den
+                    // ein RDH-Passport gilt dann als "unterst√ºtzt", wenn in den
                     // BPD der SecMech "RDH" auftaucht, und dabei die RDH-Profilnummer
-                    // aus den BPD mit der gew¸nschten RDH-Profilnummer des 
-                    // Passports ¸bereinstimmt. 
-                    // Es reicht auch nur die ‹bereinstimmung auf "RDH", wenn
-                    // das Passport seine Profil-Nummer noch nicht weiﬂ ("").
+                    // aus den BPD mit der gew√ºnschten RDH-Profilnummer des 
+                    // Passports √ºbereinstimmt. 
+                    // Es reicht auch nur die √úbereinstimmung auf "RDH", wenn
+                    // das Passport seine Profil-Nummer noch nicht wei√ü ("").
                     ret=true;
                     break;
                 }
@@ -130,9 +130,9 @@ public abstract class AbstractRDHPassport
     {
         String ret;
         
-        // TODO: hier auch hˆhere hbci-versionen ber¸cksichtigen
+        // TODO: hier auch h√∂here hbci-versionen ber√ºcksichtigen
         if (getHBCIVersion().equals("300")) {
-            // TODO: bei verwendung der digisig hier anderen wert zur¸ckgeben
+            // TODO: bei verwendung der digisig hier anderen wert zur√ºckgeben
             ret=Sig.SECFUNC_FINTS_SIG_SIG;
         } else {
             ret=Sig.SECFUNC_HBCI_SIG_RDH;
@@ -163,7 +163,7 @@ public abstract class AbstractRDHPassport
             ret=Sig.SIGMODE_PSS;
             break;
         default:
-            // TODO das sp‰ter vom security profile abh‰ngig machen
+            // TODO das sp√§ter vom security profile abh√§ngig machen
             // RDH3: ISO9796-(1|2)
             // RDH4: PKCS1
             // RDH5: PKCS1
@@ -200,7 +200,7 @@ public abstract class AbstractRDHPassport
             ret=Crypt.ENCMODE_CBC;
             break;
         default:
-            // TODO das sp‰ter vom security profile abh‰ngig machen
+            // TODO das sp√§ter vom security profile abh√§ngig machen
             // RDH3: PKCS1
             // RDH4: PKCS1
             // RDH5: PKCS1
@@ -228,7 +228,7 @@ public abstract class AbstractRDHPassport
             ret=bytes;
             break;
         default:
-            // TODO das sp‰ter vom security profile abh‰ngig machen
+            // TODO das sp√§ter vom security profile abh√§ngig machen
             throw new HBCI_Exception("*** dont know which crypt data size to use for profile rdh-"+profile);
         }
 
@@ -252,7 +252,7 @@ public abstract class AbstractRDHPassport
             ret=Sig.HASHALG_SHA256_SHA256;
             break;
         default:
-            // TODO das sp‰ter vom security profile abh‰ngig machen
+            // TODO das sp√§ter vom security profile abh√§ngig machen
             // RDH3: RIPE/SHA
             // RDH4: SHA
             // RDH5: SHA
@@ -283,7 +283,7 @@ public abstract class AbstractRDHPassport
             // hashprovider=null;
             break;
         default:
-            // TODO das sp‰ter vom security profile abh‰ngig machen
+            // TODO das sp√§ter vom security profile abh√§ngig machen
             throw new HBCI_Exception("*** dont know which hash instance to use for profile rdh-"+profile);
         }
 
@@ -312,7 +312,7 @@ public abstract class AbstractRDHPassport
             sigprovider="CryptAlgs4Java";
             break;
         default:
-            // TODO das sp‰ter vom security profile abh‰ngig machen
+            // TODO das sp√§ter vom security profile abh√§ngig machen
             throw new HBCI_Exception("*** dont know which signature instance to use for profile rdh-"+profile);
         }
 

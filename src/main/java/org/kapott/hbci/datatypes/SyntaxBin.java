@@ -29,31 +29,31 @@ import org.kapott.hbci.exceptions.InvalidUserDataException;
 import org.kapott.hbci.manager.HBCIUtilsInternal;
 
 /* @internal
-    @brief SyntaxBin enth�lt Bin�rdaten.
+    @brief SyntaxBin enthÃ¤lt BinÃ¤rdaten.
 
     Beim Initialisieren gibt das erste
-    Zeichen des �bergebenen Strings den Typ der nachfolgenden Daten an:
-      - N bedeutet, der nachfolgende String ist eine Integer-Zahl, die bin�r
-        dargestellt werden soll 
-      - B bedeutet, der nachfolgende String ist bereits ein Bin�rstring 
-        und soll ohne �nderungen �bernommen werden
+    Zeichen des Ã¼bergebenen Strings den Typ der nachfolgenden Daten an:
+      - N bedeutet, der nachfolgende String ist eine Integer-Zahl, die binÃ¤r
+        dargestellt werden soll
+      - B bedeutet, der nachfolgende String ist bereits ein BinÃ¤rstring
+        und soll ohne Ãnderungen Ã¼bernommen werden
 
     @author $Author: willuhn $
 */
 
 // intern wird das byte-array gespeichert
 public class SyntaxBin
-     extends SyntaxDE
+        extends SyntaxDE
 {
     /** @internal @brief Returns a given number in byte notation
 
-        This method transforms a given number into its byte-representation
-        in big-endian-format.
+    This method transforms a given number into its byte-representation
+    in big-endian-format.
 
-        @param x the String representation of the number
-        @return a String, where each "character" is one byte of the
-                big-endian-byte-representation of the given number
-    */
+     @param x the String representation of the number
+     @return a String, where each "character" is one byte of the
+     big-endian-byte-representation of the given number
+     */
     private static String expandNumber(String x)
     {
         try {
@@ -63,19 +63,19 @@ public class SyntaxBin
         }
     }
 
-    /** @internal @brief erzeugt den HBCI-Datentyp BIN 
+    /** @internal @brief erzeugt den HBCI-Datentyp BIN
 
-        Es wird der erzeugte String zur�ckgegeben. Dazu wird das erste Zeichen
-        des uebergebenen Strings ausgewertet. Ist dieses "N", so wird der
-        uebergebene String als Integer-Wert interpretiert und in seine
-        binaere Byte-Darstellung konvertiert. Bei "B" als erstem Zeichen wird
-        der String as-is uebernommen.
+    Es wird der erzeugte String zurÃ¼ckgegeben. Dazu wird das erste Zeichen
+    des uebergebenen Strings ausgewertet. Ist dieses "N", so wird der
+    uebergebene String als Integer-Wert interpretiert und in seine
+    binaere Byte-Darstellung konvertiert. Bei "B" als erstem Zeichen wird
+    der String as-is uebernommen.
 
-        @param x the String to be converted
-        @return the binary String representing the given value
-        @exception IllegalArgumentException occurs when the first character of
-                   the given string is neither "N" nor "B"
-    */
+     @param x the String to be converted
+     @return the binary String representing the given value
+     @exception IllegalArgumentException occurs when the first character of
+     the given string is neither "N" nor "B"
+     */
     private static String expand(String x)
     {
         char format = x.charAt(0);
@@ -83,34 +83,34 @@ public class SyntaxBin
         String ret = null;
 
         switch (format) {
-        case 'N':
-            ret = expandNumber(st);
-            break;
-        case 'B':
-            ret = st;
-            break;
-        default:
-            throw new InvalidArgumentException(HBCIUtilsInternal.getLocMsg(
-                    "EXC_DTBIN_NO_VALID_FORMAT",
-                    Character.toString(format)));
+            case 'N':
+                ret = expandNumber(st);
+                break;
+            case 'B':
+                ret = st;
+                break;
+            default:
+                throw new InvalidArgumentException(HBCIUtilsInternal.getLocMsg(
+                        "EXC_DTBIN_NO_VALID_FORMAT",
+                        Character.toString(format)));
         }
 
         return ret;
     }
 
     /** @internal @brief creates an object representing the BIN datatype
-        @see SyntaxDE
-    */
+     @see SyntaxDE
+     */
     public SyntaxBin(String x, int minlen, int maxlen)
     {
         super(expand(x),minlen,maxlen);
     }
-    
+
     public void init(String x, int minlen, int maxlen)
     {
         super.init(expand(x),minlen,maxlen);
     }
-    
+
     /** @see SyntaxDE */
     public String toString(int zero)
     {
@@ -123,10 +123,10 @@ public class SyntaxBin
 
     /** @internal @brief returns the size of the header
 
-        @param st the string representing the complete datatype BIN
-        @return the length of the header-field in this string (i.e.
-                the number of bytes making the @len@ part of the string
-    */
+     @param st the string representing the complete datatype BIN
+     @return the length of the header-field in this string (i.e.
+     the number of bytes making the @len@ part of the string
+     */
     private int getHeaderLen(String st)
     {
         int idx = 0;
@@ -144,13 +144,13 @@ public class SyntaxBin
 
     /** @internal @brief gets the "real" value out of an HBCI-BIN-datatype
 
-        this method takes a string representing the value of a BIN-datatype
-        and extracts the real value (the data making the element) from it.
-        for this to achieve it removes the header containing the length
-        of the data
+    this method takes a string representing the value of a BIN-datatype
+    and extracts the real value (the data making the element) from it.
+    for this to achieve it removes the header containing the length
+    of the data
 
-        @param st the content of an HBCI-BIN-datatype-field
-        @return the "real" data wrapped into the given string
+     @param st the content of an HBCI-BIN-datatype-field
+     @return the "real" data wrapped into the given string
      */
     private String parse(String st)
     {
@@ -164,7 +164,7 @@ public class SyntaxBin
 
         return ret;
     }
-    
+
     private void initData(StringBuffer res,int minsize,int maxsize)
     {
         int startidx = skipPreDelim(res);
@@ -187,5 +187,5 @@ public class SyntaxBin
     {
         initData(res,minsize,maxsize);
     }
-    
+
 }

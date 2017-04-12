@@ -23,9 +23,9 @@ package org.kapott.hbci.GV_Result;
 
 
 
-/** R�ckgabedaten f�r das Einreichen einer terminierten SEPA-Lastschrift. Beim Einreichen
+/** RÃ¼ckgabedaten fÃ¼r das Einreichen einer terminierten SEPA-Lastschrift. Beim Einreichen
     einer terminierten Lastschrift gibt die Bank u.U. eine Auftrags-Identifikationsnummer
-    zur�ck, die benutzt werden kann, um den Auftrag sp�ter zu �ndern oder zu l�schen. */
+    zurÃ¼ck, die benutzt werden kann, um den Auftrag spÃ¤ter zu Ã¤ndern oder zu lÃ¶schen. */
 public class GVRLastB2BSEPA extends AbstractGVRLastSEPA
 {
 }

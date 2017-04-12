@@ -26,10 +26,10 @@ import java.io.InputStreamReader;
 
 
 
-/** Default-Implementation einer Callback-Klasse f�r textbasierte Anwendungen. Diese Klasse
-    ist eine vollst�ndig funktionsf�hige Callback-Klasse und kann direkt in eigenen
+/** Default-Implementation einer Callback-Klasse fÃ¼r textbasierte Anwendungen. Diese Klasse
+    ist eine vollstÃ¤ndig funktionsfÃ¤hige Callback-Klasse und kann direkt in eigenen
     Anwendungen benutzt werden. Sie basiert auf der Klasse {@link HBCICallbackIOStreams} 
-    f�r Stream-basierte Ein-/Ausgabe und verwendet STDIN bzw. STDOUT als
+    fÃ¼r Stream-basierte Ein-/Ausgabe und verwendet STDIN bzw. STDOUT als
     Input- resp. Output-Streams. */
 public class HBCICallbackConsole
     extends HBCICallbackIOStreams

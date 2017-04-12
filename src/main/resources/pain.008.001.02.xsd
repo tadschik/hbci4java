@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Von der Deutschen Kreditwirtschaft bereitgestelltes Kunde-Bank-Schema für die SEPA-Lastschrift (nutzbar für CORE und B2B) -->
-<!-- Version gemäß DFÜ-Abkommen Anlage 3, Version 3.0, gültig ab November 2016 mit Umsetzung der EPC SDD Core IG 9.0 bzw. SDD B2B IG 7.0 und Erweiterung Mandatsreferenz um Leerzeichen - Namespace analog ISO 20022 Edition 2009, da voll kompatibel, zudem inkl. aller EPC-Vorgaben-->
-<!-- Beim Local Instrument ist die gesamte externe ISO-Codeliste aufgenommen (wenngleich hier gemäß Spezifikation nur CORE und B2B zulässig sind) -->
+<!-- Von der Deutschen Kreditwirtschaft bereitgestelltes Kunde-Bank-Schema fÃ¼r die SEPA-Lastschrift (nutzbar fÃ¼r CORE und B2B) -->
+<!-- Version gemÃ¤Ã DFÃ-Abkommen Anlage 3, Version 3.0, gÃ¼ltig ab November 2016 mit Umsetzung der EPC SDD Core IG 9.0 bzw. SDD B2B IG 7.0 und Erweiterung Mandatsreferenz um Leerzeichen - Namespace analog ISO 20022 Edition 2009, da voll kompatibel, zudem inkl. aller EPC-Vorgaben-->
+<!-- Beim Local Instrument ist die gesamte externe ISO-Codeliste aufgenommen (wenngleich hier gemÃ¤Ã Spezifikation nur CORE und B2B zulÃ¤ssig sind) -->
 <!-- Mit XMLSpy v2008 rel. 2 (http://www.altova.com) von Wenzel und mit XMLSpy v2007 rel. 3 (http://www.altova.com) von Schopohl (SIZ Bonn) bearbeitet -->
 <xs:schema xmlns="urn:iso:std:iso:20022:tech:xsd:pain.008.001.02" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:iso:std:iso:20022:tech:xsd:pain.008.001.02" elementFormDefault="qualified">
 	<xs:element name="Document" type="Document"/>
@@ -52,7 +52,7 @@
 		<xs:sequence>
 			<xs:element name="OrgnlMndtId" type="RestrictedIdentificationSEPA1" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>Mandatory if changes occur in ‘Mandate Identification’, otherwise not to be used.</xs:documentation>
+					<xs:documentation>Mandatory if changes occur in âMandate Identificationâ, otherwise not to be used.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="OrgnlCdtrSchmeId" type="PartyIdentificationSEPA4" minOccurs="0">
@@ -173,9 +173,9 @@ If the receiving bank validates the check digit and if this validation fails, th
 			<xs:element name="MndtRltdInf" type="MandateRelatedInformationSDD"/>
 			<xs:element name="CdtrSchmeId" type="PartyIdentificationSEPA3" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>It is recommended that all transactions within the same ‘Payment Information’ block have the same ‘Creditor Scheme Identification’.
-This data element must be present at either ‘Payment Information’ or ‘Direct Debit
-Transaction’ level.</xs:documentation>
+					<xs:documentation>It is recommended that all transactions within the same âPayment Informationâ block have the same âCreditor Scheme Identificationâ.
+This data element must be present at either âPayment Informationâ or âDirect Debit
+Transactionâ level.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:sequence>
@@ -186,13 +186,13 @@ Transaction’ level.</xs:documentation>
 			<xs:element name="InstdAmt" type="ActiveOrHistoricCurrencyAndAmountSEPA"/>
 			<xs:element name="ChrgBr" type="ChargeBearerTypeSEPACode" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>It is recommended that this element be specified at ‘Payment Information’ level.</xs:documentation>
+					<xs:documentation>It is recommended that this element be specified at âPayment Informationâ level.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="DrctDbtTx" type="DirectDebitTransactionSDD"/>
 			<xs:element name="UltmtCdtr" type="PartyIdentificationSEPA1" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>This data element may be present either at ‘Payment Information’ or at ‘Direct Debit Transaction Information’ level.</xs:documentation>
+					<xs:documentation>This data element may be present either at âPayment Informationâ or at âDirect Debit Transaction Informationâ level.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="DbtrAgt" type="BranchAndFinancialInstitutionIdentificationSEPA3"/>
@@ -401,13 +401,13 @@ The reason code from the Rulebook is indicated using one of the following messag
 			<xs:choice>
 				<xs:element name="OrgId" type="OrganisationIdentificationSEPAChoice">
 					<xs:annotation>
-						<xs:documentation>Either ‘BIC or BEI’ or one
-occurrence of ‘Other’ is allowed.</xs:documentation>
+						<xs:documentation>Either âBIC or BEIâ or one
+occurrence of âOtherâ is allowed.</xs:documentation>
 					</xs:annotation>
 				</xs:element>
 				<xs:element name="PrvtId" type="PersonIdentificationSEPA1Choice">
 					<xs:annotation>
-						<xs:documentation>Either ‘Date and Place of Birth’ or one occurrence of ‘Other’ is allowed</xs:documentation>
+						<xs:documentation>Either âDate and Place of Birthâ or one occurrence of âOtherâ is allowed</xs:documentation>
 					</xs:annotation>
 				</xs:element>
 			</xs:choice>
@@ -427,7 +427,7 @@ person.</xs:documentation>
 		<xs:sequence>
 			<xs:element name="Nm" type="Max70Text" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>‘Name’ is limited to 70 characters in length.</xs:documentation>
+					<xs:documentation>âNameâ is limited to 70 characters in length.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="Id" type="PartySEPAChoice" minOccurs="0"/>
@@ -437,7 +437,7 @@ person.</xs:documentation>
 		<xs:sequence>
 			<xs:element name="Nm" type="Max70Text">
 				<xs:annotation>
-					<xs:documentation>‘Name’ is limited to 70 characters in length.</xs:documentation>
+					<xs:documentation>âNameâ is limited to 70 characters in length.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="PstlAdr" type="PostalAddressSEPA" minOccurs="0"/>
@@ -453,7 +453,7 @@ person.</xs:documentation>
 		<xs:sequence>
 			<xs:element name="Nm" type="Max70Text" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>If present the new’ Name’ must be specified under ‘Creditor’. ‘Name’ is limited to 70 characters in length.</xs:documentation>
+					<xs:documentation>If present the newâ Nameâ must be specified under âCreditorâ. âNameâ is limited to 70 characters in length.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="Id" type="PartySEPA2" minOccurs="0"/>
@@ -463,7 +463,7 @@ person.</xs:documentation>
 		<xs:sequence>
 			<xs:element name="Nm" type="Max70Text">
 				<xs:annotation>
-					<xs:documentation>‘Name’ is limited to 70 characters in length.</xs:documentation>
+					<xs:documentation>âNameâ is limited to 70 characters in length.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="PstlAdr" type="PostalAddressSEPA" minOccurs="0"/>
@@ -481,7 +481,7 @@ person.</xs:documentation>
 			<xs:element name="PmtMtd" type="PaymentMethod2Code"/>
 			<xs:element name="BtchBookg" type="BatchBookingIndicator" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>If present and contains ‘true’, batch booking is requested. If present and contains ‘false’, booking per transaction is requested. If element is not present, pre-agreed customer-to-bank conditions apply.</xs:documentation>
+					<xs:documentation>If present and contains âtrueâ, batch booking is requested. If present and contains âfalseâ, booking per transaction is requested. If element is not present, pre-agreed customer-to-bank conditions apply.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="NbOfTxs" type="Max15NumericText" minOccurs="0"/>
@@ -493,19 +493,19 @@ person.</xs:documentation>
 			<xs:element name="CdtrAgt" type="BranchAndFinancialInstitutionIdentificationSEPA3"/>
 			<xs:element name="UltmtCdtr" type="PartyIdentificationSEPA1" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>This data element may be present either at ‘Payment Information’ or at ‘Direct Debit Transaction Information’ level.</xs:documentation>
+					<xs:documentation>This data element may be present either at âPayment Informationâ or at âDirect Debit Transaction Informationâ level.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="ChrgBr" type="ChargeBearerTypeSEPACode" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>It is recommended that this element be specified at ‘Payment Information’ level.</xs:documentation>
+					<xs:documentation>It is recommended that this element be specified at âPayment Informationâ level.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="CdtrSchmeId" type="PartyIdentificationSEPA3" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>It is recommended that all transactions within the same ‘Payment Information’ block have the same ‘Creditor Scheme Identification’.
-This data element must be present at either ‘Payment Information’ or ‘Direct Debit
-Transaction’ level.</xs:documentation>
+					<xs:documentation>It is recommended that all transactions within the same âPayment Informationâ block have the same âCreditor Scheme Identificationâ.
+This data element must be present at either âPayment Informationâ or âDirect Debit
+Transactionâ level.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="DrctDbtTxInf" type="DirectDebitTransactionInformationSDD" maxOccurs="unbounded"/>
@@ -521,13 +521,13 @@ Transaction’ level.</xs:documentation>
 			<xs:element name="SvcLvl" type="ServiceLevel"/>
 			<xs:element name="LclInstrm" type="LocalInstrumentSEPA">
 				<xs:annotation>
-					<xs:documentation>Only ‘B2B’ and 'CORE' is allowed. The mixing of different Local Instrument values is not allowed in the same message.</xs:documentation>
+					<xs:documentation>Only âB2Bâ and 'CORE' is allowed. The mixing of different Local Instrument values is not allowed in the same message.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="SeqTp" type="SequenceType1Code"/>
 			<xs:element name="CtgyPurp" type="CategoryPurposeSEPA" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>Depending on the agreement between the Creditor and the Creditor Bank, ‘Category Purpose’ may be forwarded to the Debtor Bank.</xs:documentation>
+					<xs:documentation>Depending on the agreement between the Creditor and the Creditor Bank, âCategory Purposeâ may be forwarded to the Debtor Bank.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:sequence>
@@ -544,9 +544,9 @@ Transaction’ level.</xs:documentation>
 		<xs:sequence>
 			<xs:element name="Othr" type="RestrictedPersonIdentificationSEPA">
 				<xs:annotation>
-					<xs:documentation>Only one occurrence of ‘Other’ is allowed, and no other sub-elements are allowed.
+					<xs:documentation>Only one occurrence of âOtherâ is allowed, and no other sub-elements are allowed.
 Identification must be used with an identifier described in General Message Element Specifications, Chapter 1.5.2 of the Implementation Guide.
-Scheme Name’ under ‘Other’ must specify ‘SEPA’ under ‘Proprietary</xs:documentation>
+Scheme Nameâ under âOtherâ must specify âSEPAâ under âProprietary</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:sequence>

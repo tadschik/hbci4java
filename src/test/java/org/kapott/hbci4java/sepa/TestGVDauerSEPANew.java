@@ -79,7 +79,7 @@ public class TestGVDauerSEPANew extends AbstractTest {
         job.setParam("turnus", "1");
         job.setParam("execday", "1");
         
-        System.out.println("---------F�r Job zur Queue");
+        System.out.println("---------Fï¿½r Job zur Queue");
         job.addToQueue();
 
         

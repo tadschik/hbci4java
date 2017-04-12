@@ -24,11 +24,11 @@ package org.kapott.hbci.manager;
 import java.io.Serializable;
 import java.security.Key;
 
-/** Diese Klasse repr�sentiert einen von <em>HBCI4Java</em>verwendeten Schl�ssel.
-    Ein solcher HBCI-Schl�ssel besteht aus
-    administrativen Daten zu diesem Schl�ssel (Besitzer, Version) sowie den eigentlichen
+/** Diese Klasse reprÃ¤sentiert einen von <em>HBCI4Java</em>verwendeten SchlÃ¼ssel.
+    Ein solcher HBCI-SchlÃ¼ssel besteht aus
+    administrativen Daten zu diesem SchlÃ¼ssel (Besitzer, Version) sowie den eigentlichen
     kryptographischen Daten. Bei Verwendung von asymmetrischen Sicherheitsverfahren
-    (RDH) werden sowohl f�r den �ffentlichen als auch f�r den privaten Schl�sselteil
+    (RDH) werden sowohl fÃ¼r den Ã¶ffentlichen als auch fÃ¼r den privaten SchlÃ¼sselteil
     intern je ein <code>HBCIKey</code>-Objekt verwendet!
     Bei einigen Sicherheitsverfahren (DDV, PinTan) werden
     die kryptografischen Daten nicht in diesem Objekt gespeichert, sondern nur die
@@ -38,20 +38,20 @@ public final class HBCIKey
 {
     private static final long serialVersionUID =1L;
     
-    /** L�ndercode des Schl�sselbesitzers */
+    /** LÃ¤ndercode des SchlÃ¼sselbesitzers */
     public String country;
-    /** Bankleitzahl des Schl�sselbesitzers */
+    /** Bankleitzahl des SchlÃ¼sselbesitzers */
     public String blz;
-    /** Nutzerkennung des Schl�sselbesitzers. Wenn der Schl�ssel
-        einem "richtigen" Nutzer geh�rt, so wird hier seine HBCI-Userkennung eingestellt;
-        geh�rt der Schl�ssel der Bank, so steht hier eine bankinterne
-        ID (u.U. die Bankleitzahl o.�.) */
+    /** Nutzerkennung des SchlÃ¼sselbesitzers. Wenn der SchlÃ¼ssel
+        einem "richtigen" Nutzer gehÃ¶rt, so wird hier seine HBCI-Userkennung eingestellt;
+        gehÃ¶rt der SchlÃ¼ssel der Bank, so steht hier eine bankinterne
+        ID (u.U. die Bankleitzahl o.Ã¤.) */
     public String userid;
-    /** Schl�sselnummer */
+    /** SchlÃ¼sselnummer */
     public String num;
-    /** Schl�sselversion */
+    /** SchlÃ¼sselversion */
     public String version;
-    /** kryptographische Schl�sseldaten (kann <code>null</code> sein)*/
+    /** kryptographische SchlÃ¼sseldaten (kann <code>null</code> sein)*/
     public Key key;
 
     /** Neues <code>HBCIKey</code>-Objekt erzeugen */

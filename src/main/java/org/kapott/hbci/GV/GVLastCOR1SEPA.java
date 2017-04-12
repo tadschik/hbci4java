@@ -1,5 +1,5 @@
 /** 
- * Gesch�ftsvorfall SEPA Basislastschrift. Diese ist in pain.008.003.02.xsd spezifiziert.
+ * GeschÃ¤ftsvorfall SEPA Basislastschrift. Diese ist in pain.008.003.02.xsd spezifiziert.
  * @author Jan Thielemann
  */
 

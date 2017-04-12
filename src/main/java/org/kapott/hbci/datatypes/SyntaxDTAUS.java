@@ -37,13 +37,13 @@ public class SyntaxDTAUS
         // faelschlicherweise als die Sonderzeichen aus der ASCII-Tabelle interpretiert.
         // In Wirklichkeit sind es jedoch die deutschen Umlaute. Wir biegen das
         // hier wieder gerade.
-        st=st.replace("[","�");  // 0x5B
-        st=st.replace("\\","�"); // 0x5C
-        st=st.replace("]","�");  // 0x5D
-        st=st.replace("{","�");  // 0x7B
-        st=st.replace("|","�");  // 0x7C
-        st=st.replace("}","�");  // 0x7D
-        st=st.replace("~","�");  // 0x7E
+        st=st.replace("[","Ã");  // 0x5B
+        st=st.replace("\\","Ã"); // 0x5C
+        st=st.replace("]","Ã");  // 0x5D
+        st=st.replace("{","Ã¤");  // 0x7B
+        st=st.replace("|","Ã¶");  // 0x7C
+        st=st.replace("}","Ã¼");  // 0x7D
+        st=st.replace("~","Ã");  // 0x7E
       
         st=st.toUpperCase();
         st=st.replace('\344','\133').replace('\304','\133');
@@ -61,7 +61,7 @@ public class SyntaxDTAUS
                   (ch=='&') || (ch=='-') || (ch=='+') ||
                   (ch=='*') || (ch=='%') || (ch=='/') ||
                   (ch=='$') || 
-                  (ch==0x5B) || (ch==0x5C) || (ch==0x5D) || (ch==0x7E))) {              // � � � �
+                  (ch==0x5B) || (ch==0x5C) || (ch==0x5D) || (ch==0x7E))) {              // Ã Ã Ã Ã
                 
                 String msg=HBCIUtilsInternal.getLocMsg("EXC_DTAUS_INV_CHAR",Character.toString(ch));
                 if (!HBCIUtilsInternal.ignoreError(null,"client.errors.ignoreWrongDataSyntaxErrors",msg)) {

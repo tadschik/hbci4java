@@ -38,51 +38,51 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * <p>Tool zum Abholen und Auswerten von Kontoausz�gen, gleichzeitig
- * Beispielprogramm f�r die Verwendung von <em>HBCI4Java</em>. Dieses Tool sollte nicht
+ * <p>Tool zum Abholen und Auswerten von KontoauszÃ¼gen, gleichzeitig
+ * Beispielprogramm fÃ¼r die Verwendung von <em>HBCI4Java</em>. Dieses Tool sollte nicht
  * out-of-the-box benutzt werden, da erst einige Anpassungen im Quelltext
- * vorgenommen werden m�ssen. Es dient eher als Vorlage, wie <em>HBCI4Java</em>
+ * vorgenommen werden mÃ¼ssen. Es dient eher als Vorlage, wie <em>HBCI4Java</em>
  * im konkreten Anwendungsfall eingesetzt werden kann.</p>
  * <p>Die Methode {@link #main(String[])} zeigt die Verwendung mit einem einzelnen Haupt-
  * Thread. die Methode {@link #main_multithreaded(String[])} skizziert die Implementierung
- * f�r Anwendungen mit mehreren Threads.</p>
- * <p>Im Quelltext m�ssen folgende Stellen angepasst werden:</p>
+ * fÃ¼r Anwendungen mit mehreren Threads.</p>
+ * <p>Im Quelltext mÃ¼ssen folgende Stellen angepasst werden:</p>
  * <ul>
  * <li><p>Beim Aufruf der Methode <code>HBCIUtils.init()</code> wird
- * der Name eines Property-Files angegeben, in welchem alle ben�tigten
+ * der Name eines Property-Files angegeben, in welchem alle benÃ¶tigten
  * Kernel-Parameter aufgelistet sind. Diese Datei muss erst erzeugt
  * (Kopieren und Anpassen von <code>hbci.props.template</code>)
  * und der Dateiname beim Aufruf angepasst werden.</p></li>
  * <li><p>Zum Festlegen des abzufragenden Kontos wird zurzeit automatisch das
- * erste Konto benutzt, auf welches �ber HBCI zugegriffen werden kann. Ist
- * diese Information nicht verf�gbar (einige Banken senden keine Informationen
- * �ber die verf�gbaren Konten), oder soll eine andere Kontoverbindung
- * benutzt werden, so sind entsprechende �nderungen bei der Initialisierung
+ * erste Konto benutzt, auf welches Ã¼ber HBCI zugegriffen werden kann. Ist
+ * diese Information nicht verfÃ¼gbar (einige Banken senden keine Informationen
+ * Ã¼ber die verfÃ¼gbaren Konten), oder soll eine andere Kontoverbindung
+ * benutzt werden, so sind entsprechende Ãnderungen bei der Initialisierung
  * der Variablen <code>myaccount</code> vorzunehmen.</p></li>
  * <li><p>Soll der Kontoauszug nur ab einem bestimmten Zeitpunkt (und nicht alle
- * verf�gbaren Daten) abgeholt werden, so ist beim Erzeugen des entsprechenden
+ * verfÃ¼gbaren Daten) abgeholt werden, so ist beim Erzeugen des entsprechenden
  * Auftrages das Startdatum einzustellen (im Quelltext zur Zeit auskommentiert).</p></li>
- * <li><p>Au�erdem ist im Quelltext Code zur eigentlichen Auswertung der Ausz�ge
+ * <li><p>AuÃerdem ist im Quelltext Code zur eigentlichen Auswertung der AuszÃ¼ge
  * zu implementieren. In dieser Vorlage wird nur nach einer fest codierten
  * Rechnungsnummer im Verwendungszweck gesucht. Der entsprechende Abschnitt im
- * Quelltext ist den eigenen Bed�rfnissen anzupassen.</p></li>
+ * Quelltext ist den eigenen BedÃ¼rfnissen anzupassen.</p></li>
  * </ul>
- * <p>Anschlie�end kann der Quelltext compiliert und mit
+ * <p>AnschlieÃend kann der Quelltext compiliert und mit
  * <pre>java&nbsp;-cp&nbsp;...&nbsp;org.kapott.hbci.tools.AnalyzeReportOfTransactions</pre>
  * gestartet werden.</p>
  * <p>Der Quellcode dieser Klasse zeigt die prinzipielle Benutzung von <em>HBCI4Java</em>.
  * Wurde der HBCI-Zugang, der mit diesem Programm benutzt werden soll, noch nie verwendet,
- * so werden alle ben�tigten Schritte zur Initialisierung der Zugangsdaten und
- * Sicherheitsmedien automatisch von <em>HBCI4Java</em> durchgef�hrt. Es ist nicht
- * n�tigt, f�r die Initialisierung von "frischen" Sicherheitsmedien speziellen
+ * so werden alle benÃ¶tigten Schritte zur Initialisierung der Zugangsdaten und
+ * Sicherheitsmedien automatisch von <em>HBCI4Java</em> durchgefÃ¼hrt. Es ist nicht
+ * nÃ¶tigt, fÃ¼r die Initialisierung von "frischen" Sicherheitsmedien speziellen
  * Code in die HBCI-Anwendung einzubauen -- die entsprechenden Aktionen werden
- * automatisch und v�llig transparent von <em>HBCI4Java</em> durchgef�hrt. Das hat
+ * automatisch und vÃ¶llig transparent von <em>HBCI4Java</em> durchgefÃ¼hrt. Das hat
  * den Vorteil, dass jede beliebige Anwendung, die <em>HBCI4Java</em> als HBCI-Bibliothek
  * benutzt, gleichzeitig zum Initialisieren von HBCI-Sicherheitsmedien benutzt
- * werden kann, ohne dass daf�r spezieller Programmcode n�tig w�re. Au�erdem wird dadurch
+ * werden kann, ohne dass dafÃ¼r spezieller Programmcode nÃ¶tig wÃ¤re. AuÃerdem wird dadurch
  * sichergestellt, dass nur initialisierte und funktionierende HBCI-Sicherheitsmedien
  * benutzt werden (weil <em>HBCI4Java</em> beim Laden eines Sicherheitsmediums automatisch
- * entsprechende �berpr�fungen vornimmt).</p>
+ * entsprechende ÃberprÃ¼fungen vornimmt).</p>
  */
 public final class AnalyzeReportOfTransactions {
     public static void main(String[] args)
@@ -144,7 +144,7 @@ public final class AnalyzeReportOfTransactions {
         // Execute all jobs
         HBCIExecStatus ret = hbciHandle.execute();
 
-        // GVRKUms = Gesch�fts Vorfall Result Konto Umsatz
+        // GVRKUms = GeschÃ¤fts Vorfall Result Konto Umsatz
         GVRKUms result = (GVRKUms) bankAccountStatementJob.getJobResult();
 
         if (result.isOK()) {

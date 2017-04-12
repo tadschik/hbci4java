@@ -47,7 +47,7 @@ public class AllowedGVTest extends AbstractTest {
 	    
 	    MsgGen gen = kernel.getMsgGen();
 	    
-        // alle patches f�r die unverschl�sselte nachricht durchlaufen
+        // alle patches fï¿½r die unverschlï¿½sselte nachricht durchlaufen
 	    String newmsgstring = data;
         for (int i=0;i<rewriters.length;i++) {
             newmsgstring=rewriters[i].incomingClearText(newmsgstring,gen);
@@ -84,7 +84,7 @@ public class AllowedGVTest extends AbstractTest {
 	        
 	        MsgGen gen = kernel.getMsgGen();
 	        
-	        // alle patches f�r die unverschl�sselte nachricht durchlaufen
+	        // alle patches fï¿½r die unverschlï¿½sselte nachricht durchlaufen
 	        String newmsgstring = data;
 	        for (int i=0;i<rewriters.length;i++) {
 	            newmsgstring=rewriters[i].incomingClearText(newmsgstring,gen);

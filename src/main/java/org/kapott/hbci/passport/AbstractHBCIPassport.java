@@ -42,9 +42,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-/** <p>Diese Klasse stellt die Basisklasse f�r alle "echten" Passport-Implementationen
+/** <p>Diese Klasse stellt die Basisklasse fÃ¼r alle "echten" Passport-Implementationen
     dar. Hier werden bereits einige Methoden implementiert sowie einige 
-    zus�tzliche Hilfsmethoden zur Verf�gung gestellt.</p><p>
+    zusÃ¤tzliche Hilfsmethoden zur VerfÃ¼gung gestellt.</p><p>
     Aus einer HBCI-Anwendung heraus ist hier nur eine einzige Methode interessant,
     um eine Instanz eines bestimmtes Passports zu erzeugen</p> */
 public abstract class AbstractHBCIPassport
@@ -326,8 +326,8 @@ public abstract class AbstractHBCIPassport
         	// TODO: very dirty!
         	ret.name=getCustomerId();
         	
-        	// an dieser Stelle sind jetzt alle Werte gef�llt, die teilweise
-        	// zwingend ben�tigt werden
+        	// an dieser Stelle sind jetzt alle Werte gefÃ¼llt, die teilweise
+        	// zwingend benÃ¶tigt werden
         }
         
         return ret;
@@ -661,9 +661,9 @@ public abstract class AbstractHBCIPassport
         return getUPD().getProperty("UPA.usage").equals("0");
     }
 
-    /** <p>Erzeugt eine Instanz eines HBCIPassports und gibt diese zur�ck. Der
+    /** <p>Erzeugt eine Instanz eines HBCIPassports und gibt diese zurÃ¼ck. Der
         Typ der erzeugten Passport-Instanz wird durch den Parameter <code>name</code>
-        bestimmt. G�ltige Werte sind zur Zeit
+        bestimmt. GÃ¼ltige Werte sind zur Zeit
         <ul>
           <li>DDV</li>
           <li>RDHNew</li>
@@ -673,8 +673,8 @@ public abstract class AbstractHBCIPassport
           <li>RDHXFile</li>
           <li>Anonymous</li>
         </ul></p>
-        <p>Der zus�tzliche Parameter <code>init</code> gibt ein Objekt an, welches
-        bereits w�hrend der Instanziierung des Passport-Objektes in dessen internen
+        <p>Der zusÃ¤tzliche Parameter <code>init</code> gibt ein Objekt an, welches
+        bereits wÃ¤hrend der Instanziierung des Passport-Objektes in dessen internen
         <code>clientData</code>-Datenstrukturen gespeichert wird
         (siehe {@link org.kapott.hbci.passport.HBCIPassport#setClientData(String,Object)}).
         Auf dieses Objekt kann dann mit 
@@ -683,20 +683,20 @@ public abstract class AbstractHBCIPassport
         gesetzt.</p>
         <p>Beim Erzeugen eines Passport-Objektes tritt i.d.R. der 
         {@link org.kapott.hbci.callback.HBCICallback Callback} <code>NEED_PASSPHRASE</code>
-        auf, um nach dem Passwort f�r das Einlesen der Schl�sseldatei zu fragen. 
-        Von der Callback-Methode eventuell zus�tzlich ben�tigte Daten zu diesem Passport
+        auf, um nach dem Passwort fÃ¼r das Einlesen der SchlÃ¼sseldatei zu fragen. 
+        Von der Callback-Methode eventuell zusÃ¤tzlich benÃ¶tigte Daten zu diesem Passport
         konnten bis zu dieser Stelle noch nicht via <code>setClientData(...)</code>
-        gesetzt werden, weil das Passport-Objekt noch gar nicht existierte. F�r diesen
+        gesetzt werden, weil das Passport-Objekt noch gar nicht existierte. FÃ¼r diesen
         Zweck gibt es das <code>init</code>-Objekt, welches bereits beim Erzeugen
         des Passport-Objektes (und <em>vor</em> dem Aufrufen eines Callbacks) zu den
-        zus�tzlichen Passport-Daten hinzugef�gt wird (mit der id "<code>init</code>").</p>
+        zusÃ¤tzlichen Passport-Daten hinzugefÃ¼gt wird (mit der id "<code>init</code>").</p>
         <p>Eine beispielhafte (wenn auch nicht sehr praxisnahe) Anwendung dieses 
         Features wird im Quelltext des Tools 
         {@link org.kapott.hbci.tools.AnalyzeReportOfTransactions}
         gezeigt. Zumindest das Prinzip sollte damit jedoch klar werden.</p>
         @param name Typ der zu erzeugenden Passport-Instanz
-        @param init Objekt, welches schon w�hrend der Passport-Erzeugung via
-        <code>setClientData("init",init)</code> zu den Passport-Daten hinzugef�gt wird.
+        @param init Objekt, welches schon wÃ¤hrend der Passport-Erzeugung via
+        <code>setClientData("init",init)</code> zu den Passport-Daten hinzugefÃ¼gt wird.
         @return Instanz eines HBCIPassports */
     public static HBCIPassport getInstance(HBCICallback callback, Properties properties, String name, Object init)
     {
@@ -739,7 +739,7 @@ public abstract class AbstractHBCIPassport
 
     /** Erzeugt eine Instanz eines HBCI-Passports. Der Typ der erzeugten
         Passport-Instanz wird hierbei dem Wert des HBCI-Parameters
-        <code>client.passport.default</code> entnommen. G�ltige Werte f�r diesen
+        <code>client.passport.default</code> entnommen. GÃ¼ltige Werte fÃ¼r diesen
         HBCI-Parameter sind die gleichen wie beim Aufruf der Methode
         @return Instanz eines HBCI-Passports */
     public static HBCIPassport getInstance(HBCICallback callback, Properties properties, Object init)

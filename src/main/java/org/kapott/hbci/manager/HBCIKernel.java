@@ -24,82 +24,82 @@ package org.kapott.hbci.manager;
 import java.util.Hashtable;
 import java.util.List;
 
-/** HBCI-Kernel f�r eine bestimmte HBCI-Version. Objekte dieser Klasse 
- * werden intern f�r die Nachrichtenerzeugung und -analyse verwendet. */
+/** HBCI-Kernel fÃ¼r eine bestimmte HBCI-Version. Objekte dieser Klasse 
+ * werden intern fÃ¼r die Nachrichtenerzeugung und -analyse verwendet. */
 public interface HBCIKernel
 {
-    /** Gibt die HBCI-Versionsnummer zur�ck, f�r die dieses Kernel-Objekt 
+    /** Gibt die HBCI-Versionsnummer zurÃ¼ck, fÃ¼r die dieses Kernel-Objekt 
      * Nachrichten erzeugen und analysieren kann.
      * @return HBCI-Versionsnummer */
     public String getHBCIVersion();
 
-    /** <p>Gibt die Namen und Versionen aller von <em>HBCI4Java</em> f�r die
-     * aktuelle HBCI-Version (siehe {@link #getHBCIVersion()}) unterst�tzten 
-     * Lowlevel-Gesch�ftsvorf�lle zur�ck. Es ist zu beachten, dass ein konkreter
-     * HBCI-Zugang i.d.R. nicht alle in dieser Liste aufgef�hrten 
-     * Gesch�ftsvorf�lle auch tats�chlich anbietet (siehe daf�r
+    /** <p>Gibt die Namen und Versionen aller von <em>HBCI4Java</em> fÃ¼r die
+     * aktuelle HBCI-Version (siehe {@link #getHBCIVersion()}) unterstÃ¼tzten 
+     * Lowlevel-GeschÃ¤ftsvorfÃ¤lle zurÃ¼ck. Es ist zu beachten, dass ein konkreter
+     * HBCI-Zugang i.d.R. nicht alle in dieser Liste aufgefÃ¼hrten 
+     * GeschÃ¤ftsvorfÃ¤lle auch tatsÃ¤chlich anbietet (siehe dafÃ¼r
      * {@link HBCIHandler#getSupportedLowlevelJobs()}).</p>
-     * <p>Die zur�ckgegebene Hashtable enth�lt als Key jeweils einen String mit 
-     * dem Bezeichner eines Lowlevel-Jobs, welcher f�r die Erzeugung eines
+     * <p>Die zurÃ¼ckgegebene Hashtable enthÃ¤lt als Key jeweils einen String mit 
+     * dem Bezeichner eines Lowlevel-Jobs, welcher fÃ¼r die Erzeugung eines
      * Lowlevel-Jobs mit {@link HBCIHandler#newLowlevelJob(String)} verwendet
-     * werden kann. Der dazugeh�rige Wert ist ein List-Objekt (bestehend aus 
-     * Strings), welches alle GV-Versionsnummern enth�lt, die von 
-     * <em>HBCI4Java</em> f�r diesen GV unterst�tzt werden.</p>
+     * werden kann. Der dazugehÃ¶rige Wert ist ein List-Objekt (bestehend aus 
+     * Strings), welches alle GV-Versionsnummern enthÃ¤lt, die von 
+     * <em>HBCI4Java</em> fÃ¼r diesen GV unterstÃ¼tzt werden.</p>
      * @return Hashtable aller Lowlevel-Jobs, die prinzipiell vom aktuellen
-     * Handler-Objekt unterst�tzt werden. */
+     * Handler-Objekt unterstÃ¼tzt werden. */
     public Hashtable<String, List<String>> getAllLowlevelJobs();
 
-    /** <p>Gibt alle f�r einen bestimmten Lowlevel-Job m�glichen Job-Parameter-Namen
-     * zur�ck. Der �bergebene Job-Name ist einer der von <em>HBCI4Java</em>
-     * unterst�tzten Jobnamen, die Versionsnummer muss eine der f�r diesen GV
-     * unterst�tzten Versionsnummern sein (siehe {@link #getAllLowlevelJobs()}).
-     * Als Ergebnis erh�lt man eine Liste aller Parameter-Namen, die f�r einen
+    /** <p>Gibt alle fÃ¼r einen bestimmten Lowlevel-Job mÃ¶glichen Job-Parameter-Namen
+     * zurÃ¼ck. Der Ã¼bergebene Job-Name ist einer der von <em>HBCI4Java</em>
+     * unterstÃ¼tzten Jobnamen, die Versionsnummer muss eine der fÃ¼r diesen GV
+     * unterstÃ¼tzten Versionsnummern sein (siehe {@link #getAllLowlevelJobs()}).
+     * Als Ergebnis erhÃ¤lt man eine Liste aller Parameter-Namen, die fÃ¼r einen
      * Lowlevel-Job (siehe {@link HBCIHandler#newLowlevelJob(String)}) gesetzt
-     * werden k�nnen (siehe 
+     * werden kÃ¶nnen (siehe 
      * {@link org.kapott.hbci.GV.HBCIJob#setParam(String, String)}).</p>
-     * <p>Aus der Liste der m�glichen Parameternamen ist nicht ersichtlich, 
+     * <p>Aus der Liste der mÃ¶glichen Parameternamen ist nicht ersichtlich, 
      * welche Parameter zwingend und welche optional sind, bzw. wie oft ein
-     * Parameter mindestens oder h�chstens auftreten darf. F�r diese Art der
+     * Parameter mindestens oder hÃ¶chstens auftreten darf. FÃ¼r diese Art der
      * Informationen stehen zur Zeit noch keine Methoden bereit.</p>
      * <p>Siehe dazu auch {@link HBCIHandler#getLowlevelJobParameterNames(String)}.</p>
      * @param gvname Name des Lowlevel-Jobs
      * @param version Version des Lowlevel-jobs
      * @return Liste aller Job-Parameter, die beim Erzeugen des angegebenen
-     * Lowlevel-Jobs gesetzt werden k�nnen */
+     * Lowlevel-Jobs gesetzt werden kÃ¶nnen */
     public List getLowlevelJobParameterNames(String gvname,String version);
 
-    /** <p>Gibt f�r einen bestimmten Lowlevel-Job die Namen aller
-     * m�glichen Lowlevel-Result-Properties zur�ck 
+    /** <p>Gibt fÃ¼r einen bestimmten Lowlevel-Job die Namen aller
+     * mÃ¶glichen Lowlevel-Result-Properties zurÃ¼ck 
      * (siehe {@link org.kapott.hbci.GV_Result.HBCIJobResult#getResultData()}).
-     * Der �bergebene Job-Name ist einer der von <em>HBCI4Java</em>
-     * unterst�tzten Jobnamen, die Versionsnummer muss eine der f�r diesen GV
-     * unterst�tzten Versionsnummern sein (siehe {@link #getAllLowlevelJobs()}).
-     * Als Ergebnis erh�lt man eine Liste aller Property-Namen, die in den
-     * Lowlevel-Ergebnisdaten eines Jobs auftreten k�nnen.</p>
+     * Der Ã¼bergebene Job-Name ist einer der von <em>HBCI4Java</em>
+     * unterstÃ¼tzten Jobnamen, die Versionsnummer muss eine der fÃ¼r diesen GV
+     * unterstÃ¼tzten Versionsnummern sein (siehe {@link #getAllLowlevelJobs()}).
+     * Als Ergebnis erhÃ¤lt man eine Liste aller Property-Namen, die in den
+     * Lowlevel-Ergebnisdaten eines Jobs auftreten kÃ¶nnen.</p>
      * <p>Aus der resultierenden Liste ist nicht ersichtlich, 
-     * welche Properties immer zur�ckgeben werden und welche optional sind, bzw. 
-     * wie oft ein bestimmter Wert mindestens oder h�chstens auftreten kann. 
-     * F�r diese Art der Informationen stehen zur Zeit noch keine Methoden 
+     * welche Properties immer zurÃ¼ckgeben werden und welche optional sind, bzw. 
+     * wie oft ein bestimmter Wert mindestens oder hÃ¶chstens auftreten kann. 
+     * FÃ¼r diese Art der Informationen stehen zur Zeit noch keine Methoden 
      * bereit.</p>
      * <p>Siehe dazu auch {@link HBCIHandler#getLowlevelJobResultNames(String)}.</p>
      * @param gvname Name des Lowlevel-Jobs
      * @param version Version des Lowlevel-jobs
      * @return Liste aller Property-Namen, die in den Lowlevel-Antwortdaten
-     * eines Jobs auftreten k�nnen */
+     * eines Jobs auftreten kÃ¶nnen */
     public List getLowlevelJobResultNames(String gvname,String version);
 
-    /** <p>Gibt f�r einen bestimmten Lowlevel-Job die Namen aller
-     * m�glichen Job-Restriction-Parameter zur�ck 
+    /** <p>Gibt fÃ¼r einen bestimmten Lowlevel-Job die Namen aller
+     * mÃ¶glichen Job-Restriction-Parameter zurÃ¼ck 
      * (siehe auch {@link org.kapott.hbci.GV.HBCIJob#getJobRestrictions()} und
      * {@link HBCIHandler#getLowlevelJobRestrictions(String)}).
-     * Der �bergebene Job-Name ist einer der von <em>HBCI4Java</em>
-     * unterst�tzten Jobnamen, die Versionsnummer muss eine der f�r diesen GV
-     * unterst�tzten Versionsnummern sein (siehe {@link #getAllLowlevelJobs()}).
-     * Als Ergebnis erh�lt man eine Liste aller Property-Namen, die in den
-     * Job-Restrictions-Daten eines Jobs auftreten k�nnen.</p>
+     * Der Ã¼bergebene Job-Name ist einer der von <em>HBCI4Java</em>
+     * unterstÃ¼tzten Jobnamen, die Versionsnummer muss eine der fÃ¼r diesen GV
+     * unterstÃ¼tzten Versionsnummern sein (siehe {@link #getAllLowlevelJobs()}).
+     * Als Ergebnis erhÃ¤lt man eine Liste aller Property-Namen, die in den
+     * Job-Restrictions-Daten eines Jobs auftreten kÃ¶nnen.</p>
      * @param gvname Name des Lowlevel-Jobs
      * @param version Version des Lowlevel-jobs
      * @return Liste aller Property-Namen, die in den Job-Restriction-Daten
-     * eines Jobs auftreten k�nnen */
+     * eines Jobs auftreten kÃ¶nnen */
     public List getLowlevelJobRestrictionNames(String gvname,String version);
 }

@@ -11,7 +11,7 @@
 		<xs:sequence>
 			<xs:element name="OrgnlMndtId" type="Max35Text" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>Mandatory if changes occur in ‘Mandate Identification’, otherwise not to be used.</xs:documentation>
+					<xs:documentation>Mandatory if changes occur in âMandate Identificationâ, otherwise not to be used.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="OrgnlCdtrSchmeId" type="PartyIdentificationSEPA3" minOccurs="0">
@@ -27,7 +27,7 @@
 			</xs:element>
 			<xs:element name="OrgnlDbtrAgt" type="BranchAndFinancialInstitutionIdentificationSEPA2" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>To use ‘Proprietary Identification’ with code ‘SMNDA’ to indicate same mandate with new Debtor Agent. To be used with the ‘FRST’ indicator in the ‘Sequence Type’.</xs:documentation>
+					<xs:documentation>To use âProprietary Identificationâ with code âSMNDAâ to indicate same mandate with new Debtor Agent. To be used with the âFRSTâ indicator in the âSequence Typeâ.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:sequence>
@@ -289,12 +289,12 @@
 			<xs:element name="OrgnlMsgNmId" type="Max35Text"/>
 			<xs:element name="GrpSts" type="TransactionGroupStatus1CodeSEPA" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>Either ‘Group Status’ or ‘Transaction Status’ must be present with the code ‘RJCT’.     </xs:documentation>
+					<xs:documentation>Either âGroup Statusâ or âTransaction Statusâ must be present with the code âRJCTâ.     </xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="StsRsnInf" type="StatusReasonInformationSEPA" minOccurs="0" maxOccurs="unbounded">
 				<xs:annotation>
-					<xs:documentation>‘Status Reason Information’ may be present either in ‘Original Group Information And Status’ or in ‘Transaction Information and Status’.</xs:documentation>
+					<xs:documentation>âStatus Reason Informationâ may be present either in âOriginal Group Information And Statusâ or in âTransaction Information and Statusâ.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:sequence>
@@ -354,7 +354,7 @@
 		<xs:sequence>
 			<xs:element name="PrvtId" type="PersonIdentificationSEPA">
 				<xs:annotation>
-					<xs:documentation>‘Identification Type’ under ‘Other Identification’ must specify ‘SEPA’.  ‘Identification’ under ‘Other Identification’ is allowed using an identifier described in General Message Element Specifications, Chapter 1.6.2. of the Implementation Guide.</xs:documentation>
+					<xs:documentation>âIdentification Typeâ under âOther Identificationâ must specify âSEPAâ.  âIdentificationâ under âOther Identificationâ is allowed using an identifier described in General Message Element Specifications, Chapter 1.6.2. of the Implementation Guide.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:sequence>
@@ -376,7 +376,7 @@
 		<xs:sequence>
 			<xs:element name="Nm" type="Max70Text" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>If present the new’ Name’ must be specified under ‘Creditor’.</xs:documentation>
+					<xs:documentation>If present the newâ Nameâ must be specified under âCreditorâ.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="Id" type="PartySEPA2" minOccurs="0"/>
@@ -431,17 +431,17 @@
 			<xs:element name="OrgnlEndToEndId" type="RestrictedIdentification2" minOccurs="0"/>
 			<xs:element name="TxSts" type="TransactionIndividualStatus1CodeSEPA" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>Either ‘Group Status’ or ‘Transaction Status’ must be present with the code ‘RJCT’.</xs:documentation>
+					<xs:documentation>Either âGroup Statusâ or âTransaction Statusâ must be present with the code âRJCTâ.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="StsRsnInf" type="StatusReasonInformationSEPA" minOccurs="0" maxOccurs="unbounded">
 				<xs:annotation>
-					<xs:documentation>‘Status Reason Information’ may be present either in ‘Original Group Information And Status’ or in ‘Transaction Information and Status’.</xs:documentation>
+					<xs:documentation>âStatus Reason Informationâ may be present either in âOriginal Group Information And Statusâ or in âTransaction Information and Statusâ.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="OrgnlTxRef" type="OriginalTransactionReferenceSEPA">
 				<xs:annotation>
-					<xs:documentation>The message elements under ‘Original Transaction Reference’ must be populated with the same value as the message elements of the original instruction, as defined within the following elements.</xs:documentation>
+					<xs:documentation>The message elements under âOriginal Transaction Referenceâ must be populated with the same value as the message elements of the original instruction, as defined within the following elements.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:sequence>

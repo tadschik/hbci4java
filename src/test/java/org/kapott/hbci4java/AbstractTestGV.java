@@ -60,7 +60,7 @@ public class AbstractTestGV extends AbstractTest {
         int source_acc_idx = Integer.parseInt(params.getProperty("source_account_idx"));
         job.setParam("src",passport.getAccounts()[source_acc_idx]);
         
-        System.out.println("---------F�r Job zur Queue");
+        System.out.println("---------Fï¿½r Job zur Queue");
         job.addToQueue();
 
         

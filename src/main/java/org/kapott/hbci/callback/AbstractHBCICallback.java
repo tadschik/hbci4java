@@ -26,7 +26,7 @@ import java.util.Date;
 
 import org.kapott.hbci.passport.HBCIPassport;
 
-/** Diese Klasse dient als Basisklasse f�r allen Callback-Klassen. Eine Anwendung sollte
+/** Diese Klasse dient als Basisklasse fÃ¼r allen Callback-Klassen. Eine Anwendung sollte
     zur Erstellung einer eigenen Callback-Klasse diese oder eine der schon bereitgestellten
     "fertigen" Klassen ({@link org.kapott.hbci.callback.HBCICallbackConsole},
     {@link org.kapott.hbci.callback.HBCICallbackSwing}) erweitern */
@@ -34,9 +34,9 @@ public abstract class AbstractHBCICallback
     implements HBCICallback
 {
     /** Erzeugt einen Log-Eintrag. Diese Methode wird von den mitgelieferten
-     * Callback-Klassen f�r die Erzeugung von Log-Eintr�gen verwendet. Um 
-     * ein eigenes Format f�r die Log-Eintrage zu definieren, kann diese
-     * Methode mit einer eigenen Implementierung �berschrieben werden.<br/>
+     * Callback-Klassen fÃ¼r die Erzeugung von Log-EintrÃ¤gen verwendet. Um 
+     * ein eigenes Format fÃ¼r die Log-Eintrage zu definieren, kann diese
+     * Methode mit einer eigenen Implementierung Ã¼berschrieben werden.<br/>
      * Die Parameter entsprechen denen der 
      * {@link HBCICallback#log(String, int, Date, StackTraceElement) log}-Methode
      * @return ein Log-Eintrag
@@ -85,8 +85,8 @@ public abstract class AbstractHBCICallback
         status(passport,statusTag,new Object[] {o});
     }
     
-    /** Standard-Verhalten - gibt f�r alle Callbacks <code>false</code> (= asynchrone
-     * Callback-Behandlung) zur�ck.*/
+    /** Standard-Verhalten - gibt fÃ¼r alle Callbacks <code>false</code> (= asynchrone
+     * Callback-Behandlung) zurÃ¼ck.*/
     public boolean useThreadedCallback(HBCIPassport passport,int reason,String msg,
                                        int datatype,StringBuffer retData)
     {

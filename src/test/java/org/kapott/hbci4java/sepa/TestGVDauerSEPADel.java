@@ -77,7 +77,7 @@ public class TestGVDauerSEPADel extends AbstractTest {
         job.setParam("execday", "1");
         job.setParam("orderid", params.getProperty("orderid"));
         
-        System.out.println("---------F�r Job zur Queue");
+        System.out.println("---------Fï¿½r Job zur Queue");
         job.addToQueue();
 
         

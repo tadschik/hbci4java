@@ -32,24 +32,24 @@ import org.kapott.hbci.passport.AbstractHBCIPassport;
 import org.kapott.hbci.passport.HBCIPassportInternal;
 import org.kapott.hbci.passport.HBCIPassportRDHNew;
 
-/** <p>Tool zum Konvertieren von SIZ-RDH-Schl�sseldateien in 
-    RDHNew-Dateien. SIZ-RDH-Schl�sseldateien werden von HBCI-Software verwendet,
+/** <p>Tool zum Konvertieren von SIZ-RDH-SchlÃ¼sseldateien in 
+    RDHNew-Dateien. SIZ-RDH-SchlÃ¼sseldateien werden von HBCI-Software verwendet,
     die auf dem SIZ-HBCI-Kernel basiert (z.B. von <em>StarMoney</em>).</p>
     <p>Die Konvertierung kann auch
-    mit dem separat verf�gbaren <em>HBCI4Java Passport Editor</em> durchgef�hrt werden.</p>
-    <p>Soll der HBCI-Zugang sowohl mit der urspr�nglichen Software als auch parallel
-    dazu mit <em>HBCI4Java</em> benutzt werden, so ist eine Konvertierung der Schl�sseldatei
-    nicht zu empfehlen. Statt dessen sollte die Schl�sseldatei direkt benutzt werden.
-    Daf�r kann die Passport-Variante {@link org.kapott.hbci.passport.HBCIPassportSIZRDHFile}
+    mit dem separat verfÃ¼gbaren <em>HBCI4Java Passport Editor</em> durchgefÃ¼hrt werden.</p>
+    <p>Soll der HBCI-Zugang sowohl mit der ursprÃ¼nglichen Software als auch parallel
+    dazu mit <em>HBCI4Java</em> benutzt werden, so ist eine Konvertierung der SchlÃ¼sseldatei
+    nicht zu empfehlen. Statt dessen sollte die SchlÃ¼sseldatei direkt benutzt werden.
+    DafÃ¼r kann die Passport-Variante {@link org.kapott.hbci.passport.HBCIPassportSIZRDHFile}
     benutzt werden.</p>
     <p>Siehe dazu auch die Datei <code>README.SIZRDHFile</code></p> 
     <p>Aufgerufen wird dieser Konverter mit
     <pre>java -cp ... org.kapott.hbci.tools.ConvertSIZRDHPassport</pre>
     Es handelt sich um ein interaktives Programm. Nach dem Start wird nach dem
-    Dateinamen einer existierenden SIZ-RDH-Schl�sseldatei sowie nach dem Usernamen und 
-    Passwort f�r deren Entschl�sselung gefragt. Anschlie�end wird nach einem
-    <em>neuen(!)</em> Dateinamen f�r die zu erstellende RDHNew-Passport-Datei
-    sowie nach einem Passwort f�r deren Verschl�sselung gefragt. Nach Beendigung
+    Dateinamen einer existierenden SIZ-RDH-SchlÃ¼sseldatei sowie nach dem Usernamen und 
+    Passwort fÃ¼r deren EntschlÃ¼sselung gefragt. AnschlieÃend wird nach einem
+    <em>neuen(!)</em> Dateinamen fÃ¼r die zu erstellende RDHNew-Passport-Datei
+    sowie nach einem Passwort fÃ¼r deren VerschlÃ¼sselung gefragt. Nach Beendigung
     des Programmes existiert die RDHNew-Passport-Datei, welche ab sofort benutzt
     werden kann.</p> */
 // TODO: ConvertRDHXFilePassport 

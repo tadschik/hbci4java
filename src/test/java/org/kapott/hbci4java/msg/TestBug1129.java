@@ -89,7 +89,7 @@ public class TestBug1129 extends AbstractTest
   {
     HBCIUtils.setParam("client.errors.ignoreWrongDataSyntaxErrors","yes");
     Hashtable<String, String> ht = parse();
-    Assert.assertEquals("EB�HREN Z.T. IM VORAUS",ht.get("CustomMsgRes.GVRes_6.DauerListRes4.usage.usage_3"));
+    Assert.assertEquals("EBï¿½HREN Z.T. IM VORAUS",ht.get("CustomMsgRes.GVRes_6.DauerListRes4.usage.usage_3"));
   }
 
 }
