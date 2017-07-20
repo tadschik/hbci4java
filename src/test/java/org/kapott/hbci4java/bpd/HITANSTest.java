@@ -11,7 +11,7 @@
 
 package org.kapott.hbci4java.bpd;
 
-import hbci4java.AbstractTest;
+import org.kapott.hbci4java.AbstractTest;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -25,6 +25,7 @@ import org.kapott.hbci.manager.MsgGen;
 import org.kapott.hbci.passport.HBCIPassportPinTan;
 import org.kapott.hbci.protocol.MSG;
 import org.kapott.hbci.protocol.factory.MSGFactory;
+import org.kapott.hbci4java.AbstractTest;
 
 /**
  * Testet das Parsen der HITANS-Segmente aus den BPD.
@@ -106,7 +107,7 @@ public class HITANSTest extends AbstractTest
   public void testCurrentSecMechInfo() throws Exception
   {
     Properties bpd = getBPD("bpd/bpd2-formatted.txt","300");
-    HBCIPassportPinTan passport = new HBCIPassportPinTan(null,0);
+    HBCIPassportPinTan passport = new HBCIPassportPinTan(null, null, null,0);
     passport.setCurrentTANMethod("942");
     passport.setBPD(bpd);
     

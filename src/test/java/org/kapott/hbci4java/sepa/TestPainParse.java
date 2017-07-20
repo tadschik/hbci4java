@@ -16,7 +16,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.kapott.hbci.sepa.PainVersion;
 
-import hbci4java.AbstractTest;
+import org.kapott.hbci4java.AbstractTest;
 
 /**
  * Testet das Parsen von Pain XML-Dateien - ohne HBCI-Context.

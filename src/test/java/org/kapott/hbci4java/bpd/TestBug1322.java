@@ -7,7 +7,7 @@
 
 package org.kapott.hbci4java.bpd;
 
-import hbci4java.AbstractTest;
+import org.kapott.hbci4java.AbstractTest;
 
 import java.util.Hashtable;
 import java.util.Iterator;

@@ -104,7 +104,7 @@ public abstract class AbstractTest
     Locale.setDefault(Locale.GERMANY);
     Properties props = new Properties();
     props.put("log.loglevel.default",""+HBCIUtils.LOG_DEBUG2);
-    HBCIUtils.init(props,new HBCICallbackConsole());
+//    HBCIUtils.init(props,new HBCICallbackConsole());
   }
   
   /**
@@ -114,7 +114,7 @@ public abstract class AbstractTest
   @AfterClass
   public static void afterClass() throws Exception
   {
-    HBCIUtils.done();
+//    HBCIUtils.done();
   }
 }
 

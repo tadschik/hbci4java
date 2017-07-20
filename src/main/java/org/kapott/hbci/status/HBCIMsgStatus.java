@@ -215,7 +215,7 @@ public final class HBCIMsgStatus
         for (Iterator<HBCIRetVal> i=retvals.iterator(); i.hasNext();) {
             HBCIRetVal ret=i.next();
             
-            if (ret.code.equals("9942") ||      // PIN falsch (konkret)
+            if (ret.code.equals("9931") || ret.code.equals("9942") ||      // PIN falsch (konkret)
                     ret.code.equals("9340"))    // Signatur falsch (generisch)
             {
                 result=true;

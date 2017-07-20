@@ -1,7 +1,7 @@
 package org.kapott.hbci4java.sepa;
 
 import org.junit.Test;
-import hbci4java.AbstractTest;
+import org.kapott.hbci4java.AbstractTest;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -138,8 +138,8 @@ public class TestGVDauerSEPAEdit extends AbstractTest {
         }
       };
       
-      HBCIUtils.init(props,callback);
-      this.passport = (HBCIPassportPinTan) AbstractHBCIPassport.getInstance("PinTan");
+//      HBCIUtils.init(props,callback);
+      this.passport = (HBCIPassportPinTan) AbstractHBCIPassport.getInstance(new HBCICallbackConsole(), props, "PinTan");
       
       // init handler
       this.handler = new HBCIHandler(params.getProperty("hbciversion"),passport);
@@ -176,7 +176,7 @@ public class TestGVDauerSEPAEdit extends AbstractTest {
         }
         finally
         {
-          HBCIUtils.done();
+//          HBCIUtils.done();
         }
       }
     }

@@ -11,7 +11,7 @@
 
 package org.kapott.hbci4java.sepa;
 
-import hbci4java.AbstractTest;
+import org.kapott.hbci4java.AbstractTest;
 
 import java.io.File;
 import java.util.HashMap;
@@ -158,8 +158,8 @@ public class TestGVUebSEPA extends AbstractTest
       }
     };
     
-    HBCIUtils.init(props,callback);
-    this.passport = (HBCIPassportPinTan) AbstractHBCIPassport.getInstance("PinTan");
+//    HBCIUtils.init(props,callback);
+    this.passport = (HBCIPassportPinTan) AbstractHBCIPassport.getInstance(new HBCICallbackConsole(), props, "PinTan");
     
     // init handler
     this.handler = new HBCIHandler("plus",passport);
@@ -196,7 +196,7 @@ public class TestGVUebSEPA extends AbstractTest
       }
       finally
       {
-        HBCIUtils.done();
+//        HBCIUtils.done();
       }
     }
   }

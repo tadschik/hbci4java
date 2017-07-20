@@ -10,7 +10,7 @@ import org.kapott.hbci.protocol.MSG;
 import org.kapott.hbci.protocol.MultipleSyntaxElements;
 import org.kapott.hbci.protocol.factory.MSGFactory;
 
-import hbci4java.AbstractTest;
+import org.kapott.hbci4java.AbstractTest;
 
 /**
  * Testet den Workaround zum Abkuerzen multipler optionaler DEGs.

@@ -1,6 +1,6 @@
 package org.kapott.hbci4java.bpd;
 
-import hbci4java.AbstractTest;
+import org.kapott.hbci4java.AbstractTest;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ public class AllowedGVTest extends AbstractTest {
 	    String data = getFile("bpd/bpd-allowedgv.txt");
 	    HBCIKernelImpl kernel = new HBCIKernelImpl(null,"plus");
 	    
-	    Rewrite.setData("msgName","Synch");
+//	    Rewrite.setData("msgName","Synch");
         // liste der rewriter erzeugen
         String rewriters_st=HBCIUtils.getParam("kernel.rewriter");
         ArrayList<Rewrite> al=new ArrayList<Rewrite>();
@@ -63,7 +63,7 @@ public class AllowedGVTest extends AbstractTest {
 	        String data = getFile("bpd/bpd-allowedgv2.txt");
 	        HBCIKernelImpl kernel = new HBCIKernelImpl(null,"300");
 	        
-	        Rewrite.setData("msgName","Synch");
+//	        Rewrite.setData("msgName","Synch");
 	        // liste der rewriter erzeugen
 	        String rewriters_st=HBCIUtils.getParam("kernel.rewriter");
 	        ArrayList<Rewrite> al=new ArrayList<Rewrite>();

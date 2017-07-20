@@ -450,7 +450,7 @@ public class PainVersion implements Comparable<PainVersion>
       }
       catch (UnsupportedEncodingException e)
       {
-        HBCIUtils.log(e,HBCIUtils.LOG_ERR);
+        HBCIUtils.log(e);
       }
       return null;
     }

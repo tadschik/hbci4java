@@ -14,7 +14,7 @@ import org.junit.Test;
 import org.kapott.hbci.manager.HHDVersion;
 import org.kapott.hbci.manager.MatrixCode;
 
-import hbci4java.AbstractTest;
+import org.kapott.hbci4java.AbstractTest;
 
 /**
  * Testet den Parser fuer die Matrix-Codes.

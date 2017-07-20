@@ -11,7 +11,7 @@
 
 package org.kapott.hbci4java.ddv;
 
-import hbci4java.AbstractTest;
+import org.kapott.hbci4java.AbstractTest;
 
 import java.io.File;
 import java.util.Properties;
@@ -76,8 +76,8 @@ public class PCSCTest extends AbstractTest
     props.put("client.passport.DDV.path",dir.getAbsolutePath() + "/");
     props.put("client.passport.DDV.entryidx","1");
     props.put("log.loglevel.default",Integer.toString(HBCIUtils.LOG_DEBUG2));
-    HBCIUtils.init(props,new HBCICallbackConsole());
-    this.passport = (HBCIPassportDDVPCSC) AbstractHBCIPassport.getInstance("DDVPCSC");
+//    HBCIUtils.init(props,new HBCICallbackConsole());
+    this.passport = (HBCIPassportDDVPCSC) AbstractHBCIPassport.getInstance(new HBCICallbackConsole(), props, "DDVPCSC");
   }
   
   /**
@@ -94,7 +94,7 @@ public class PCSCTest extends AbstractTest
     }
     finally
     {
-      HBCIUtils.done();
+//      HBCIUtils.done();
     }
   }
   

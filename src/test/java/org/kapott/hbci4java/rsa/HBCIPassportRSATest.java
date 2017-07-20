@@ -3,7 +3,8 @@
  */
 package org.kapott.hbci4java.rsa;
 
-import hbci4java.AbstractTest;
+import org.kapott.hbci.callback.HBCICallbackConsole;
+import org.kapott.hbci4java.AbstractTest;
 
 import java.io.File;
 
@@ -44,7 +45,7 @@ public class HBCIPassportRSATest extends AbstractTest {
     public void beforeCard() throws Exception {
         HBCIUtils.setParam("client.passport.RSA.path", dir.getAbsolutePath() + "/");
         HBCIUtils.setParam("client.passport.RSA.entryidx", "1");
-        this.passport = (HBCIPassportRSA) AbstractHBCIPassport.getInstance("RSA");
+        this.passport = (HBCIPassportRSA) AbstractHBCIPassport.getInstance(new HBCICallbackConsole(), null, "RSA");
     }
     
     @After

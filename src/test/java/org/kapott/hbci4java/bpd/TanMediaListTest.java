@@ -1,7 +1,7 @@
 package org.kapott.hbci4java.bpd;
 
 import org.junit.Test;
-import hbci4java.AbstractTest;
+import org.kapott.hbci4java.AbstractTest;
 import org.kapott.hbci.manager.HBCIKernelImpl;
 import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.manager.MsgGen;
@@ -21,7 +21,7 @@ public class TanMediaListTest extends AbstractTest {
 	    HBCIKernelImpl kernel = new HBCIKernelImpl(null,"300");
 
 	    
-	    Rewrite.setData("msgName","CustomMsg");
+//	    Rewrite.setData("msgName","CustomMsg");
       // liste der rewriter erzeugen
       String rewriters_st=HBCIUtils.getParam("kernel.rewriter");
       ArrayList<Rewrite> al=new ArrayList<Rewrite>();

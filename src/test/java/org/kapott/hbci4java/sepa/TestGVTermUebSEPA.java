@@ -1,8 +1,8 @@
 package org.kapott.hbci4java.sepa;
 
 import org.junit.Test;
-import hbci4java.AbstractTest;
-import hbci4java.AbstractTestGV;
+import org.kapott.hbci4java.AbstractTest;
+import org.kapott.hbci4java.AbstractTestGV;
 
 import java.io.File;
 import java.io.FileInputStream;

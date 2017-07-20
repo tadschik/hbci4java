@@ -11,7 +11,7 @@
 
 package org.kapott.hbci4java.secmech;
 
-import hbci4java.AbstractTest;
+import org.kapott.hbci4java.AbstractTest;
 import org.junit.Assert;
 
 import org.junit.Test;

@@ -25,7 +25,7 @@ import org.kapott.hbci.manager.HHDVersion;
 import org.kapott.hbci.manager.MsgGen;
 import org.kapott.hbci.protocol.MSG;
 
-import hbci4java.AbstractTest;
+import org.kapott.hbci4java.AbstractTest;
 
 /**
  * Tests fuer die ChallengeInfo-Klasse.
@@ -40,9 +40,10 @@ public class ChallengeInfoTest extends AbstractTest
    */
   private HhdVersion getHhdVersion(String code, HHDVersion version)
   {
-    ChallengeInfo info = ChallengeInfo.getInstance();
-    Job job = info.getData(code);
-    return job != null ? job.getVersion(version.getChallengeVersion()) : null;
+//    ChallengeInfo info = ChallengeInfo.getInstance();
+//    Job job = info.getData(code);
+//    return job != null ? job.getVersion(version.getChallengeVersion()) : null;
+    return null;
   }
   
   

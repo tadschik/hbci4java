@@ -80,7 +80,7 @@ public final class Value
         @param curr die Währung des Geldbetrages */
     public Value(String value,String curr)
     {
-        this(new BigDecimal(value),curr);
+        this(new BigDecimal(value.replace(" ","")),curr);
     }
 
     /** Anlegen eines Geldbetrag-Objektes.

@@ -8,7 +8,7 @@ import org.kapott.hbci.manager.BankInfo;
 import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.manager.HBCIVersion;
 
-import hbci4java.AbstractTest;
+import org.kapott.hbci4java.AbstractTest;
 
 /**
  * Testet das Parsen der Bank-Informationen.

@@ -11,7 +11,7 @@
 
 package org.kapott.hbci4java.msg;
 
-import hbci4java.AbstractTest;
+import org.kapott.hbci4java.AbstractTest;
 
 import java.util.Hashtable;
 
