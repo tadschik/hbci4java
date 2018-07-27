@@ -90,10 +90,7 @@ public final class HBCIInstitute
             p.setProperty(BPD_KEY_LASTUPDATE,String.valueOf(System.currentTimeMillis()));
             passport.setBPD(p);
             HBCIUtils.log("installed new BPD with version "+passport.getBPDVersion(),HBCIUtils.LOG_INFO);
-            passport.getCallback().status(passport,HBCICallback.STATUS_INST_BPD_INIT_DONE,passport.getBPD());
-            
-            // send information about successfully received BPD to InfoPoint server
-            HBCIUtilsInternal.infoPointSendBPD(passport, result);
+            HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_INST_BPD_INIT_DONE,passport.getBPD());
         }
     }
 
@@ -149,9 +146,6 @@ public final class HBCIInstitute
         if (foundChanges) {
             HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_INST_GET_KEYS_DONE,null);
             acknowledgeNewKeys();
-            
-            // send information about successfully received keys to InfoPoint server
-            HBCIUtilsInternal.infoPointSendPublicKeys(passport, result);
         }
     }
     
@@ -179,7 +173,7 @@ public final class HBCIInstitute
 
     private void doDialogEnd(String dialogid,boolean needSig)
     {
-        passport.getCallback().status(passport,HBCICallback.STATUS_DIALOG_END,null);
+        HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_DIALOG_END,null);
         
         kernel.rawNewMsg("DialogEndAnon");
         kernel.rawSet("MsgHead.dialogid",dialogid);
@@ -187,7 +181,7 @@ public final class HBCIInstitute
         kernel.rawSet("DialogEndS.dialogid",dialogid);
         kernel.rawSet("MsgTail.msgnum","2");
         HBCIMsgStatus status=kernel.rawDoIt(HBCIKernelImpl.DONT_SIGNIT,HBCIKernelImpl.DONT_CRYPTIT,needSig,HBCIKernelImpl.DONT_NEED_CRYPT);
-        passport.getCallback().status(passport,HBCICallback.STATUS_DIALOG_END_DONE,status);
+        HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_DIALOG_END_DONE,status);
         
         if (!status.isOK()) {
             HBCIUtils.log("dialog end failed: "+status.getErrorString(),HBCIUtils.LOG_ERR);
@@ -288,8 +282,8 @@ public final class HBCIInstitute
                     passport.getBPD().setProperty("BPA.version","0");
                     passport.saveChanges();
                 }
-
-                passport.getCallback().status(passport,HBCICallback.STATUS_INST_BPD_INIT,null);
+                
+                HBCIUtilsInternal.getCallback().status(passport,HBCICallback.STATUS_INST_BPD_INIT,null);
                 HBCIUtils.log("fetching BPD",HBCIUtils.LOG_INFO);
                 
                 HBCIMsgStatus status=null;
@@ -301,8 +295,8 @@ public final class HBCIInstitute
                     kernel.rawSet("ProcPrep.BPD", "0");
                     kernel.rawSet("ProcPrep.UPD", passport.getUPDVersion());
                     kernel.rawSet("ProcPrep.lang", "0");
-                    kernel.rawSet("ProcPrep.prodName", HBCIUtils.getParam("client.product.name","HBCI4Java"));
-                    kernel.rawSet("ProcPrep.prodVersion", HBCIUtils.getParam("client.product.version","2.5"));
+                    kernel.rawSet("ProcPrep.prodName", HBCIUtils.getParam("client.product.name",HBCIUtils.PRODUCT_ID));
+                    kernel.rawSet("ProcPrep.prodVersion", HBCIUtils.getParam("client.product.version","3"));
 
                     status=kernel.rawDoIt(HBCIKernelImpl.DONT_SIGNIT,HBCIKernelImpl.DONT_CRYPTIT,
                             HBCIKernelImpl.DONT_NEED_SIG,HBCIKernelImpl.DONT_NEED_CRYPT);
@@ -341,7 +335,7 @@ public final class HBCIInstitute
                   if (he.isFatal())
                     throw he;
                 }
-                HBCIUtils.log(e);
+                HBCIUtils.log(e,HBCIUtils.LOG_INFO);
                 // Viele Kreditinstitute unterstützen den anonymen Login nicht. Dass sollte nicht als Fehler den Anwender beunruhigen
                 HBCIUtils.log("FAILED! - maybe this institute does not support anonymous logins",HBCIUtils.LOG_INFO);
                 HBCIUtils.log("we will nevertheless go on",HBCIUtils.LOG_INFO);
@@ -404,8 +398,8 @@ public final class HBCIInstitute
                     kernel.rawSet("ProcPrep.BPD", passport.getBPDVersion());
                     kernel.rawSet("ProcPrep.UPD", passport.getUPDVersion());
                     kernel.rawSet("ProcPrep.lang", "0");
-                    kernel.rawSet("ProcPrep.prodName", HBCIUtils.getParam("client.product.name","HBCI4Java"));
-                    kernel.rawSet("ProcPrep.prodVersion", HBCIUtils.getParam("client.product.version","2.5"));
+                    kernel.rawSet("ProcPrep.prodName", HBCIUtils.getParam("client.product.name",HBCIUtils.PRODUCT_ID));
+                    kernel.rawSet("ProcPrep.prodVersion", HBCIUtils.getParam("client.product.version","3"));
 
                     status = kernel.rawDoIt(HBCIKernelImpl.DONT_SIGNIT,HBCIKernelImpl.DONT_CRYPTIT,
                             HBCIKernelImpl.DONT_NEED_SIG,HBCIKernelImpl.DONT_NEED_CRYPT);

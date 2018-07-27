@@ -208,7 +208,8 @@ public class HBCIPassportDDV
                         passportKey=calculatePassportKey(FOR_LOAD);
 
                     PBEParameterSpec paramspec=new PBEParameterSpec(CIPHER_SALT,CIPHER_ITERATIONS);
-                    Cipher cipher=Cipher.getInstance("PBEWithMD5AndDES");
+                    String provider = HBCIUtils.getParam("kernel.security.provider");
+                    Cipher cipher = provider == null ? Cipher.getInstance("PBEWithMD5AndDES") : Cipher.getInstance("PBEWithMD5AndDES", provider);
                     cipher.init(Cipher.DECRYPT_MODE,passportKey,paramspec);
                     
                     o=null;
@@ -263,7 +264,31 @@ public class HBCIPassportDDV
     @Override
     public void setFileName(String filename) 
     { 
-        this.filename=filename;
+      // Checken, ob der Dateiname ungueltige Zeichen enthaelt. Wenn das der Fall ist, schneiden wir die raus
+      // Siehe https://homebanking-hilfe.de/forum/topic.php?p=138325#real138325
+      if (filename != null && filename.length() > 0)
+      {
+        File f = new File(filename);
+        String name = f.getName();
+        
+        // Zeichen, die nicht enthalten sein sollten, entfernen wir
+        // Konkret sind nur Buchstaben, Zahlen und Unterstrich erlaubt
+        name = name.replaceAll("[^a-zA-Z0-9_-]","");
+        
+        // Wenn die Datei laenger als 25 Zeichen ist, schneiden wir die ueberzaehligen ab
+        if (name.length() > 25)
+          name = name.substring(0,25);
+        
+        f = new File(f.getParentFile(),name);
+        String newName = f.getAbsolutePath();
+        if (!newName.equals(filename))
+        {
+          HBCIUtils.log("auto-fixed passport filename from " + filename + " to " + newName,HBCIUtils.LOG_INFO);
+          filename = newName;
+        }
+      }
+      
+      this.filename = filename;
     }
 
     public void setComPort(int comport)
@@ -629,7 +654,8 @@ public class HBCIPassportDDV
             File tempfile=File.createTempFile(prefix,"",directory);
 
             PBEParameterSpec paramspec=new PBEParameterSpec(CIPHER_SALT,CIPHER_ITERATIONS);
-            Cipher cipher=Cipher.getInstance("PBEWithMD5AndDES");
+            String provider = HBCIUtils.getParam("kernel.security.provider");
+            Cipher cipher = provider == null ? Cipher.getInstance("PBEWithMD5AndDES") : Cipher.getInstance("PBEWithMD5AndDES", provider);
             cipher.init(Cipher.ENCRYPT_MODE,passportKey,paramspec);
             ObjectOutputStream o=new ObjectOutputStream(new CipherOutputStream(new FileOutputStream(tempfile),cipher));
             
@@ -688,11 +714,12 @@ public class HBCIPassportDDV
             System.arraycopy(msgkeys[0],posi,longKey,16,8);
 
             DESedeKeySpec spec=new DESedeKeySpec(longKey);
-            SecretKeyFactory fac=SecretKeyFactory.getInstance("DESede");
+        	String provider = HBCIUtils.getParam("kernel.security.provider");
+        	SecretKeyFactory fac = provider==null ? SecretKeyFactory.getInstance("DESede") : SecretKeyFactory.getInstance("DESede", provider);
             SecretKey key=fac.generateSecret(spec);
 
             // nachricht verschluesseln
-            Cipher cipher=Cipher.getInstance("DESede/CBC/NoPadding");
+        	Cipher cipher = provider == null ? Cipher.getInstance("DESede/CBC/NoPadding") : Cipher.getInstance("DESede/CBC/NoPadding", provider);
             byte[] ivarray=new byte[8];
             Arrays.fill(ivarray,(byte)(0));
             IvParameterSpec iv=new IvParameterSpec(ivarray);
@@ -721,11 +748,12 @@ public class HBCIPassportDDV
             System.arraycopy(plainKey,posi,longKey,16,8);
 
             DESedeKeySpec spec=new DESedeKeySpec(longKey);
-            SecretKeyFactory fac=SecretKeyFactory.getInstance("DESede");
+        	String provider = HBCIUtils.getParam("kernel.security.provider");
+        	SecretKeyFactory fac = provider==null ? SecretKeyFactory.getInstance("DESede") : SecretKeyFactory.getInstance("DESede", provider);
             SecretKey key=fac.generateSecret(spec);
 
             // nachricht entschluesseln
-            Cipher cipher=Cipher.getInstance("DESede/CBC/NoPadding");
+        	Cipher cipher = provider == null ? Cipher.getInstance("DESede/CBC/NoPadding") : Cipher.getInstance("DESede/CBC/NoPadding", provider);
             byte[] ivarray=new byte[8];
             Arrays.fill(ivarray,(byte)(0));
             IvParameterSpec iv=new IvParameterSpec(ivarray);

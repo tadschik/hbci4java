@@ -124,7 +124,8 @@ public class HBCIPassportAnonymous
                         passportKey=calculatePassportKey(FOR_LOAD);
 
                     PBEParameterSpec paramspec=new PBEParameterSpec(CIPHER_SALT,CIPHER_ITERATIONS);
-                    Cipher cipher=Cipher.getInstance("PBEWithMD5AndDES");
+                    String provider = HBCIUtils.getParam("kernel.security.provider");
+                    Cipher cipher = provider == null ? Cipher.getInstance("PBEWithMD5AndDES") : Cipher.getInstance("PBEWithMD5AndDES", provider) ;
                     cipher.init(Cipher.DECRYPT_MODE,passportKey,paramspec);
 
                     root=null;
@@ -148,8 +149,8 @@ public class HBCIPassportAnonymous
                         break;
                 }
 
-                setCountry(getElementValue(root,"country"));
                 setBLZ(getElementValue(root,"blz"));
+                setCountry(getElementValue(root,"country"));
                 setHost(getElementValue(root,"host"));
                 setPort(new Integer(getElementValue(root,"port")));
                 setHBCIVersion(getElementValue(root,"hbciversion"));
@@ -487,7 +488,8 @@ public class HBCIPassportAnonymous
                 passportKey=calculatePassportKey(FOR_SAVE);
 
             PBEParameterSpec paramspec=new PBEParameterSpec(CIPHER_SALT,CIPHER_ITERATIONS);
-            Cipher cipher=Cipher.getInstance("PBEWithMD5AndDES");
+            String provider = HBCIUtils.getParam("kernel.security.provider");
+            Cipher cipher = provider == null ? Cipher.getInstance("PBEWithMD5AndDES") : Cipher.getInstance("PBEWithMD5AndDES", provider);
             cipher.init(Cipher.ENCRYPT_MODE,passportKey,paramspec);
 
             DocumentBuilderFactory fac=DocumentBuilderFactory.newInstance();

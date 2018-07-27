@@ -21,30 +21,39 @@
 
 package org.kapott.hbci.passport;
 
-import org.kapott.hbci.callback.AbstractHBCICallback;
+import java.io.File;
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Properties;
+
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+
 import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.comm.Comm;
 import org.kapott.hbci.comm.Filter;
 import org.kapott.hbci.exceptions.HBCI_Exception;
 import org.kapott.hbci.exceptions.InvalidUserDataException;
-import org.kapott.hbci.manager.*;
+import org.kapott.hbci.manager.HBCIDialog;
+import org.kapott.hbci.manager.HBCIKey;
+import org.kapott.hbci.manager.HBCIUtils;
+import org.kapott.hbci.manager.HBCIUtilsInternal;
+import org.kapott.hbci.manager.IHandlerData;
+import org.kapott.hbci.manager.LogFilter;
 import org.kapott.hbci.status.HBCIMsgStatus;
 import org.kapott.hbci.structures.Konto;
 import org.kapott.hbci.structures.Limit;
 import org.kapott.hbci.structures.Value;
 
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import java.io.File;
-import java.io.Serializable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-
-/** <p>Diese Klasse stellt die Basisklasse fÃ¼r alle "echten" Passport-Implementationen
+/** <p>Diese Klasse stellt die Basisklasse für alle "echten" Passport-Implementationen
     dar. Hier werden bereits einige Methoden implementiert sowie einige 
-    zusÃ¤tzliche Hilfsmethoden zur VerfÃ¼gung gestellt.</p><p>
+    zusätzliche Hilfsmethoden zur Verfügung gestellt.</p><p>
     Aus einer HBCI-Anwendung heraus ist hier nur eine einzige Methode interessant,
     um eine Instanz eines bestimmtes Passports zu erzeugen</p> */
 public abstract class AbstractHBCIPassport
@@ -68,19 +77,14 @@ public abstract class AbstractHBCIPassport
     private Comm       comm;
     private Hashtable<String, Object>  persistentData;
 
-    protected HBCICallback callback;
     private IHandlerData parentHandlerData;
-    protected Properties properties;
     
     protected static final boolean FOR_SAVE=true;
     protected static final boolean FOR_LOAD=false;
     
-    public AbstractHBCIPassport(Properties properties, HBCICallback callback, Object init)
+    public AbstractHBCIPassport(Object init)
     {
-        this.callback = callback;
-        this.properties = properties;
         persistentData=new Hashtable<String, Object>();
-
         setClientData("init",init);
     }
 
@@ -91,23 +95,23 @@ public abstract class AbstractHBCIPassport
     {
         boolean dataChanged=false;
 
-        if (needCountry &&
-            (getCountry()==null || getCountry().length()==0)) {
-            StringBuffer sb=new StringBuffer("DE");
-            callback.callback(this,HBCICallback.NEED_COUNTRY,HBCIUtilsInternal.getLocMsg("COUNTRY"),HBCICallback.TYPE_TEXT,sb);
-            if (sb.length()==0)
-                throw new InvalidUserDataException(HBCIUtilsInternal.getLocMsg("EXCMSG_EMPTY_X",HBCIUtilsInternal.getLocMsg("COUNTRY")));
-            setCountry(sb.toString());
-            dataChanged=true;
-        }
-
         if (needBLZ && 
             (getBLZ()==null || getBLZ().length()==0)) {
             StringBuffer sb=new StringBuffer();
-            callback.callback(this,HBCICallback.NEED_BLZ,HBCIUtilsInternal.getLocMsg("BLZ"),HBCICallback.TYPE_TEXT,sb);
+            HBCIUtilsInternal.getCallback().callback(this,HBCICallback.NEED_BLZ,HBCIUtilsInternal.getLocMsg("BLZ"),HBCICallback.TYPE_TEXT,sb);
             if (sb.length()==0)
                 throw new InvalidUserDataException(HBCIUtilsInternal.getLocMsg("EXCMSG_EMPTY_X",HBCIUtilsInternal.getLocMsg("BLZ")));
             setBLZ(sb.toString());
+            dataChanged=true;
+        }
+        
+        if (needCountry &&
+            (getCountry()==null || getCountry().length()==0)) {
+            StringBuffer sb=new StringBuffer("DE");
+            HBCIUtilsInternal.getCallback().callback(this,HBCICallback.NEED_COUNTRY,HBCIUtilsInternal.getLocMsg("COUNTRY"),HBCICallback.TYPE_TEXT,sb);
+            if (sb.length()==0)
+                throw new InvalidUserDataException(HBCIUtilsInternal.getLocMsg("EXCMSG_EMPTY_X",HBCIUtilsInternal.getLocMsg("COUNTRY")));
+            setCountry(sb.toString());
             dataChanged=true;
         }
 
@@ -124,8 +128,8 @@ public abstract class AbstractHBCIPassport
             } else {
                 sb=new StringBuffer(HBCIUtils.getHBCIHostForBLZ(getBLZ()));
             }
-
-            callback.callback(this,HBCICallback.NEED_HOST,HBCIUtilsInternal.getLocMsg("HOST"),HBCICallback.TYPE_TEXT,sb);
+            
+            HBCIUtilsInternal.getCallback().callback(this,HBCICallback.NEED_HOST,HBCIUtilsInternal.getLocMsg("HOST"),HBCICallback.TYPE_TEXT,sb);
             if (sb.length()==0)
                 throw new InvalidUserDataException(HBCIUtilsInternal.getLocMsg("EXCMSG_EMPTY_X",HBCIUtilsInternal.getLocMsg("HOST")));
             setHost(sb.toString());
@@ -135,7 +139,7 @@ public abstract class AbstractHBCIPassport
         if (needPort && 
             (getPort()==null || getPort().intValue()==0)) {
             StringBuffer sb=new StringBuffer((this instanceof AbstractPinTanPassport) ? "443" : "3000");
-            callback.callback(this,HBCICallback.NEED_PORT,HBCIUtilsInternal.getLocMsg("PORT"),HBCICallback.TYPE_TEXT,sb);
+            HBCIUtilsInternal.getCallback().callback(this,HBCICallback.NEED_PORT,HBCIUtilsInternal.getLocMsg("PORT"),HBCICallback.TYPE_TEXT,sb);
             if (sb.length()==0)
                 throw new InvalidUserDataException(HBCIUtilsInternal.getLocMsg("EXCMSG_EMPTY_X",HBCIUtilsInternal.getLocMsg("PORT")));
             setPort(new Integer(sb.toString()));
@@ -145,7 +149,7 @@ public abstract class AbstractHBCIPassport
         if (needFilter &&
                 (getFilterType()==null || getFilterType().length()==0)) {
             StringBuffer sb=new StringBuffer("Base64");
-            callback.callback(this,HBCICallback.NEED_FILTER,HBCIUtilsInternal.getLocMsg("FILTER"),HBCICallback.TYPE_TEXT,sb);
+            HBCIUtilsInternal.getCallback().callback(this,HBCICallback.NEED_FILTER,HBCIUtilsInternal.getLocMsg("FILTER"),HBCICallback.TYPE_TEXT,sb);
             if (sb.length()==0)
                 throw new InvalidUserDataException(HBCIUtilsInternal.getLocMsg("EXCMSG_EMPTY_X",HBCIUtilsInternal.getLocMsg("FILTER")));
             setFilterType(sb.toString());
@@ -155,7 +159,7 @@ public abstract class AbstractHBCIPassport
         if (needUserId &&
             (getUserId()==null || getUserId().length()==0)) {
             StringBuffer sb=new StringBuffer();
-            callback.callback(this,HBCICallback.NEED_USERID,HBCIUtilsInternal.getLocMsg("USERID"),HBCICallback.TYPE_TEXT,sb);
+            HBCIUtilsInternal.getCallback().callback(this,HBCICallback.NEED_USERID,HBCIUtilsInternal.getLocMsg("USERID"),HBCICallback.TYPE_TEXT,sb);
             if (sb.length()==0)
                 throw new InvalidUserDataException(HBCIUtilsInternal.getLocMsg("EXCMSG_EMPTY_X",HBCIUtilsInternal.getLocMsg("USERID")));
             setUserId(sb.toString());
@@ -165,7 +169,7 @@ public abstract class AbstractHBCIPassport
         if (needCustomerId &&
             (getStoredCustomerId()==null || getStoredCustomerId().length()==0)) {
             StringBuffer sb=new StringBuffer(getCustomerId());
-            callback.callback(this,HBCICallback.NEED_CUSTOMERID,HBCIUtilsInternal.getLocMsg("CUSTOMERID"),HBCICallback.TYPE_TEXT,sb);
+            HBCIUtilsInternal.getCallback().callback(this,HBCICallback.NEED_CUSTOMERID,HBCIUtilsInternal.getLocMsg("CUSTOMERID"),HBCICallback.TYPE_TEXT,sb);
             setCustomerId(sb.toString());
             dataChanged=true;
         }
@@ -326,8 +330,8 @@ public abstract class AbstractHBCIPassport
         	// TODO: very dirty!
         	ret.name=getCustomerId();
         	
-        	// an dieser Stelle sind jetzt alle Werte gefÃ¼llt, die teilweise
-        	// zwingend benÃ¶tigt werden
+        	// an dieser Stelle sind jetzt alle Werte gefüllt, die teilweise
+        	// zwingend benötigt werden
         }
         
         return ret;
@@ -604,7 +608,7 @@ public abstract class AbstractHBCIPassport
 
     public final void setBLZ(String blz)
     {
-    	LogFilter.getInstance().addSecretData(blz,"X",LogFilter.FILTER_MOST);
+      	LogFilter.getInstance().addSecretData(blz,"X",LogFilter.FILTER_MOST);
         this.blz=blz;
     }
 
@@ -625,13 +629,13 @@ public abstract class AbstractHBCIPassport
     
     public final void setUserId(String userid)
     {
-    	LogFilter.getInstance().addSecretData(userid,"X",LogFilter.FILTER_IDS);
+      	LogFilter.getInstance().addSecretData(userid,"X",LogFilter.FILTER_IDS);
         this.userid=userid;
     }
 
     public final void setCustomerId(String customerid)
     {
-    	LogFilter.getInstance().addSecretData(customerid,"X",LogFilter.FILTER_IDS);
+      	LogFilter.getInstance().addSecretData(customerid,"X",LogFilter.FILTER_IDS);
         this.customerid=customerid;
     }    
 
@@ -661,9 +665,9 @@ public abstract class AbstractHBCIPassport
         return getUPD().getProperty("UPA.usage").equals("0");
     }
 
-    /** <p>Erzeugt eine Instanz eines HBCIPassports und gibt diese zurÃ¼ck. Der
+    /** <p>Erzeugt eine Instanz eines HBCIPassports und gibt diese zurück. Der
         Typ der erzeugten Passport-Instanz wird durch den Parameter <code>name</code>
-        bestimmt. GÃ¼ltige Werte sind zur Zeit
+        bestimmt. Gültige Werte sind zur Zeit
         <ul>
           <li>DDV</li>
           <li>RDHNew</li>
@@ -673,8 +677,8 @@ public abstract class AbstractHBCIPassport
           <li>RDHXFile</li>
           <li>Anonymous</li>
         </ul></p>
-        <p>Der zusÃ¤tzliche Parameter <code>init</code> gibt ein Objekt an, welches
-        bereits wÃ¤hrend der Instanziierung des Passport-Objektes in dessen internen
+        <p>Der zusätzliche Parameter <code>init</code> gibt ein Objekt an, welches
+        bereits während der Instanziierung des Passport-Objektes in dessen internen
         <code>clientData</code>-Datenstrukturen gespeichert wird
         (siehe {@link org.kapott.hbci.passport.HBCIPassport#setClientData(String,Object)}).
         Auf dieses Objekt kann dann mit 
@@ -683,22 +687,22 @@ public abstract class AbstractHBCIPassport
         gesetzt.</p>
         <p>Beim Erzeugen eines Passport-Objektes tritt i.d.R. der 
         {@link org.kapott.hbci.callback.HBCICallback Callback} <code>NEED_PASSPHRASE</code>
-        auf, um nach dem Passwort fÃ¼r das Einlesen der SchlÃ¼sseldatei zu fragen. 
-        Von der Callback-Methode eventuell zusÃ¤tzlich benÃ¶tigte Daten zu diesem Passport
+        auf, um nach dem Passwort für das Einlesen der Schlüsseldatei zu fragen. 
+        Von der Callback-Methode eventuell zusätzlich benötigte Daten zu diesem Passport
         konnten bis zu dieser Stelle noch nicht via <code>setClientData(...)</code>
-        gesetzt werden, weil das Passport-Objekt noch gar nicht existierte. FÃ¼r diesen
+        gesetzt werden, weil das Passport-Objekt noch gar nicht existierte. Für diesen
         Zweck gibt es das <code>init</code>-Objekt, welches bereits beim Erzeugen
         des Passport-Objektes (und <em>vor</em> dem Aufrufen eines Callbacks) zu den
-        zusÃ¤tzlichen Passport-Daten hinzugefÃ¼gt wird (mit der id "<code>init</code>").</p>
+        zusätzlichen Passport-Daten hinzugefügt wird (mit der id "<code>init</code>").</p>
         <p>Eine beispielhafte (wenn auch nicht sehr praxisnahe) Anwendung dieses 
         Features wird im Quelltext des Tools 
         {@link org.kapott.hbci.tools.AnalyzeReportOfTransactions}
         gezeigt. Zumindest das Prinzip sollte damit jedoch klar werden.</p>
         @param name Typ der zu erzeugenden Passport-Instanz
-        @param init Objekt, welches schon wÃ¤hrend der Passport-Erzeugung via
-        <code>setClientData("init",init)</code> zu den Passport-Daten hinzugefÃ¼gt wird.
+        @param init Objekt, welches schon während der Passport-Erzeugung via
+        <code>setClientData("init",init)</code> zu den Passport-Daten hinzugefügt wird.
         @return Instanz eines HBCIPassports */
-    public static HBCIPassport getInstance(HBCICallback callback, Properties properties, String name, Object init)
+    public static HBCIPassport getInstance(String name,Object init)
     {
         if (name==null) {
             throw new NullPointerException("name of passport implementation must not be null");
@@ -711,8 +715,8 @@ public abstract class AbstractHBCIPassport
                 
             HBCIUtils.log("creating new instance of a "+name+" passport",HBCIUtils.LOG_DEBUG);
             Class cl=Class.forName(className);
-            Constructor con=cl.getConstructor(new Class[] {Properties.class, HBCICallback.class, Object.class});
-            HBCIPassport p=(HBCIPassport)(con.newInstance(new Object[] {properties, callback, init}));
+            Constructor con=cl.getConstructor(new Class[] {Object.class});
+            HBCIPassport p=(HBCIPassport)(con.newInstance(new Object[] {init}));
             return p;
         }
         catch (ClassNotFoundException e)
@@ -739,26 +743,30 @@ public abstract class AbstractHBCIPassport
 
     /** Erzeugt eine Instanz eines HBCI-Passports. Der Typ der erzeugten
         Passport-Instanz wird hierbei dem Wert des HBCI-Parameters
-        <code>client.passport.default</code> entnommen. GÃ¼ltige Werte fÃ¼r diesen
+        <code>client.passport.default</code> entnommen. Gültige Werte für diesen
         HBCI-Parameter sind die gleichen wie beim Aufruf der Methode
+        {@link #getInstance(String)}.
+        @param init (siehe {@link #getInstance(String,Object)})
         @return Instanz eines HBCI-Passports */
-    public static HBCIPassport getInstance(HBCICallback callback, Properties properties, Object init)
+    public static HBCIPassport getInstance(Object init)
     {
-        String passportName=properties.getProperty("client.passport.default");
+        String passportName=HBCIUtils.getParam("client.passport.default");
         if (passportName==null)
             throw new InvalidUserDataException(HBCIUtilsInternal.getLocMsg("EXCMSG_NODEFPASS"));
 
-        return getInstance(callback, properties, passportName, init);
+        return getInstance(passportName,init);
     }
-
-    public static HBCIPassport getInstance(HBCICallback callback, Properties properties, String name)
+    
+    /** Entspricht {@link #getInstance(String,Object) getInstance(name,null)} */
+    public static HBCIPassport getInstance(String name)
     {
-        return getInstance(callback, properties,name,null);
+        return getInstance(name,null);
     }
-
-    public static HBCIPassport getInstance(HBCICallback callback, Properties properties)
+    
+    /** Entspricht {@link #getInstance(Object) getInstance((Object)null)} */
+    public static HBCIPassport getInstance()
     {
-        return getInstance(callback, properties, (Object)null);
+        return getInstance((Object)null);
     }
 
     public void close()
@@ -775,7 +783,7 @@ public abstract class AbstractHBCIPassport
     {
         try {
             StringBuffer passphrase=new StringBuffer();
-            callback.callback(this,
+            HBCIUtilsInternal.getCallback().callback(this,
                                              forSaving?HBCICallback.NEED_PASSPHRASE_SAVE
                                                       :HBCICallback.NEED_PASSPHRASE_LOAD,
                                              forSaving?HBCIUtilsInternal.getLocMsg("CALLB_NEED_PASS_NEW")
@@ -787,7 +795,8 @@ public abstract class AbstractHBCIPassport
             }
             LogFilter.getInstance().addSecretData(passphrase.toString(),"X",LogFilter.FILTER_SECRETS);
 
-            SecretKeyFactory fac=SecretKeyFactory.getInstance("PBEWithMD5AndDES");
+            String provider = HBCIUtils.getParam("kernel.security.provider");
+            SecretKeyFactory fac = provider==null ? SecretKeyFactory.getInstance("PBEWithMD5AndDES") : SecretKeyFactory.getInstance("PBEWithMD5AndDES", provider);
             PBEKeySpec keyspec=new PBEKeySpec(passphrase.toString().toCharArray());
             SecretKey passportKey=fac.generateSecret(keyspec);
             keyspec.clearPassword();
@@ -1085,13 +1094,5 @@ public abstract class AbstractHBCIPassport
         
         if (!origFile.exists())
             throw new HBCI_Exception("could not rename " + tmpFile.getName() + " to " + origFile.getName());
-    }
-
-    public Properties getProperties() {
-        return properties;
-    }
-
-    public HBCICallback getCallback() {
-        return callback;
     }
 }

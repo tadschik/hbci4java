@@ -402,4 +402,5 @@ public interface HBCIPassport
         @return Objekt, welches mit {@link #setClientData(String,Object)}
         im Passport gespeichert wurde.*/ 
     public Object getClientData(String id);
+
 }

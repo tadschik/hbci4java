@@ -24,6 +24,7 @@ package org.kapott.hbci.GV;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Properties;
 
 import org.kapott.hbci.GV.parsers.ISEPAParser;
@@ -34,21 +35,24 @@ import org.kapott.hbci.exceptions.HBCI_Exception;
 import org.kapott.hbci.manager.HBCIHandler;
 import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.manager.LogFilter;
-import org.kapott.hbci.sepa.PainVersion;
-import org.kapott.hbci.sepa.PainVersion.Type;
+import org.kapott.hbci.sepa.SepaVersion;
+import org.kapott.hbci.sepa.SepaVersion.Type;
 import org.kapott.hbci.status.HBCIMsgStatus;
 import org.kapott.hbci.structures.Konto;
 import org.kapott.hbci.structures.Value;
 
+/**
+ * Geschaeftsvorfall zum Abrufen der Liste der SEPA-Dauerauftraege.
+ */
 public final class GVDauerSEPAList extends AbstractSEPAGV
 {
-    private final static PainVersion DEFAULT = PainVersion.PAIN_001_001_02;
+    private final static SepaVersion DEFAULT = SepaVersion.PAIN_001_001_02;
 
     /**
      * @see org.kapott.hbci.GV.AbstractSEPAGV#getDefaultPainVersion()
      */
     @Override
-    protected PainVersion getDefaultPainVersion()
+    protected SepaVersion getDefaultPainVersion()
     {
         return DEFAULT;
     }
@@ -115,15 +119,15 @@ public final class GVDauerSEPAList extends AbstractSEPAGV
         
         final String sepadescr    = result.getProperty(header+".sepadescr");
         final String pain         = result.getProperty(header+".sepapain");
-        final PainVersion version = PainVersion.choose(sepadescr,pain);
+        final SepaVersion version = SepaVersion.choose(sepadescr,pain);
         
-        ISEPAParser parser = SEPAParserFactory.get(version);
-        ArrayList<Properties> sepaResults = new ArrayList<Properties>();
+        ISEPAParser<List<Properties>> parser = SEPAParserFactory.get(version);
+        List<Properties> sepaResults = new ArrayList<Properties>();
         try
         {
             // Encoding siehe GVTermUebSEPAList
             HBCIUtils.log("  parsing sepa data: " + pain,HBCIUtils.LOG_DEBUG2);
-            parser.parse(new ByteArrayInputStream(pain.getBytes(Comm.ENCODING)), sepaResults);
+            parser.parse(new ByteArrayInputStream(pain.getBytes(Comm.ENCODING)),sepaResults);
             HBCIUtils.log("  parsed sepa data, entries: " + sepaResults.size(),HBCIUtils.LOG_INFO);
         }
         catch (Exception e)

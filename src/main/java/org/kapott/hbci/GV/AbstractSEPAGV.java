@@ -17,10 +17,8 @@ import org.kapott.hbci.exceptions.HBCI_Exception;
 import org.kapott.hbci.manager.HBCIHandler;
 import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.manager.HBCIUtilsInternal;
-import org.kapott.hbci.passport.HBCIPassport;
-import org.kapott.hbci.passport.HBCIPassportInternal;
-import org.kapott.hbci.sepa.PainVersion;
-import org.kapott.hbci.sepa.PainVersion.Type;
+import org.kapott.hbci.sepa.SepaVersion;
+import org.kapott.hbci.sepa.SepaVersion.Type;
 
 /** 
  * Abstrakte Basis-Klasse fuer JAXB-basierte SEPA-Jobs.
@@ -36,7 +34,7 @@ public abstract class AbstractSEPAGV extends HBCIJobImpl
     public final static String ENDTOEND_ID_NOTPROVIDED = "NOTPROVIDED";
     
     protected final Properties sepaParams = new Properties();
-    private PainVersion pain         = null;
+    private SepaVersion pain         = null;
     private ISEPAGenerator generator = null;
 
     /**
@@ -44,7 +42,7 @@ public abstract class AbstractSEPAGV extends HBCIJobImpl
      * wenn von der Bank keine geliefert wurden.
      * @return Default-Pain-Version.
      */
-    protected abstract PainVersion getDefaultPainVersion();
+    protected abstract SepaVersion getDefaultPainVersion();
     
     /**
      * Liefert den PAIN-Type.
@@ -74,59 +72,6 @@ public abstract class AbstractSEPAGV extends HBCIJobImpl
         super(handler, name, jobResult);
         this.pain = this.determinePainVersion(handler,name);
     }
-    
-    /**
-     * Durchsucht das BPD-Segment "HISPAS" nach dem Property "cannationalacc"
-     * um herauszufinden, ob beim Versand eines SEPA-Auftrages die nationale Bankverbindung
-     * angegeben sein darf.
-     * 
-     * Siehe FinTS_3.0_Messages_Geschaeftsvorfaelle_2013-05-28_final_version.pdf - Kapitel B.3.2
-     * 
-     * @param handler
-     * @return true, wenn der BPD-Parameter von der Bank mit "J" befuellt ist und die
-     * nationale Bankverbindung angegeben sein darf.
-     */
-    protected boolean canNationalAcc(HBCIHandler handler)
-    {
-        // Checken, ob das Flag im Passport durch die Anwendung hart codiert ist.
-        // Dort kann die Entscheidung ueberschrieben werden, ob die nationale Kontoverbindung
-        // mitgeschickt wird oder nicht.
-        // Das wird voraussichtlich u.a. fuer die Postbank benoetigt, weil die in HISPAS
-        // zwar mitteilt, dass die nationale Kontoverbindung NICHT angegeben werden soll.
-        // Beim anschliessenden Einreichen einer SEPA-Ueberweisung beschwert sie sich aber,
-        // wenn man sie nicht mitgesendet hat. Die verbieten also erst das Senden der
-        // nationalen Kontoverbindung, verlangen sie anschliessend aber. Ein Fehler der
-        // Bank. Siehe http://www.onlinebanking-forum.de/forum/topic.php?p=86444#real86444
-        HBCIPassport passport = handler.getPassport();
-        if (passport instanceof HBCIPassportInternal)
-        {
-            HBCIPassportInternal pi = (HBCIPassportInternal) passport;
-            Object o = pi.getPersistentData("cannationalacc");
-            if (o != null)
-            {
-                String s = o.toString();
-                HBCIUtils.log("value of \"cannationalacc\" overwritten in passport, value: " + s,HBCIUtils.LOG_INFO);
-                return s.equalsIgnoreCase("J");
-            }
-        }
-        
-        HBCIUtils.log("searching for value of \"cannationalacc\" in HISPAS",HBCIUtils.LOG_INFO);
-        
-        // Ansonsten suchen wir in HISPAS - aber nur, wenn wir die Daten schon haben
-        if (handler.getSupportedLowlevelJobs().getProperty("SEPAInfo") == null)
-        {
-            HBCIUtils.log("no HISPAS data found",HBCIUtils.LOG_INFO);
-            return false; // Ne, noch nicht. Dann lassen wir das erstmal weg
-        }
-        
-        
-        // SEPAInfo laden und darüber iterieren
-        Properties props = handler.getLowlevelJobRestrictions("SEPAInfo");
-        String value = props.getProperty("cannationalacc");
-        HBCIUtils.log("cannationalacc=" + value,HBCIUtils.LOG_INFO);
-        return value != null && value.equalsIgnoreCase("J");
-    }
-    
     /**
      * Diese Methode schaut in den BPD nach den unterstützen pain Versionen
      * (bei LastSEPA pain.008.xxx.xx) und vergleicht diese mit den von HBCI4Java
@@ -137,19 +82,19 @@ public abstract class AbstractSEPAGV extends HBCIJobImpl
      * gesucht werden soll.
      * @return die ermittelte PAIN-Version.
      */
-    private PainVersion determinePainVersion(HBCIHandler handler, String gvName)
+    private SepaVersion determinePainVersion(HBCIHandler handler, String gvName)
     {
         // Schritt 1: Wir holen uns die globale maximale PAIN-Version
-        PainVersion globalVersion = this.determinePainVersionInternal(handler,GVSEPAInfo.getLowlevelName());
+        SepaVersion globalVersion = this.determinePainVersionInternal(handler,GVSEPAInfo.getLowlevelName());
         
         // Schritt 2: Die des Geschaeftsvorfalls - fuer den Fall, dass die Bank
         // dort weitere Einschraenkungen hinterlegt hat
-        PainVersion jobVersion = this.determinePainVersionInternal(handler,gvName);
+        SepaVersion jobVersion = this.determinePainVersionInternal(handler,gvName);
         
         // Wir haben gar keine PAIN-Version gefunden
         if (globalVersion == null && jobVersion == null)
         {
-            PainVersion def = this.getDefaultPainVersion();
+            SepaVersion def = this.getDefaultPainVersion();
             HBCIUtils.log("unable to determine matching pain version, using default: " + def,HBCIUtils.LOG_WARN);
             return def;
         }
@@ -176,7 +121,7 @@ public abstract class AbstractSEPAGV extends HBCIJobImpl
      * gesucht werden soll.
      * @return die ermittelte PAIN-Version oder NULL wenn keine ermittelt werden konnte.
      */
-    private PainVersion determinePainVersionInternal(HBCIHandler handler, final String gvName)
+    private SepaVersion determinePainVersionInternal(HBCIHandler handler, final String gvName)
     {
         HBCIUtils.log("searching for supported pain versions for GV " + gvName,HBCIUtils.LOG_DEBUG);
         
@@ -186,7 +131,7 @@ public abstract class AbstractSEPAGV extends HBCIJobImpl
             return null;
         }
 
-        List<PainVersion> found = new ArrayList<PainVersion>();
+        List<SepaVersion> found = new ArrayList<SepaVersion>();
     
         // GV-Restrictions laden und darüber iterieren
         Properties props = handler.getLowlevelJobRestrictions(gvName);
@@ -202,10 +147,10 @@ public abstract class AbstractSEPAGV extends HBCIJobImpl
             String urn = props.getProperty(key);
             try
             {
-                PainVersion version = PainVersion.byURN(urn);
+                SepaVersion version = SepaVersion.byURN(urn);
                 if (version.getType() == this.getPainType())
                 {
-                    if (!version.isSupported(this.getPainJobName()))
+                    if (!version.canGenerate(this.getPainJobName()))
                     {
                         HBCIUtils.log("  unsupported " + version,HBCIUtils.LOG_DEBUG);
                         continue;
@@ -218,7 +163,7 @@ public abstract class AbstractSEPAGV extends HBCIJobImpl
                     // noetig, da das "PainVersion.byURN" (siehe oben) ohnehin bereits
                     // macht - wenn wir die PAIN-Version kennen, nehmen wir gleich die
                     // eigene Instanz. Siehe auch
-                    // TestPainVersion#test011 bzw. http://www.onlinebanking-forum.de/phpBB2/viewtopic.php?p=95160#95160
+                    // TestSepaVersion#test011 bzw. http://www.onlinebanking-forum.de/phpBB2/viewtopic.php?p=95160#95160
                     HBCIUtils.log("  found " + version,HBCIUtils.LOG_DEBUG);
                     found.add(version);
                 }
@@ -230,7 +175,7 @@ public abstract class AbstractSEPAGV extends HBCIJobImpl
             }
         }
         
-        return PainVersion.findGreatest(found);
+        return SepaVersion.findGreatest(found);
     }
 
     /**
@@ -326,7 +271,7 @@ public abstract class AbstractSEPAGV extends HBCIJobImpl
      * Liefert den zu verwendenden PAIN-Version fuer die HBCI-Nachricht.
      * @return der zu verwendende PAIN-Version fuer die HBCI-Nachricht.
      */
-    protected PainVersion getPainVersion()
+    protected SepaVersion getPainVersion()
     {
         return this.pain;
     }

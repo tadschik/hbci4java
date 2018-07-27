@@ -31,11 +31,21 @@ import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.PBEParameterSpec;
+
 import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.exceptions.HBCI_Exception;
 import org.kapott.hbci.exceptions.InvalidPassphraseException;
-import org.kapott.hbci.manager.*;
+import org.kapott.hbci.manager.FlickerCode;
+import org.kapott.hbci.manager.HBCIUtils;
+import org.kapott.hbci.manager.HBCIUtilsInternal;
+import org.kapott.hbci.manager.HHDVersion;
 import org.kapott.hbci.manager.HHDVersion.Type;
+import org.kapott.hbci.manager.LogFilter;
 import org.kapott.hbci.security.Sig;
 
 /** <p>Passport-Klasse für HBCI mit PIN/TAN. Dieses Sicherheitsverfahren wird erst
@@ -63,33 +73,32 @@ public class HBCIPassportPinTan
     extends AbstractPinTanPassport
 {
     private String    filename;
-//    private SecretKey passportKey;
+    private SecretKey passportKey;
 
     private final static byte[] CIPHER_SALT={(byte)0x26,(byte)0x19,(byte)0x38,(byte)0xa7,
                                              (byte)0x99,(byte)0xbc,(byte)0xf1,(byte)0x55};
     private final static int CIPHER_ITERATIONS=987;
 
-    public HBCIPassportPinTan(Properties properties, HBCICallback callback, Object init, int dummy)
+    public HBCIPassportPinTan(Object init,int dummy)
     {
-        super(properties, callback, init);
-        this.properties = properties;
+        super(init);
     }
 
-    public HBCIPassportPinTan(Properties properties, HBCICallback callback, Object initObject)
+    public HBCIPassportPinTan(Object initObject)
     {
-        this(properties, callback, initObject,0);
+        this(initObject,0);
 
         String  header="client.passport.PinTan.";
-        String  fname=properties.getProperty(header+"filename");
-        boolean init=properties.getProperty(header+"init","1").equals("1");
-
-        setFileName(fname);
-        setCertFile(properties.getProperty(header+"certfile"));
-        setCheckCert(properties.getProperty(header+"checkcert","1").equals("1"));
+        String  fname=HBCIUtils.getParam(header+"filename");
+        boolean init=HBCIUtils.getParam(header+"init","1").equals("1");
         
-        setProxy(properties.getProperty(header+"proxy",""));
-        setProxyUser(properties.getProperty(header+"proxyuser",""));
-        setProxyPass(properties.getProperty(header+"proxypass",""));
+        setFileName(fname);
+        setCertFile(HBCIUtils.getParam(header+"certfile"));
+        setCheckCert(HBCIUtils.getParam(header+"checkcert","1").equals("1"));
+        
+        setProxy(HBCIUtils.getParam(header+"proxy",""));
+        setProxyUser(HBCIUtils.getParam(header+"proxyuser",""));
+        setProxyPass(HBCIUtils.getParam(header+"proxypass",""));
 
         if (init) {
             this.read();
@@ -99,12 +108,12 @@ public class HBCIPassportPinTan
                 saveChanges();
         }
     }
-
+    
     /**
      * Gibt den Dateinamen der Schlüsseldatei zurück.
      * @return Dateiname der Schlüsseldatei
      */
-    public String getFileName()
+    public String getFileName() 
     {
         return filename;
     }
@@ -113,24 +122,19 @@ public class HBCIPassportPinTan
      * Speichert den Dateinamen der Passport-Datei.
      * @param filename
      */
-    public void setFileName(String filename)
-    {
+    public void setFileName(String filename) 
+    { 
         this.filename=filename;
     }
-
+    
     /**
      * @see org.kapott.hbci.passport.HBCIPassportInternal#resetPassphrase()
      */
     public void resetPassphrase()
     {
-//        passportKey=null;
+        passportKey=null;
     }
-
-    @Override
-    public Properties getProperties() {
-        return properties;
-    }
-
+    
     /**
      * Erzeugt die Passport-Datei wenn noetig.
      * In eine extra Funktion ausgelagert, damit es von abgeleiteten Klassen ueberschrieben werden kann.
@@ -145,7 +149,7 @@ public class HBCIPassportPinTan
         File file = new File(fname);
         if (file.exists() && file.isFile() && file.canRead())
             return;
-
+        
         HBCIUtils.log("have to create new passport file",HBCIUtils.LOG_WARN);
         askForMissingData(true,true,true,true,true,true,true);
         saveChanges();
@@ -159,7 +163,7 @@ public class HBCIPassportPinTan
     protected void read()
     {
         create();
-
+        
         String fname = this.getFileName();
         if (fname==null) {
             throw new NullPointerException("client.passport.PinTan.filename must not be null");
@@ -170,25 +174,25 @@ public class HBCIPassportPinTan
         ObjectInputStream o = null;
         try
         {
-            int retries = Integer.parseInt(properties.getProperty("client.retries.passphrase","3"));
+            int retries = Integer.parseInt(HBCIUtils.getParam("client.retries.passphrase","3"));
             
             while (true) {
-//                if (passportKey == null)
-//                    passportKey = calculatePassportKey(FOR_LOAD);
+                if (passportKey == null)
+                    passportKey = calculatePassportKey(FOR_LOAD);
 
-//                PBEParameterSpec paramspec=new PBEParameterSpec(CIPHER_SALT,CIPHER_ITERATIONS);
-//                Cipher cipher=Cipher.getInstance("PBEWithMD5AndDES");
-//                cipher.init(Cipher.DECRYPT_MODE,passportKey,paramspec);
+                PBEParameterSpec paramspec=new PBEParameterSpec(CIPHER_SALT,CIPHER_ITERATIONS);
+                String provider = HBCIUtils.getParam("kernel.security.provider");
+                Cipher cipher = provider == null ? Cipher.getInstance("PBEWithMD5AndDES") : Cipher.getInstance("PBEWithMD5AndDES", provider);
+                cipher.init(Cipher.DECRYPT_MODE,passportKey,paramspec);
                 
                 o = null;
                 try
                 {
-//                    o=new ObjectInputStream(new CipherInputStream(new FileInputStream(fname),cipher));
-                    o=new ObjectInputStream(new FileInputStream(fname));
+                    o=new ObjectInputStream(new CipherInputStream(new FileInputStream(fname),cipher));
                 }
                 catch (StreamCorruptedException e)
                 {
-//                    passportKey=null;
+                    passportKey=null;
                     
                     retries--;
                     if (retries<=0)
@@ -254,20 +258,20 @@ public class HBCIPassportPinTan
         
         try
         {
-//            if (passportKey==null)
-//                passportKey=calculatePassportKey(FOR_SAVE);
+            if (passportKey==null) 
+                passportKey=calculatePassportKey(FOR_SAVE);
             
-//            PBEParameterSpec paramspec=new PBEParameterSpec(CIPHER_SALT,CIPHER_ITERATIONS);
-//            Cipher cipher=Cipher.getInstance("PBEWithMD5AndDES");
-//            cipher.init(Cipher.ENCRYPT_MODE,passportKey,paramspec);
+            PBEParameterSpec paramspec=new PBEParameterSpec(CIPHER_SALT,CIPHER_ITERATIONS);
+            String provider = HBCIUtils.getParam("kernel.security.provider");
+            Cipher cipher = provider == null ? Cipher.getInstance("PBEWithMD5AndDES") : Cipher.getInstance("PBEWithMD5AndDES", provider);
+            cipher.init(Cipher.ENCRYPT_MODE,passportKey,paramspec);
 
             File directory = passportfile.getAbsoluteFile().getParentFile();
             String prefix  = passportfile.getName()+"_";
             tempfile       = File.createTempFile(prefix,"",directory);
 
             HBCIUtils.log("writing to passport file " + tempfile, HBCIUtils.LOG_DEBUG);
-//            ObjectOutputStream o = new ObjectOutputStream(new CipherOutputStream(new FileOutputStream(tempfile),cipher));
-            ObjectOutputStream o = new ObjectOutputStream(new FileOutputStream(tempfile));
+            ObjectOutputStream o = new ObjectOutputStream(new CipherOutputStream(new FileOutputStream(tempfile),cipher));
 
             o.writeObject(getCountry());
             o.writeObject(getBLZ());
@@ -329,15 +333,16 @@ public class HBCIPassportPinTan
             if (getPIN()==null) {
                 StringBuffer s=new StringBuffer();
 
-//                HBCIUtilsInternal.getCallback().callback(this,
-//                                                 HBCICallback.NEED_PT_PIN,
-//                                                 HBCIUtilsInternal.getLocMsg("CALLB_NEED_PTPIN"),
-//                                                 HBCICallback.TYPE_SECRET,
-//                                                 s);
-//                if (s.length()==0) {
-//                    throw new HBCI_Exception(HBCIUtilsInternal.getLocMsg("EXCMSG_PINZERO"));
-//                }
-                LogFilter.getInstance().addSecretData(getPIN(),"X", LogFilter.FILTER_SECRETS);
+                HBCIUtilsInternal.getCallback().callback(this,
+                                                 HBCICallback.NEED_PT_PIN,
+                                                 HBCIUtilsInternal.getLocMsg("CALLB_NEED_PTPIN"),
+                                                 HBCICallback.TYPE_SECRET,
+                                                 s);
+                if (s.length()==0) {
+                    throw new HBCI_Exception(HBCIUtilsInternal.getLocMsg("EXCMSG_PINZERO"));
+                }
+                setPIN(s.toString());
+                LogFilter.getInstance().addSecretData(getPIN(),"X",LogFilter.FILTER_SECRETS);
             }
             
             String tan="";
@@ -370,11 +375,22 @@ public class HBCIPassportPinTan
                             // noch keine tan bekannt --> callback
                             
                             StringBuffer s=new StringBuffer();
-                            callback.callback(this,
-                                HBCICallback.NEED_PT_TAN,
-                                HBCIUtilsInternal.getLocMsg("CALLB_NEED_PTTAN"),
-                                HBCICallback.TYPE_TEXT,
-                                s);
+                            try
+                            {
+                                HBCIUtilsInternal.getCallback().callback(this,
+                                                HBCICallback.NEED_PT_TAN,
+                                                HBCIUtilsInternal.getLocMsg("CALLB_NEED_PTTAN"),
+                                                HBCICallback.TYPE_TEXT,
+                                                s);
+                            }
+                            catch (HBCI_Exception e)
+                            {
+                                throw e;
+                            }
+                            catch (Exception e)
+                            {
+                                throw new HBCI_Exception(e);
+                            }
                             if (s.length()==0) {
                                 throw new HBCI_Exception(HBCIUtilsInternal.getLocMsg("EXCMSG_TANZERO"));
                             }
@@ -424,7 +440,7 @@ public class HBCIPassportPinTan
                         // Bei PhotoTAN haengen wir ungeparst das HHDuc an. Das kann dann auf
                         // Anwendungsseite per MatrixCode geparst werden
                         payload.append(hhduc);
-                        callback.callback(this,HBCICallback.NEED_PT_PHOTOTAN,msg,HBCICallback.TYPE_TEXT,payload);
+                        HBCIUtilsInternal.getCallback().callback(this,HBCICallback.NEED_PT_PHOTOTAN,msg,HBCICallback.TYPE_TEXT,payload);
                     }
                     else
                     {
@@ -432,8 +448,8 @@ public class HBCIPassportPinTan
                         String flicker = parseFlickercode(challenge,hhduc);
                         if (flicker != null)
                             payload.append(flicker);
-
-                        callback.callback(this,HBCICallback.NEED_PT_TAN,msg,HBCICallback.TYPE_TEXT,payload);
+                        
+                        HBCIUtilsInternal.getCallback().callback(this,HBCICallback.NEED_PT_TAN,msg,HBCICallback.TYPE_TEXT,payload);
                     }
 
                     setPersistentData("externalid",null); // External-ID aus Passport entfernen
@@ -534,7 +550,7 @@ public class HBCIPassportPinTan
     public void close()
     {
         super.close();
-//        passportKey=null;
+        passportKey=null;
     }
     
 }

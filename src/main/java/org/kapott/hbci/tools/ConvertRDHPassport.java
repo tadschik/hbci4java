@@ -24,7 +24,6 @@ package org.kapott.hbci.tools;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Properties;
 
 import org.kapott.hbci.callback.HBCICallbackConsole;
 import org.kapott.hbci.manager.HBCIUtils;
@@ -39,25 +38,25 @@ import org.kapott.hbci.passport.HBCIPassportRDHNew;
     "<code>RDHNew</code>". Siehe dazu auch die Datei <code>README.RDHNew</code>
     im <em>HBCI4Java</em>-Archiv.</p>
     <p>Die Konvertierung von RDH-Passports in RDHNew-Passports kann auch
-    mit dem separat verfÃ¼gbaren HBCI4Java Passport Editor durchgefÃ¼hrt werden.
-    Mit diesem Editor kÃ¶nnen darÃ¼ber hinaus RDHNew-Passports auch wieder
+    mit dem separat verfügbaren HBCI4Java Passport Editor durchgeführt werden.
+    Mit diesem Editor können darüber hinaus RDHNew-Passports auch wieder
     in RDH-Passports konvertiert werden.</p> 
     <p>Bei der <code>RDHNew</code>-Variante hat sich im Vergleich zu <code>RDH</code>
-    das Dateiformat der SchlÃ¼sseldateien geÃ¤ndert. Deshalb muss vor Verwendung einer alten
-    <code>RDH</code>-SchlÃ¼sseldatei diese erst in das neue Dateiformat konvertiert
+    das Dateiformat der Schlüsseldateien geändert. Deshalb muss vor Verwendung einer alten
+    <code>RDH</code>-Schlüsseldatei diese erst in das neue Dateiformat konvertiert
     werden. Das geschieht mit diesem Tool. Vor dessen Anwendung sollte sicherheithalber
-    ein Backup der aktuellen (alten) RDH-SchlÃ¼sseldatei angelegt werden
+    ein Backup der aktuellen (alten) RDH-Schlüsseldatei angelegt werden
     (das sollte aber sowieso vorhanden sein!).</p>
     <p>Aufgerufen wird der Konverter mit
     <pre>java -cp ... org.kapott.hbci.tools.ConvertRDHPassport</pre>
     Es handelt sich um ein interaktives Programm. Nach dem Start wird nach dem
     Dateinamen einer existierenden RDH-Passport-Datei sowie nach dem Passwort
-    fÃ¼r deren EntschlÃ¼sselung gefragt. AnschlieÃend wird nach einem
-    <em>neuen(!)</em> Dateinamen fÃ¼r die zu erstellende RDHNew-Passport-Datei
-    sowie nach einem Passwort fÃ¼r deren VerschlÃ¼sselung gefragt. Nach Beendigung
+    für deren Entschlüsselung gefragt. Anschließend wird nach einem
+    <em>neuen(!)</em> Dateinamen für die zu erstellende RDHNew-Passport-Datei
+    sowie nach einem Passwort für deren Verschlüsselung gefragt. Nach Beendigung
     des Programmes existiert die RDHNew-Passport-Datei, welche ab sofort benutzt
     werden kann.</p>
-    <p>Um eine RDHNew-Passport-Datei zu benutzen, mÃ¼ssen alle HBCI-Parameter, die
+    <p>Um eine RDHNew-Passport-Datei zu benutzen, müssen alle HBCI-Parameter, die
     vorher mit "<code>client.passport.RDH.*</code>" gesetzt wurden, jetzt mit
     "<code>client.passport.RDHNew.*</code>" gesetzt werden, und als 
     "<code>client.passport.default</code>" bzw. als Argument zu
@@ -66,6 +65,46 @@ import org.kapott.hbci.passport.HBCIPassportRDHNew;
     <p>Die alte Passport-Datei sollte ab sofort nicht mehr verwendet werden.</p>*/
 public class ConvertRDHPassport
 {
+    public static void main(String[] args) 
+        throws IOException
+    {
+        HBCIUtils.init(null,new HBCICallbackConsole());
+        
+        String nameOld=readParam(args,0,"Filename of old RDH passport file");
+        HBCIUtils.setParam("client.passport.RDH.filename",nameOld);
+        HBCIUtils.setParam("client.passport.RDH.init","1");
+        HBCIPassportInternal passportOld=(HBCIPassportInternal)AbstractHBCIPassport.getInstance("RDH");
+        
+        String nameNew=readParam(args,1,"Filename of new RDHNew passport file");
+        HBCIUtils.setParam("client.passport.RDHNew.filename",nameNew);
+        HBCIUtils.setParam("client.passport.RDHNew.init","0");
+        HBCIPassportInternal passportNew=(HBCIPassportInternal)AbstractHBCIPassport.getInstance("RDHNew");
+
+        passportNew.setBLZ(passportOld.getBLZ());
+        passportNew.setCountry(passportOld.getCountry());
+        passportNew.setHost(passportOld.getHost());
+        passportNew.setPort(passportOld.getPort());
+        passportNew.setUserId(passportOld.getUserId());
+        passportNew.setCustomerId(passportOld.getCustomerId());
+        passportNew.setSysId(passportOld.getSysId());
+        passportNew.setSigId(passportOld.getSigId());
+        passportNew.setProfileVersion(passportOld.getProfileVersion());
+        passportNew.setHBCIVersion(passportOld.getHBCIVersion());
+        passportNew.setBPD(passportOld.getBPD());
+        passportNew.setUPD(passportOld.getUPD());
+        
+        ((HBCIPassportRDHNew)passportNew).setInstSigKey(((AbstractRDHSWPassport)passportOld).getInstSigKey());
+        ((HBCIPassportRDHNew)passportNew).setInstEncKey(((AbstractRDHSWPassport)passportOld).getInstEncKey());
+        ((HBCIPassportRDHNew)passportNew).setMyPublicSigKey(((AbstractRDHSWPassport)passportOld).getMyPublicSigKey());
+        ((HBCIPassportRDHNew)passportNew).setMyPrivateSigKey(((AbstractRDHSWPassport)passportOld).getMyPrivateSigKey());
+        ((HBCIPassportRDHNew)passportNew).setMyPublicEncKey(((AbstractRDHSWPassport)passportOld).getMyPublicEncKey());
+        ((HBCIPassportRDHNew)passportNew).setMyPrivateEncKey(((AbstractRDHSWPassport)passportOld).getMyPrivateEncKey());
+        
+        passportNew.saveChanges();
+        
+        passportOld.close();
+        passportNew.close();            
+    }
 
     private static String readParam(String[] args,int idx,String st)
         throws IOException

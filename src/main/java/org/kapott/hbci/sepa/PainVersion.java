@@ -31,7 +31,9 @@ import org.w3c.dom.Node;
 
 /**
  * Kapselt das Parsen und Vergleichen von SEPA Pain-Versionen.
+ * @deprecated Bitte {@link SepaVersion} verwenden.
  */
+@Deprecated
 public class PainVersion implements Comparable<PainVersion>
 {
     private final static String DF_MAJOR = "000";

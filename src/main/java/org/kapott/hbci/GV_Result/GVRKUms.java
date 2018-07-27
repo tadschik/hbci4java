@@ -21,6 +21,14 @@
 
 package org.kapott.hbci.GV_Result;
 
+import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+
 import org.kapott.hbci.exceptions.HBCI_Exception;
 import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.manager.HBCIUtilsInternal;
@@ -29,12 +37,6 @@ import org.kapott.hbci.structures.Konto;
 import org.kapott.hbci.structures.Saldo;
 import org.kapott.hbci.structures.Value;
 import org.kapott.hbci.swift.Swift;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.*;
 
 /** <p>Ergebnisse der Abfrage von Kontoumsatzinformationen.
     Ein Objekt dieser Klasse entspricht einen Kontoauszug.
@@ -48,9 +50,6 @@ import java.util.*;
 public class GVRKUms
     extends HBCIJobResultImpl
 {
-
-    private static Logger LOG = LoggerFactory.getLogger(GVRKUms.class);
-
     /** Eine "Zeile" des Kontoauszuges (enthält Daten einer Transaktion) */
     public static class UmsLine
         implements Serializable
@@ -117,6 +116,22 @@ public class GVRKUms
         
         /** Gibt an, ob ein Umsatz ein SEPA-Umsatz ist **/
         public boolean isSepa;
+        
+        /**
+         * Gibt an, ob ein Umsatz per CAMT abgerufen wurde.
+         */
+        public boolean isCamt;
+        
+        /**
+         * NUR BEI CAMT: Eindeutiger Identifier der Buchung. Erst seit SEPA mit Abruf per CAMT
+         * verfuegbar. Bei MT940-Abruf ist der Wert leer.
+         */
+        public String id;
+        
+        /**
+         * NUR BEI CAMT: Der Purpose-Code der Buchung.
+         */
+        public String purposecode;
 
         public UmsLine()
         {
@@ -267,14 +282,27 @@ public class GVRKUms
         this.bufferMT942.append(data);
     }
 
-    /** Gibt die Umsatzinformationen gruppiert nach Buchungstagen zurück.
-        @return Liste mit Informationen zu einzelnen Buchungstagen ({@link GVRKUms.BTag}) */
+    /**
+     * Gibt die Umsatzinformationen gruppiert nach Buchungstagen zurück.
+     * @return Liste mit Informationen zu einzelnen Buchungstagen ({@link GVRKUms.BTag})
+     **/
     public List<BTag> getDataPerDay()
     {
         verifyMT94xParsing("getDataPerDay()");
         return tageMT940;
     }
+    
+    /**
+     * Gibt die vorgemerkten Umsaetze gruppiert nach Buchungstagen zurueck.
+     * @return Liste mit Informationen zu einzelnen Buchungstagen der Vormerkbuchungen ({@link GVRKUms.BTag})
+     **/
+    public List<BTag> getDataPerDayUnbooked()
+    {
+        verifyMT94xParsing("getDataPerDayUnbooked()");
+        return tageMT942;
+    }
 
+    
     /** Gibt alle Transaktionsdatensätze in einer "flachen" Struktur zurück.
         D.h. nicht in einzelne Buchungstage unterteilt, sondern in einer Liste
         analog zu einem "normalen" Kontoauszug.
@@ -338,30 +366,37 @@ public class GVRKUms
         }
 
         if (restMT940!=null && restMT940.length()!=0) {
-            LOG.warn(
+            HBCIUtils.log(
                 where+
                 ": mt940 has not been parsed successfully " +
                 "- probably returned data will be incomplete. "+
                 "check variable 'restMT940' (or set logging level to 4 (=DEBUG)) "+
-                "to see the data that could not be parsed.");
-            LOG.debug("restMT940: "+restMT940);
+                "to see the data that could not be parsed.",
+                HBCIUtils.LOG_WARN);
+            HBCIUtils.log("restMT940: "+restMT940, HBCIUtils.LOG_DEBUG);
         }
 
         if (restMT942!=null && restMT942.length()!=0) {
-            LOG.warn(
+            HBCIUtils.log(
                 where+
                 ": mt942 has not been parsed successfully " +
                 "- probably returned data will be incomplete. "+
                 "check variable 'restMT942' (or set logging level to 4 (=DEBUG)) "+
-                "to see the data that could not be parsed.");
-            LOG.debug("restMT942: "+restMT942);
+                "to see the data that could not be parsed.",
+                HBCIUtils.LOG_WARN);
+            HBCIUtils.log("restMT942: "+restMT942, HBCIUtils.LOG_DEBUG);
         }
     }
 
     private void parseMT94x(StringBuffer buffer, List<BTag> tage, StringBuffer rest)
     {
-        LOG.debug("now parsing MT94x data");
-        parsed=true;
+        parsed = true;
+        
+        // Verwenden wir bei CAMT-Umsaetzen.
+        if (buffer == null || buffer.length() == 0)
+            return;
+        
+        HBCIUtils.log("now parsing MT94x data", HBCIUtils.LOG_DEBUG);
 
         try {
             SimpleDateFormat dateFormat=new SimpleDateFormat("yyMMdd");
@@ -643,7 +678,7 @@ public class GVRKUms
                                 int space = acc.blz.indexOf(" ");
                                 if (space != -1)
                                 {
-                                    LOG.debug("blz/bic \"" + acc.blz + "\" contains invalid chars, trimming after first space");
+                                    HBCIUtils.log("blz/bic \"" + acc.blz + "\" contains invalid chars, trimming after first space", HBCIUtils.LOG_DEBUG);
                                     acc.blz = acc.blz.substring(0,space);
                                 }
                             }
@@ -745,8 +780,8 @@ public class GVRKUms
             // remove this debugging output
             // HBCIUtils.log("Parsing of MT940 ok until now; unparsed data: "+buffer,HBCIUtils.LOG_DEBUG2);
         } catch (Exception e) {
-            LOG.error("There is unparsed MT94x data - an exception occured while parsing");
-            LOG.debug("current MT94x buffer: "+buffer,HBCIUtils.LOG_DEBUG2);
+            HBCIUtils.log("There is unparsed MT94x data - an exception occured while parsing",HBCIUtils.LOG_ERR);
+            HBCIUtils.log("current MT94x buffer: "+buffer,HBCIUtils.LOG_DEBUG2);
             throw new HBCI_Exception(e);
         } finally {
             rest.setLength(0);

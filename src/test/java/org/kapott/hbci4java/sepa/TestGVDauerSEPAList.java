@@ -1,9 +1,5 @@
 package org.kapott.hbci4java.sepa;
 
-import static org.junit.Assert.*;
-import org.junit.Test;
-import org.kapott.hbci4java.AbstractTest;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -11,8 +7,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-
-import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -29,6 +23,9 @@ import org.kapott.hbci.passport.AbstractHBCIPassport;
 import org.kapott.hbci.passport.HBCIPassport;
 import org.kapott.hbci.passport.HBCIPassportPinTan;
 import org.kapott.hbci.status.HBCIExecStatus;
+import org.kapott.hbci4java.AbstractTest;
+
+import junit.framework.Assert;
 
 
 
@@ -61,7 +58,7 @@ public class TestGVDauerSEPAList extends AbstractTest {
         int source_acc_idx = Integer.parseInt(params.getProperty("source_account_idx"));
         job.setParam("src",passport.getAccounts()[source_acc_idx]);
         
-        System.out.println("---------Fï¿½r Job zur Queue");
+        System.out.println("---------Für Job zur Queue");
         job.addToQueue();
 
         
@@ -93,7 +90,6 @@ public class TestGVDauerSEPAList extends AbstractTest {
               
       Properties props = new Properties();
       props.put("log.loglevel.default",Integer.toString(LOGLEVEL));
-      props.put("infoPoint.enabled",Boolean.FALSE.toString());
       
       props.put("client.passport.PinTan.filename",dir.getAbsolutePath() + File.separator + System.currentTimeMillis() + ".pt");
       props.put("client.passport.PinTan.init","1");
@@ -121,8 +117,8 @@ public class TestGVDauerSEPAList extends AbstractTest {
         }
       };
       
-//      HBCIUtils.init(props,callback);
-//      this.passport = (HBCIPassportPinTan) AbstractHBCIPassport.getInstance("PinTan");
+      HBCIUtils.init(props,callback);
+      this.passport = (HBCIPassportPinTan) AbstractHBCIPassport.getInstance("PinTan");
       
       // init handler
       this.handler = new HBCIHandler(params.getProperty("hbciversion"),passport);
@@ -159,7 +155,7 @@ public class TestGVDauerSEPAList extends AbstractTest {
         }
         finally
         {
-//          HBCIUtils.done();
+          HBCIUtils.done();
         }
       }
     }

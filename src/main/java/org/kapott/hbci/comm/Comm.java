@@ -23,7 +23,6 @@ package org.kapott.hbci.comm;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.StringTokenizer;
 
 import org.kapott.hbci.callback.HBCICallback;
@@ -58,31 +57,31 @@ public abstract class Comm
         this.parentPassport=parentPassport;
         this.filter=parentPassport.getCommFilter();
         
-//        getParentPassport().getCallback().callback(parentPassport,HBCICallback.NEED_CONNECTION,
-//                HBCIUtilsInternal.getLocMsg("CALLB_NEED_CONN"),HBCICallback.TYPE_NONE,new StringBuffer());
+        HBCIUtilsInternal.getCallback().callback(parentPassport,HBCICallback.NEED_CONNECTION,
+                HBCIUtilsInternal.getLocMsg("CALLB_NEED_CONN"),HBCICallback.TYPE_NONE,new StringBuffer());
     }
 
-    public MSG pingpong(Hashtable<String, Object> kernelData, String msgName, MSG msg)
+    public MSG pingpong(String msgName, MSG msg)
     {
         IHandlerData handler=getParentPassport().getParentHandlerData();
         MsgGen       gen=handler.getMsgGen();
         
         // ausgehende nachricht versenden
-        getParentPassport().getCallback().status(getParentPassport(),HBCICallback.STATUS_MSG_SEND,null);
-        getParentPassport().getCallback().status(getParentPassport(),HBCICallback.STATUS_MSG_RAW_SEND,msg.toString(0));
+        HBCIUtilsInternal.getCallback().status(getParentPassport(),HBCICallback.STATUS_MSG_SEND,null);
+        HBCIUtilsInternal.getCallback().status(getParentPassport(),HBCICallback.STATUS_MSG_RAW_SEND,msg.toString(0));
         ping(msg);
 
         // nachricht empfangen
-        getParentPassport().getCallback().status(getParentPassport(),HBCICallback.STATUS_MSG_RECV,null);
+        HBCIUtilsInternal.getCallback().status(getParentPassport(),HBCICallback.STATUS_MSG_RECV,null);
         String st = pong(gen).toString();
-        getParentPassport().getCallback().status(getParentPassport(),HBCICallback.STATUS_MSG_RAW_RECV,st);
+        HBCIUtilsInternal.getCallback().status(getParentPassport(),HBCICallback.STATUS_MSG_RAW_RECV_ENCRYPTED,st);
 
         HBCIUtils.log("received message: "+st,HBCIUtils.LOG_DEBUG2);
         MSG retmsg=null;
 
         try {
             // erzeugen der liste aller rewriter
-            String rewriters_st=getParentPassport().getProperties().getProperty("kernel.rewriter");
+            String rewriters_st=HBCIUtils.getParam("kernel.rewriter");
             ArrayList<Rewrite> al=new ArrayList<Rewrite>();
             StringTokenizer tok=new StringTokenizer(rewriters_st,",");
             while (tok.hasMoreTokens()) {
@@ -92,19 +91,18 @@ public abstract class Comm
                                                                         rewriterName);
                     Constructor con=cl.getConstructor((Class[])null);
                     Rewrite rewriter=(Rewrite)(con.newInstance((Object[])null));
-                    rewriter.setKernelData(kernelData);
                     al.add(rewriter);
                 }
             }
             Rewrite[] rewriters= al.toArray(new Rewrite[al.size()]);
     
-            // alle rewriter fÃ¼r verschlÃ¼sselte nachricht durchlaufen
+            // alle rewriter für verschlüsselte nachricht durchlaufen
             for (int i=0;i<rewriters.length;i++) {
                 st=rewriters[i].incomingCrypted(st,gen);
             }
             
-            // versuche, nachricht als verschlÃ¼sselte nachricht zu parsen
-            getParentPassport().getCallback().status(getParentPassport(),HBCICallback.STATUS_MSG_PARSE,"CryptedRes");
+            // versuche, nachricht als verschlüsselte nachricht zu parsen
+            HBCIUtilsInternal.getCallback().status(getParentPassport(),HBCICallback.STATUS_MSG_PARSE,"CryptedRes");
             try {
                 HBCIUtils.log("trying to parse message as crypted message",HBCIUtils.LOG_DEBUG);
                 retmsg = MSGFactory.getInstance().createMSG("CryptedRes",st,st.length(),gen,MSG.DONT_CHECK_SEQ);
@@ -112,14 +110,14 @@ public abstract class Comm
                 // wenn das schiefgeht...
                 HBCIUtils.log("message seems not to be encrypted; tring to parse it as "+msgName+"Res message",HBCIUtils.LOG_DEBUG);
 
-                // alle rewriter durchlaufen, um nachricht evtl. als unverschlÃ¼sselte msg zu parsen
+                // alle rewriter durchlaufen, um nachricht evtl. als unverschlüsselte msg zu parsen
                 gen.set("_origSignedMsg",st);
                 for (int i=0;i<rewriters.length;i++) {
                     st=rewriters[i].incomingClearText(st,gen);
                 }
                 
-                // versuch, nachricht als unverschlÃ¼sselte msg zu parsen
-                getParentPassport().getCallback().status(getParentPassport(),HBCICallback.STATUS_MSG_PARSE,msgName+"Res");
+                // versuch, nachricht als unverschlüsselte msg zu parsen
+                HBCIUtilsInternal.getCallback().status(getParentPassport(),HBCICallback.STATUS_MSG_PARSE,msgName+"Res");
                 retmsg = MSGFactory.getInstance().createMSG(msgName+"Res",st,st.length(),gen);
             }
         } catch (Exception ex) {
@@ -148,7 +146,7 @@ public abstract class Comm
     public void close()
     {
         closeConnection();
-        getParentPassport().getCallback().callback(getParentPassport(),HBCICallback.CLOSE_CONNECTION,
+        HBCIUtilsInternal.getCallback().callback(getParentPassport(),HBCICallback.CLOSE_CONNECTION,
                 HBCIUtilsInternal.getLocMsg("CALLB_CLOSE_CONN"),HBCICallback.TYPE_NONE,new StringBuffer());
     }
 }
