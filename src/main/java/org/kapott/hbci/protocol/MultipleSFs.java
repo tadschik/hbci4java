@@ -1,4 +1,3 @@
-
 /*  $Id: MultipleSFs.java,v 1.1 2011/05/04 22:38:03 willuhn Exp $
 
     This file is part of HBCI4Java
@@ -21,42 +20,41 @@
 
 package org.kapott.hbci.protocol;
 
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Properties;
-
-import org.kapott.hbci.protocol.factory.SFFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-public final class MultipleSFs
-     extends MultipleSyntaxElements
-{
-    protected SyntaxElement createAndAppendNewElement(Node ref, String path, int idx, Document syntax)
-    {
-        SyntaxElement ret=null;
-        addElement((ret=SFFactory.getInstance().createSF(getType(), getName(), path, idx, syntax)));
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.ListIterator;
+
+@Slf4j
+public final class MultipleSFs extends MultipleSyntaxElements {
+
+    public MultipleSFs(Node sfref, String path, Document document) {
+        super(sfref, path, document);
+    }
+
+    public MultipleSFs(Node sfref, String path, char predelim0, char predelim1, StringBuffer res, int fullResLen, Document document, Hashtable<String, String> predefs, Hashtable<String, String> valids) {
+        super(sfref, path, predelim0, predelim1, res, fullResLen, document, predefs, valids);
+    }
+
+    protected SyntaxElement createAndAppendNewElement(Node ref, String path, int idx, Document document) {
+        SyntaxElement ret = null;
+        addElement((ret = new SF(getType(), getName(), path, idx, document)));
         return ret;
     }
 
-    public MultipleSFs(Node sfref, String path, Document syntax)
-    {
-        super(sfref, path, syntax);
+    public void init(Node sfref, String path, Document document) {
+        super.init(sfref, path, document);
     }
 
-    public void init(Node sfref, String path, Document syntax)
-    {
-        super.init(sfref, path, syntax);
-    }
-
-    public String toString(int zero)
-    {
+    public String toString(int dummy) {
         StringBuffer ret = new StringBuffer(256);
 
         for (ListIterator<SyntaxElement> i = getElements().listIterator(); i.hasNext(); ) {
-            SF sf = (SF)(i.next());
+            SF sf = (SF) (i.next());
             if (sf != null)
                 ret.append(sf.toString(0));
         }
@@ -66,35 +64,30 @@ public final class MultipleSFs
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    public MultipleSFs(Node sfref, String path, char predelim0, char predelim1, StringBuffer res, int fullResLen, Document syntax, Hashtable<String,String> predefs,Hashtable<String,String> valids)
-    {
-        super(sfref, path, predelim0, predelim1, res, fullResLen, syntax, predefs,valids);
+    public void log() {
+        for (ListIterator<SyntaxElement> i = getElements().listIterator(); i.hasNext(); ) {
+            SF sf = (SF) (i.next());
+            if (sf != null)
+                log.trace(sf.toString(0));
+        }
     }
 
-    public void init(Node sfref, String path, char predelim0, char predelim1, StringBuffer res, int fullResLen, Document syntax, Hashtable<String,String> predefs,Hashtable<String,String> valids)
-    {
-        super.init(sfref, path, predelim0, predelim1, res, fullResLen, syntax, predefs,valids);
+    public void init(Node sfref, String path, char predelim0, char predelim1, StringBuffer res, int fullResLen, Document document, Hashtable<String, String> predefs, Hashtable<String, String> valids) {
+        super.init(sfref, path, predelim0, predelim1, res, fullResLen, document, predefs, valids);
     }
 
-    protected SyntaxElement parseAndAppendNewElement(Node ref, String path, char predelim, int idx, StringBuffer res, int fullResLen, Document syntax, Hashtable<String,String> predefs,Hashtable<String,String> valids)
-    {
-        SyntaxElement ret=null;
-        addElement((ret=SFFactory.getInstance().createSF(getType(), getName(), path, predelim, idx, res, fullResLen, syntax, predefs,valids)));
+    protected SyntaxElement parseAndAppendNewElement(Node ref, String path, char predelim, int idx, StringBuffer res, int fullResLen, Document document, Hashtable<String, String> predefs, Hashtable<String, String> valids) {
+        SyntaxElement ret = null;
+        addElement((ret = new SF(getType(), getName(), path, predelim, idx, res, fullResLen, document, predefs, valids)));
         return ret;
     }
 
-    public void getElementPaths(Properties p,int[] segref,int[] degref,int[] deref)
-    {
-        for (Iterator<SyntaxElement> i=getElements().iterator();i.hasNext();) {
-            SyntaxElement e= i.next();
-            if (e!=null) {
-                e.getElementPaths(p,segref,degref,deref);
+    public void getElementPaths(HashMap<String, String> p, int[] segref, int[] degref, int[] deref) {
+        for (Iterator<SyntaxElement> i = getElements().iterator(); i.hasNext(); ) {
+            SyntaxElement e = i.next();
+            if (e != null) {
+                e.getElementPaths(p, segref, degref, deref);
             }
         }
-    }
-    
-    public void destroy()
-    {
-        super.destroy();
     }
 }

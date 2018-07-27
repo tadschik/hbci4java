@@ -1,4 +1,3 @@
-
 /*  $Id: RSigIdLeadingZero.java,v 1.2 2012/03/27 21:33:13 willuhn Exp $
 
     This file is part of HBCI4Java
@@ -21,48 +20,47 @@
 
 package org.kapott.hbci.rewrite;
 
-import org.kapott.hbci.manager.HBCIUtils;
-import org.kapott.hbci.manager.MsgGen;
+import lombok.extern.slf4j.Slf4j;
 
-public class RSigIdLeadingZero 
-    extends Rewrite
-{
-    public String incomingClearText(String st,MsgGen gen)
-    {
-        StringBuffer ret=new StringBuffer(st); 
-        int          firstPlus=st.indexOf("HNSHK");
-        
-        if (firstPlus!=-1) {
-            for (int i=0;i<6;i++) {
-                firstPlus=st.indexOf("+",firstPlus+1);
-                if (firstPlus==-1) {
+@Slf4j
+public class RSigIdLeadingZero extends Rewrite {
+
+    @Override
+    public String incomingClearText(String st) {
+        StringBuffer ret = new StringBuffer(st);
+        int firstPlus = st.indexOf("HNSHK");
+
+        if (firstPlus != -1) {
+            for (int i = 0; i < 6; i++) {
+                firstPlus = st.indexOf("+", firstPlus + 1);
+                if (firstPlus == -1) {
                     break;
                 }
             }
-            
-            if (firstPlus!=-1) {
-                int secondPlus=st.indexOf("+",firstPlus+1);
-                
-                if (secondPlus!=-1) {
-                    StringBuffer value=new StringBuffer(st.substring(firstPlus+1,secondPlus));
-                    
-                    if (value.length()>1 && value.charAt(0)=='0') {
-                        HBCIUtils.log("RSigIdLeadingZero: found leading zero ("+value+"), removing it",HBCIUtils.LOG_WARN);
-                        while (value.length()>1 && value.charAt(0)=='0') {
+
+            if (firstPlus != -1) {
+                int secondPlus = st.indexOf("+", firstPlus + 1);
+
+                if (secondPlus != -1) {
+                    StringBuffer value = new StringBuffer(st.substring(firstPlus + 1, secondPlus));
+
+                    if (value.length() > 1 && value.charAt(0) == '0') {
+                        log.warn("RSigIdLeadingZero: found leading zero (" + value + "), removing it");
+                        while (value.length() > 1 && value.charAt(0) == '0') {
                             value.deleteCharAt(0);
                         }
-                        
-                        ret.replace(firstPlus+1,secondPlus,value.toString());
-                        HBCIUtils.log("RSigIdLeadingZero: setting new sigid: "+value,HBCIUtils.LOG_WARN);
+
+                        ret.replace(firstPlus + 1, secondPlus, value.toString());
+                        log.warn("RSigIdLeadingZero: setting new sigid: " + value);
                     }
                 } else {
-                    HBCIUtils.log("RSigIdLeadingZero: can not find end of sigid in segment",HBCIUtils.LOG_WARN);
+                    log.warn("RSigIdLeadingZero: can not find end of sigid in segment");
                 }
             } else {
-                HBCIUtils.log("RSigIdLeadingZero: can not find sigid in segment",HBCIUtils.LOG_WARN);
+                log.warn("RSigIdLeadingZero: can not find sigid in segment");
             }
         }
-        
+
         return ret.toString();
     }
 }

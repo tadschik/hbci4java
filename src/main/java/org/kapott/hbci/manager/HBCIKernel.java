@@ -1,5 +1,4 @@
-
-/*  $Id: HBCIKernel.java,v 1.1 2011/05/04 22:37:46 willuhn Exp $
+/*  $Id: HBCIKernelImpl.java,v 1.1 2011/05/04 22:37:47 willuhn Exp $
 
     This file is part of HBCI4Java
     Copyright (C) 2001-2008  Stefan Palme
@@ -21,85 +20,306 @@
 
 package org.kapott.hbci.manager;
 
-import java.util.Hashtable;
-import java.util.List;
+import lombok.extern.slf4j.Slf4j;
+import org.kapott.hbci.callback.HBCICallback;
+import org.kapott.hbci.comm.CommPinTan;
+import org.kapott.hbci.exceptions.CanNotParseMessageException;
+import org.kapott.hbci.exceptions.HBCI_Exception;
+import org.kapott.hbci.passport.HBCIPassportInternal;
+import org.kapott.hbci.protocol.Message;
+import org.kapott.hbci.rewrite.Rewrite;
+import org.kapott.hbci.security.Crypt;
+import org.kapott.hbci.security.Sig;
+import org.kapott.hbci.status.HBCIMsgStatus;
 
-/** HBCI-Kernel fÃ¼r eine bestimmte HBCI-Version. Objekte dieser Klasse 
- * werden intern fÃ¼r die Nachrichtenerzeugung und -analyse verwendet. */
-public interface HBCIKernel
-{
-    /** Gibt die HBCI-Versionsnummer zurÃ¼ck, fÃ¼r die dieses Kernel-Objekt 
-     * Nachrichten erzeugen und analysieren kann.
-     * @return HBCI-Versionsnummer */
-    public String getHBCIVersion();
+import java.lang.reflect.Constructor;
+import java.util.*;
 
-    /** <p>Gibt die Namen und Versionen aller von <em>HBCI4Java</em> fÃ¼r die
-     * aktuelle HBCI-Version (siehe {@link #getHBCIVersion()}) unterstÃ¼tzten 
-     * Lowlevel-GeschÃ¤ftsvorfÃ¤lle zurÃ¼ck. Es ist zu beachten, dass ein konkreter
-     * HBCI-Zugang i.d.R. nicht alle in dieser Liste aufgefÃ¼hrten 
-     * GeschÃ¤ftsvorfÃ¤lle auch tatsÃ¤chlich anbietet (siehe dafÃ¼r
-     * {@link HBCIHandler#getSupportedLowlevelJobs()}).</p>
-     * <p>Die zurÃ¼ckgegebene Hashtable enthÃ¤lt als Key jeweils einen String mit 
-     * dem Bezeichner eines Lowlevel-Jobs, welcher fÃ¼r die Erzeugung eines
-     * Lowlevel-Jobs mit {@link HBCIHandler#newLowlevelJob(String)} verwendet
-     * werden kann. Der dazugehÃ¶rige Wert ist ein List-Objekt (bestehend aus 
-     * Strings), welches alle GV-Versionsnummern enthÃ¤lt, die von 
-     * <em>HBCI4Java</em> fÃ¼r diesen GV unterstÃ¼tzt werden.</p>
-     * @return Hashtable aller Lowlevel-Jobs, die prinzipiell vom aktuellen
-     * Handler-Objekt unterstÃ¼tzt werden. */
-    public Hashtable<String, List<String>> getAllLowlevelJobs();
+@Slf4j
+public final class HBCIKernel {
 
-    /** <p>Gibt alle fÃ¼r einen bestimmten Lowlevel-Job mÃ¶glichen Job-Parameter-Namen
-     * zurÃ¼ck. Der Ã¼bergebene Job-Name ist einer der von <em>HBCI4Java</em>
-     * unterstÃ¼tzten Jobnamen, die Versionsnummer muss eine der fÃ¼r diesen GV
-     * unterstÃ¼tzten Versionsnummern sein (siehe {@link #getAllLowlevelJobs()}).
-     * Als Ergebnis erhÃ¤lt man eine Liste aller Parameter-Namen, die fÃ¼r einen
-     * Lowlevel-Job (siehe {@link HBCIHandler#newLowlevelJob(String)}) gesetzt
-     * werden kÃ¶nnen (siehe 
-     * {@link org.kapott.hbci.GV.HBCIJob#setParam(String, String)}).</p>
-     * <p>Aus der Liste der mÃ¶glichen Parameternamen ist nicht ersichtlich, 
-     * welche Parameter zwingend und welche optional sind, bzw. wie oft ein
-     * Parameter mindestens oder hÃ¶chstens auftreten darf. FÃ¼r diese Art der
-     * Informationen stehen zur Zeit noch keine Methoden bereit.</p>
-     * <p>Siehe dazu auch {@link HBCIHandler#getLowlevelJobParameterNames(String)}.</p>
-     * @param gvname Name des Lowlevel-Jobs
-     * @param version Version des Lowlevel-jobs
-     * @return Liste aller Job-Parameter, die beim Erzeugen des angegebenen
-     * Lowlevel-Jobs gesetzt werden kÃ¶nnen */
-    public List getLowlevelJobParameterNames(String gvname,String version);
+    public final static boolean SIGNIT = true;
+    public final static boolean DONT_SIGNIT = false;
+    public final static boolean CRYPTIT = true;
+    public final static boolean DONT_CRYPTIT = false;
+    public final static boolean NEED_SIG = true;
+    public final static boolean DONT_NEED_SIG = false;
+    public final static boolean NEED_CRYPT = true;
+    public final static boolean DONT_NEED_CRYPT = false;
 
-    /** <p>Gibt fÃ¼r einen bestimmten Lowlevel-Job die Namen aller
-     * mÃ¶glichen Lowlevel-Result-Properties zurÃ¼ck 
-     * (siehe {@link org.kapott.hbci.GV_Result.HBCIJobResult#getResultData()}).
-     * Der Ã¼bergebene Job-Name ist einer der von <em>HBCI4Java</em>
-     * unterstÃ¼tzten Jobnamen, die Versionsnummer muss eine der fÃ¼r diesen GV
-     * unterstÃ¼tzten Versionsnummern sein (siehe {@link #getAllLowlevelJobs()}).
-     * Als Ergebnis erhÃ¤lt man eine Liste aller Property-Namen, die in den
-     * Lowlevel-Ergebnisdaten eines Jobs auftreten kÃ¶nnen.</p>
-     * <p>Aus der resultierenden Liste ist nicht ersichtlich, 
-     * welche Properties immer zurÃ¼ckgeben werden und welche optional sind, bzw. 
-     * wie oft ein bestimmter Wert mindestens oder hÃ¶chstens auftreten kann. 
-     * FÃ¼r diese Art der Informationen stehen zur Zeit noch keine Methoden 
-     * bereit.</p>
-     * <p>Siehe dazu auch {@link HBCIHandler#getLowlevelJobResultNames(String)}.</p>
-     * @param gvname Name des Lowlevel-Jobs
-     * @param version Version des Lowlevel-jobs
-     * @return Liste aller Property-Namen, die in den Lowlevel-Antwortdaten
-     * eines Jobs auftreten kÃ¶nnen */
-    public List getLowlevelJobResultNames(String gvname,String version);
+    private HBCIPassportInternal passport;
+    private CommPinTan commPinTan;
 
-    /** <p>Gibt fÃ¼r einen bestimmten Lowlevel-Job die Namen aller
-     * mÃ¶glichen Job-Restriction-Parameter zurÃ¼ck 
-     * (siehe auch {@link org.kapott.hbci.GV.HBCIJob#getJobRestrictions()} und
-     * {@link HBCIHandler#getLowlevelJobRestrictions(String)}).
-     * Der Ã¼bergebene Job-Name ist einer der von <em>HBCI4Java</em>
-     * unterstÃ¼tzten Jobnamen, die Versionsnummer muss eine der fÃ¼r diesen GV
-     * unterstÃ¼tzten Versionsnummern sein (siehe {@link #getAllLowlevelJobs()}).
-     * Als Ergebnis erhÃ¤lt man eine Liste aller Property-Namen, die in den
-     * Job-Restrictions-Daten eines Jobs auftreten kÃ¶nnen.</p>
-     * @param gvname Name des Lowlevel-Jobs
-     * @param version Version des Lowlevel-jobs
-     * @return Liste aller Property-Namen, die in den Job-Restriction-Daten
-     * eines Jobs auftreten kÃ¶nnen */
-    public List getLowlevelJobRestrictionNames(String gvname,String version);
+    public HBCIKernel(HBCIPassportInternal passport) {
+        this.passport = passport;
+
+        this.commPinTan = new CommPinTan(passport.getProperties().get("kernel.rewriter"), passport.getHost(), passport.getCallback())
+                .withProxy(passport.getProxy(), passport.getProxyUser(),
+                        passport.getProxyPass());
+    }
+
+    /*  Processes the current message (mid-level API).
+
+        This method creates the message specified earlier by the methods rawNewJob() and
+        rawSet(), signs and encrypts it using the values of @p inst, @p user, @p signit
+        and @p crypit and sends it to server.
+
+        After that it waits for the response, decrypts it, checks the signature of the
+        received message and returns a Properties object, that contains as keys the
+        pathnames of all elements of the received message, and as values the corresponding
+        value of the element with that path
+
+        bricht diese methode mit einer exception ab, so muss die aufrufende methode
+        die nachricht komplett neu erzeugen.
+
+        @param signit A boolean value specifying, if the message to be sent should be signed.
+        @param cryptit A boolean value specifying, if the message to be sent should be encrypted.
+        @return A Properties object that contains a path-value-pair for each dataelement of
+                the received message. */
+    public HBCIMsgStatus rawDoIt(Message message, boolean signit, boolean cryptit, boolean needSig, boolean needCrypt) {
+        message.complete();
+
+        HBCIMsgStatus msgStatus = new HBCIMsgStatus();
+
+        try {
+            log.debug("generating raw message " + message.getName());
+            passport.getCallback().status(HBCICallback.STATUS_MSG_CREATE, message.getName());
+
+            // liste der rewriter erzeugen
+            Hashtable<String, Object> kernelData = createKernelData(message.getName(), msgStatus, signit, cryptit, needSig, needCrypt);
+            ArrayList<Rewrite> rewriters = getRewriters(kernelData, passport.getProperties().get("kernel.rewriter"));
+
+            // alle rewriter durchlaufen und plaintextnachricht patchen
+            for (Rewrite rewriter1 : rewriters) {
+                message = rewriter1.outgoingClearText(message);
+            }
+
+            // wenn nachricht signiert werden soll
+            if (signit) {
+                message = signMessage(message, rewriters);
+            }
+
+            processMessage(message, msgStatus);
+
+            String responseMessageName = message.getName() + "Res";
+
+            // soll nachricht verschlüsselt werden?
+            if (cryptit) {
+                message = cryptMessage(message, rewriters);
+            }
+
+            sendMessage(message, responseMessageName, msgStatus, rewriters);
+        } catch (Exception e) {
+            // TODO: hack to be able to "disable" HKEND response message analysis
+            // because some credit institutes are buggy regarding HKEND responses
+            String paramName = "client.errors.ignoreDialogEndErrors";
+            if (message.getName().startsWith("DialogEnd")) {
+                log.error(e.getMessage(), e);
+                log.warn("error while receiving DialogEnd response - " +
+                        "but ignoring it because of special setting");
+            } else {
+                msgStatus.addException(e);
+            }
+        }
+
+        return msgStatus;
+    }
+
+    private void processMessage(Message message, HBCIMsgStatus msgStatus) {
+    /* zu jeder SyntaxElement-Referenz (2:3,1)==(SEG:DEG,DE) den Pfad
+       des jeweiligen Elementes speichern */
+        HashMap<String, String> paths = new HashMap<>();
+        message.getElementPaths(paths, null, null, null);
+        msgStatus.addData(paths);
+
+            /* für alle Elemente (Pfadnamen) die aktuellen Werte speichern,
+               wie sie bei der ausgehenden Nachricht versandt werden */
+        HashMap<String, String> current = new HashMap<>();
+        message.extractValues(current);
+        HashMap<String, String> origs = new HashMap<>();
+
+        current.forEach((key, value) -> {
+            origs.put("orig_" + key, value);
+        });
+        msgStatus.addData(origs);
+
+        // zu versendene nachricht loggen
+        String outstring = message.toString(0);
+        log.debug("sending message: " + outstring);
+
+        // max. nachrichtengröße aus BPD überprüfen
+        int maxmsgsize = passport.getMaxMsgSizeKB();
+        if (maxmsgsize != 0 && (outstring.length() >> 10) > maxmsgsize) {
+            String errmsg = HBCIUtils.getLocMsg("EXCMSG_MSGTOOLARGE",
+                    new Object[]{Integer.toString(outstring.length() >> 10), Integer.toString(maxmsgsize)});
+            throw new HBCI_Exception(errmsg);
+        }
+    }
+
+    private ArrayList<Rewrite> getRewriters(Hashtable<String, Object> kernelData, String rewriters_st) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, java.lang.reflect.InvocationTargetException {
+        ArrayList<Rewrite> al = new ArrayList<>();
+        StringTokenizer tok = new StringTokenizer(rewriters_st, ",");
+        while (tok.hasMoreTokens()) {
+            String rewriterName = tok.nextToken().trim();
+            if (rewriterName.length() != 0) {
+                Class cl = this.getClass().getClassLoader().loadClass("org.kapott.hbci.rewrite.R" +
+                        rewriterName);
+                Constructor con = cl.getConstructor((Class[]) null);
+                Rewrite rewriter = (Rewrite) (con.newInstance((Object[]) null));
+                // alle daten für den rewriter setzen
+                rewriter.setKernelData(kernelData);
+                al.add(rewriter);
+            }
+        }
+        return al;
+    }
+
+    private Message signMessage(Message message, List<Rewrite> rewriters) {
+        log.debug("trying to insert signature");
+        passport.getCallback().status(HBCICallback.STATUS_MSG_SIGN, null);
+
+        // signatur erzeugen und an nachricht anhängen
+        Sig sig = new Sig(message);
+
+        if (!sig.signIt(passport)) {
+            String errmsg = HBCIUtils.getLocMsg("EXCMSG_CANTSIGN");
+            throw new HBCI_Exception(errmsg);
+        }
+
+        // alle rewrites erledigen, die *nach* dem hinzufügen der signatur stattfinden müssen
+        for (Rewrite rewriter : rewriters) {
+            message = rewriter.outgoingSigned(message);
+        }
+        return message;
+    }
+
+    private Message cryptMessage(Message message, List<Rewrite> rewriters) {
+        log.debug("trying to encrypt message");
+        passport.getCallback().status(HBCICallback.STATUS_MSG_CRYPT, null);
+
+        // nachricht verschlüsseln
+        Crypt crypt = new Crypt(passport);
+        message = crypt.cryptIt(message);
+
+        if (!message.getName().equals("Crypted")) {
+            String errmsg = HBCIUtils.getLocMsg("EXCMSG_CANTCRYPT");
+            throw new HBCI_Exception(errmsg);
+        }
+
+        // verschlüsselte nachricht patchen
+        for (Rewrite rewriter : rewriters) {
+            message = rewriter.outgoingCrypted(message);
+        }
+
+        log.debug("encrypted message to be sent: " + message.toString(0));
+
+        return message;
+    }
+
+    private void sendMessage(Message message, String responseMessageName, HBCIMsgStatus msgStatus, List<Rewrite> rewriters) {
+        String messagePath = message.getPath();
+        String msgnum = message.getValueOfDE(messagePath + ".MsgHead.msgnum");
+        String dialogid = message.getValueOfDE(messagePath + ".MsgHead.dialogid");
+        String hbciversion = message.getValueOfDE(messagePath + ".MsgHead.hbciversion");
+
+        // nachricht versenden und antwortnachricht empfangen
+        log.debug("communicating dialogid/msgnum " + dialogid + "/" + msgnum);
+
+        Message response = commPinTan.pingpong(rewriters, message);
+        response = decryptMessage(rewriters, response, responseMessageName);
+
+        // alle patches für die plaintextnachricht durchlaufen
+        for (Rewrite rewriter : rewriters) {
+            response = rewriter.incomingData(response);
+        }
+
+        // daten aus nachricht in status-objekt einstellen
+        log.debug("extracting data from received message");
+        msgStatus.addData(response.getData());
+        checkResponse(response, msgnum, dialogid, hbciversion);
+    }
+
+    private void checkSig(Message message) {
+        // überprüfen der signatur
+        log.debug("looking for a signature");
+        passport.getCallback().status(HBCICallback.STATUS_MSG_VERIFY, null);
+
+        if (!new Sig(message).verify(passport)) {
+            String errmsg = HBCIUtils.getLocMsg("EXCMSG_INVSIG");
+            throw new HBCI_Exception(errmsg);
+        }
+    }
+
+    private void checkResponse(Message response, String msgnum, String dialogid, String hbciversion) {
+        // überprüfen einiger constraints, die in einer antwortnachricht eingehalten werden müssen
+        String responsePath = response.getPath();
+
+        String hbciversion2 = response.getValueOfDE(responsePath + ".MsgHead.hbciversion");
+        if (!hbciversion2.equals(hbciversion))
+            throw new HBCI_Exception(HBCIUtils.getLocMsg("EXCMSG_INVVERSION", new Object[]{hbciversion2,
+                    hbciversion}));
+        String msgnum2 = response.getValueOfDE(responsePath + ".MsgHead.msgnum");
+        if (!msgnum2.equals(msgnum))
+            throw new HBCI_Exception(HBCIUtils.getLocMsg("EXCMSG_INVMSGNUM_HEAD", new Object[]{msgnum2, msgnum}));
+        msgnum2 = response.getValueOfDE(responsePath + ".MsgTail.msgnum");
+        if (!msgnum2.equals(msgnum))
+            throw new HBCI_Exception(HBCIUtils.getLocMsg("EXCMSG_INVMSGNUM_TAIL", new Object[]{msgnum2, msgnum}));
+        String dialogid2 = response.getValueOfDE(responsePath + ".MsgHead.dialogid");
+        if (!dialogid.equals("0") && !dialogid2.equals(dialogid))
+            throw new HBCI_Exception(HBCIUtils.getLocMsg("EXCMSG_INVDIALOGID", new Object[]{dialogid2, dialogid}));
+        if (!dialogid.equals("0") && !response.getValueOfDE(responsePath + ".MsgHead.MsgRef.dialogid").equals(dialogid))
+            throw new HBCI_Exception(HBCIUtils.getLocMsg("EXCMSG_INVDIALOGID_REF"));
+        if (!response.getValueOfDE(responsePath + ".MsgHead.MsgRef.msgnum").equals(msgnum))
+            throw new HBCI_Exception(HBCIUtils.getLocMsg("EXCMSG_INVMSGNUM_REF"));
+
+        checkSig(response);
+    }
+
+    private Message decryptMessage(List<Rewrite> rewriters, Message response, String responseMessageName) {
+        // ist antwortnachricht verschlüsselt?
+        if (response.getName().equals("CryptedRes")) {
+            passport.getCallback().status(HBCICallback.STATUS_MSG_DECRYPT, null);
+
+            // wenn ja, dann nachricht entschlüsseln
+            log.debug("acquire crypt instance");
+            Crypt crypt = new Crypt(passport);
+            log.debug("decrypting using " + crypt);
+
+            String responseString = crypt.decryptIt(response);
+
+            // alle patches für die unverschlüsselte nachricht durchlaufen
+            log.debug("rewriting message");
+            for (Rewrite rewriter : rewriters) {
+                log.debug("applying rewriter " + rewriter.getClass().getSimpleName());
+                responseString = rewriter.incomingClearText(responseString);
+            }
+            log.debug("rewriting done");
+
+            log.debug("decrypted message after rewriting: " + responseString);
+
+            // nachricht als plaintextnachricht parsen
+            try {
+                passport.getCallback().status(HBCICallback.STATUS_MSG_PARSE, response.getName() + "Res");
+                log.debug("message to pe parsed: " + response.toString(0));
+                response = new Message(responseMessageName, responseString, responseString.length(), passport.getSyntaxDocument(), Message.CHECK_SEQ, true);
+            } catch (Exception ex) {
+                throw new CanNotParseMessageException(HBCIUtils.getLocMsg("EXCMSG_CANTPARSE"), responseString, ex);
+            }
+        }
+
+        log.debug("received message after decryption: " + response.toString(0));
+        return response;
+    }
+
+    private Hashtable<String, Object> createKernelData(String msgName, HBCIMsgStatus ret, boolean signit, boolean cryptit, boolean needSig, boolean needCrypt) {
+        Hashtable<String, Object> kernelData = new Hashtable<>();
+        kernelData.put("msgStatus", ret);
+        kernelData.put("msgName", msgName);
+        kernelData.put("signIt", signit);
+        kernelData.put("cryptIt", cryptit);
+        kernelData.put("needSig", needSig);
+        kernelData.put("needCrypt", needCrypt);
+        return kernelData;
+    }
+
 }

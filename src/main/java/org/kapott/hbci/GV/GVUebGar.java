@@ -1,4 +1,3 @@
-
 /*  $Id: GVUebGar.java,v 1.1 2011/05/04 22:37:52 willuhn Exp $
 
     This file is part of HBCI4Java
@@ -21,51 +20,45 @@
 
 package org.kapott.hbci.GV;
 
-import java.util.Properties;
+import org.kapott.hbci.manager.HBCIUtils;
+import org.kapott.hbci.passport.HBCIPassportInternal;
 
-import org.kapott.hbci.manager.HBCIHandler;
-import org.kapott.hbci.manager.HBCIUtilsInternal;
-import org.kapott.hbci.manager.LogFilter;
+import java.util.HashMap;
 
-public class GVUebGar
-    extends GVUeb
-{
-    // TODO: in doku aufnehmen
-    
-    public static String getLowlevelName()
-    {
-        return "UebGar";
-    }
-    
-    public GVUebGar(HBCIHandler handler)
-    {
-        super(handler,getLowlevelName());
+public class GVUebGar extends GVUeb {
 
-        addConstraint("src.country","My.KIK.country","DE", LogFilter.FILTER_NONE);
-        addConstraint("src.blz","My.KIK.blz",null, LogFilter.FILTER_MOST);
-        addConstraint("src.number","My.number",null, LogFilter.FILTER_IDS);
-        addConstraint("src.subnumber","My.subnumber","", LogFilter.FILTER_MOST);
-        addConstraint("dst.country","Other.KIK.country","DE", LogFilter.FILTER_NONE);
-        addConstraint("dst.blz","Other.KIK.blz",null, LogFilter.FILTER_MOST);
-        addConstraint("dst.number","Other.number",null, LogFilter.FILTER_IDS);
-        addConstraint("dst.subnumber","Other.subnumber","", LogFilter.FILTER_MOST);
-        addConstraint("btg.value","BTG.value",null, LogFilter.FILTER_MOST);
-        addConstraint("btg.curr","BTG.curr",null, LogFilter.FILTER_NONE);
-        addConstraint("name","name",null, LogFilter.FILTER_IDS);
+    public GVUebGar(HBCIPassportInternal passport) {
+        super(passport, getLowlevelName());
 
-        addConstraint("name2","name2","", LogFilter.FILTER_IDS);
-        addConstraint("key","key","51", LogFilter.FILTER_NONE);
-        // TODO: richtige zu verwendende textschluesselergaenzung abklaeren 
-        addConstraint("addkey","addkey","100", LogFilter.FILTER_NONE);
+        addConstraint("src.country", "My.KIK.country", "DE");
+        addConstraint("src.blz", "My.KIK.blz", null);
+        addConstraint("src.number", "My.number", null);
+        addConstraint("src.subnumber", "My.subnumber", "");
+        addConstraint("dst.country", "Other.KIK.country", "DE");
+        addConstraint("dst.blz", "Other.KIK.blz", null);
+        addConstraint("dst.number", "Other.number", null);
+        addConstraint("dst.subnumber", "Other.subnumber", "");
+        addConstraint("btg.value", "BTG.value", null);
+        addConstraint("btg.curr", "BTG.curr", null);
+        addConstraint("name", "name", null);
 
-        Properties parameters=getJobRestrictions();
-        int        maxusage=Integer.parseInt(parameters.getProperty("maxusage"));
+        addConstraint("name2", "name2", "");
+        addConstraint("key", "key", "51");
+        // TODO: richtige zu verwendende textschluesselergaenzung abklaeren
+        addConstraint("addkey", "addkey", "100");
 
-        for (int i=0;i<maxusage;i++) {
-            String name=HBCIUtilsInternal.withCounter("usage",i);
-            addConstraint(name,"usage."+name,"", LogFilter.FILTER_MOST);
+        HashMap<String, String> parameters = getJobRestrictions();
+        int maxusage = Integer.parseInt(parameters.get("maxusage"));
+
+        for (int i = 0; i < maxusage; i++) {
+            String name = HBCIUtils.withCounter("usage", i);
+            addConstraint(name, "usage." + name, "");
         }
     }
-    
+
+    public static String getLowlevelName() {
+        return "UebGar";
+    }
+
     // TODO: extract response data
 }

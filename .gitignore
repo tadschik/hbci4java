@@ -1,7 +1,4 @@
-/classes
-/dist
-/bin
-/build
-/gradle-app.setting
-/.gradle
-target
+target/*
+.idea
+*.iml
+pom.xml.versionsBackup

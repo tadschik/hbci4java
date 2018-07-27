@@ -20,18 +20,8 @@
 
 package org.kapott.hbci.manager;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.kapott.hbci.GV.HBCIJob;
-import org.kapott.hbci.GV.HBCIJobImpl;
+import lombok.extern.slf4j.Slf4j;
+import org.kapott.hbci.GV.AbstractHBCIJob;
 import org.kapott.hbci.datatypes.SyntaxDE;
 import org.kapott.hbci.datatypes.factory.SyntaxDEFactory;
 import org.kapott.hbci.exceptions.HBCI_Exception;
@@ -41,10 +31,19 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Diese Klasse ermittelt die noetigen HKTAN-Challenge-Parameter fuer einen
  * Geschaeftsvorfall
  */
+@Slf4j
 public class ChallengeInfo {
     /**
      * Das Singleton.
@@ -55,15 +54,13 @@ public class ChallengeInfo {
      * ct.
      */
     public ChallengeInfo() {
-        HBCIUtils.log("initializing challenge info engine", HBCIUtils.LOG_DEBUG);
-
+        log.debug("initializing challenge info engine");
 
         ////////////////////////////////////////////////////////////////////////////
         // XML-Datei lesen
-        String xmlpath = HBCIUtils.getParam("kernel.kernel.challengedatapath", "");
         InputStream dataStream = null;
 
-        String filename = xmlpath + "challengedata.xml";
+        String filename = "challengedata.xml";
         dataStream = ChallengeInfo.class.getClassLoader().getResourceAsStream(filename);
         if (dataStream == null)
             throw new InvalidUserDataException("*** can not load challenge information from " + filename);
@@ -99,7 +96,7 @@ public class ChallengeInfo {
         //
         ////////////////////////////////////////////////////////////////////////////
 
-        HBCIUtils.log("challenge information loaded", HBCIUtils.LOG_DEBUG);
+        log.debug("challenge information loaded");
     }
 
     /**
@@ -119,7 +116,7 @@ public class ChallengeInfo {
      * @param hktan   der HKTAN-Geschaeftsvorfall, in dem die Parameter gesetzt werden sollen.
      * @param secmech die BPD-Informationen zum TAN-Verfahren.
      */
-    public void applyParams(HBCIJobImpl task, HBCIJob hktan, Properties secmech) {
+    public void applyParams(AbstractHBCIJob task, AbstractHBCIJob hktan, HashMap<String, String> secmech) {
         String code = task.getHBCICode(); // Code des Geschaeftsvorfalls
 
         // Job-Parameter holen
@@ -128,26 +125,26 @@ public class ChallengeInfo {
         // Den Geschaeftsvorfall kennen wir nicht. Dann brauchen wir
         // auch keine Challenge-Parameter setzen
         if (job == null) {
-            HBCIUtils.log("have no challenge data for " + code + ", will not apply challenge params", HBCIUtils.LOG_INFO);
+            log.info("have no challenge data for " + code + ", will not apply challenge params");
             return;
         }
 
         HHDVersion version = HHDVersion.find(secmech);
-        HBCIUtils.log("using hhd version " + version, HBCIUtils.LOG_DEBUG2);
+        log.debug("using hhd version " + version);
 
         // Parameter fuer die passende HHD-Version holen
         HhdVersion hhd = job.getVersion(version.getChallengeVersion());
 
         // Wir haben keine Parameter fuer diese HHD-Version
         if (hhd == null) {
-            HBCIUtils.log("have no challenge data for " + code + " in " + version + ", will not apply challenge params", HBCIUtils.LOG_INFO);
+            log.info("have no challenge data for " + code + " in " + version + ", will not apply challenge params");
             return;
         }
 
 
         // Schritt 1: Challenge-Klasse uebernehmen
         String klass = hhd.getKlass();
-        HBCIUtils.log("using challenge klass " + klass, HBCIUtils.LOG_DEBUG2);
+        log.debug("using challenge klass " + klass);
         hktan.setParam("challengeklass", klass);
 
 
@@ -159,7 +156,7 @@ public class ChallengeInfo {
 
             // Checken, ob der Parameter angewendet werden soll.
             if (!param.isComplied(secmech)) {
-                HBCIUtils.log("skipping challenge parameter " + num + " (" + param.path + "), condition " + param.conditionName + "=" + param.conditionValue + " not complied", HBCIUtils.LOG_DEBUG2);
+                log.debug("skipping challenge parameter " + num + " (" + param.path + "), condition " + param.conditionName + "=" + param.conditionValue + " not complied");
                 continue;
             }
 
@@ -168,11 +165,11 @@ public class ChallengeInfo {
             // werden dann freigelassen
             String value = param.getValue(task);
             if (value == null || value.length() == 0) {
-                HBCIUtils.log("challenge parameter " + num + " (" + param.path + ") is empty", HBCIUtils.LOG_DEBUG2);
+                log.debug("challenge parameter " + num + " (" + param.path + ") is empty");
                 continue;
             }
 
-            HBCIUtils.log("adding challenge parameter " + num + " " + param.path + "=" + value, HBCIUtils.LOG_DEBUG2);
+            log.debug("adding challenge parameter " + num + " " + param.path + "=" + value);
             hktan.setParam("ChallengeKlassParam" + num, value);
         }
     }
@@ -310,12 +307,12 @@ public class ChallengeInfo {
          * @param secmech die BPD-Informationen zum TAN-Verfahren.
          * @return true, wenn der Parameter verwendet werden kann.
          */
-        public boolean isComplied(Properties secmech) {
+        public boolean isComplied(HashMap<String, String> secmech) {
             if (this.conditionName == null || this.conditionName.length() == 0)
                 return true;
 
             // Wir haben eine Bedingung. Mal schauen, ob sie erfuellt ist.
-            String value = secmech.getProperty(this.conditionName, "");
+            String value = secmech.get(this.conditionName) != null ? secmech.get(this.conditionName) : "";
             return value.equals(this.conditionValue);
         }
 
@@ -343,7 +340,7 @@ public class ChallengeInfo {
          * @param job der Geschaeftsvorfall.
          * @return der Wert des Parameters.
          */
-        private String getValue(HBCIJobImpl job) {
+        private String getValue(AbstractHBCIJob job) {
             // Leerer Parameter
             if (this.path == null || this.path.length() == 0)
                 return null;
@@ -378,16 +375,9 @@ public class ChallengeInfo {
             if (this.type == null || this.type.trim().length() == 0)
                 return value;
 
-            SyntaxDEFactory factory = SyntaxDEFactory.getInstance();
-            SyntaxDE syntax = null;
-            try {
-                syntax = factory.createSyntaxDE(this.type, this.path, value, 0, 0);
-                return syntax.toString(0);
-            } finally {
-                // Objekt wieder freigeben
-                if (syntax != null)
-                    factory.unuseObject(syntax, this.type);
-            }
+            SyntaxDE syntax = SyntaxDEFactory.createSyntaxDE(this.type, this.path, value, 0, 0);
+            return syntax.toString(0);
+
         }
     }
 }

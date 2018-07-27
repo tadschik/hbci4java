@@ -1,4 +1,3 @@
-
 /*  $Id: GVCustomMsg.java,v 1.1 2011/05/04 22:37:53 willuhn Exp $
 
     This file is part of HBCI4Java
@@ -23,53 +22,46 @@ package org.kapott.hbci.GV;
 
 import org.kapott.hbci.GV_Result.HBCIJobResultImpl;
 import org.kapott.hbci.exceptions.InvalidUserDataException;
-import org.kapott.hbci.manager.HBCIHandler;
-import org.kapott.hbci.manager.HBCIUtilsInternal;
-import org.kapott.hbci.manager.LogFilter;
+import org.kapott.hbci.manager.HBCIUtils;
+import org.kapott.hbci.passport.HBCIPassportInternal;
 
-public final class GVCustomMsg
-    extends HBCIJobImpl
-{
-    public static String getLowlevelName()
-    {
+public final class GVCustomMsg extends AbstractHBCIJob {
+
+    public GVCustomMsg(HBCIPassportInternal passport) {
+        super(passport, getLowlevelName(), new HBCIJobResultImpl(passport));
+
+        addConstraint("msg", "msg", null);
+
+        addConstraint("my.country", "KTV.KIK.country", "DE");
+        addConstraint("my.blz", "KTV.KIK.blz", null);
+        addConstraint("my.number", "KTV.number", null);
+        addConstraint("my.subnumber", "KTV.subnumber", "");
+        addConstraint("my.curr", "curr", "EUR");
+        addConstraint("betreff", "betreff", "");
+        addConstraint("recpt", "recpt", "");
+    }
+
+    public static String getLowlevelName() {
         return "CustomMsg";
     }
-    
-    public GVCustomMsg(HBCIHandler handler)
-    {
-        super(handler,getLowlevelName(),new HBCIJobResultImpl());
-        
-        addConstraint("msg","msg",null, LogFilter.FILTER_NONE);
 
-        addConstraint("my.country","KTV.KIK.country","DE", LogFilter.FILTER_NONE);
-        addConstraint("my.blz","KTV.KIK.blz",null, LogFilter.FILTER_MOST);
-        addConstraint("my.number","KTV.number",null, LogFilter.FILTER_IDS);
-        addConstraint("my.subnumber","KTV.subnumber","", LogFilter.FILTER_MOST);
-        addConstraint("my.curr","curr","EUR", LogFilter.FILTER_NONE);
-        addConstraint("betreff","betreff","", LogFilter.FILTER_NONE);
-        addConstraint("recpt","recpt","", LogFilter.FILTER_NONE);
-    }
-    
-    public void setParam(String paramName,String value)
-    {
+    public void setParam(String paramName, String value) {
         if (paramName.equals("msg")) {
-            String st_maxlen=getJobRestrictions().getProperty("maxlen");
-            
-            if (st_maxlen!=null) {
-                int maxlen=Integer.parseInt(st_maxlen);
-                
-                if (value.length()>maxlen) {
-                    String msg=HBCIUtilsInternal.getLocMsg("EXCMSG_TOOLONG",new String[] {paramName,value,Integer.toString(maxlen)});
-                    if (!HBCIUtilsInternal.ignoreError(getMainPassport(),"client.errors.ignoreWrongJobDataErrors",msg))
-                        throw new InvalidUserDataException(msg);
+            String st_maxlen = getJobRestrictions().get("maxlen");
+
+            if (st_maxlen != null) {
+                int maxlen = Integer.parseInt(st_maxlen);
+
+                if (value.length() > maxlen) {
+                    String msg = HBCIUtils.getLocMsg("EXCMSG_TOOLONG", new String[]{paramName, value, Integer.toString(maxlen)});
+                    throw new InvalidUserDataException(msg);
                 }
             }
         }
-        super.setParam(paramName,value);
+        super.setParam(paramName, value);
     }
-    
-    public void verifyConstraints()
-    {
+
+    public void verifyConstraints() {
         super.verifyConstraints();
         checkAccountCRC("my");
     }

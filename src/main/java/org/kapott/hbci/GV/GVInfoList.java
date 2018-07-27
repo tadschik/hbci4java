@@ -1,4 +1,3 @@
-
 /*  $Id: GVInfoList.java,v 1.1 2011/05/04 22:37:52 willuhn Exp $
 
     This file is part of HBCI4Java
@@ -22,54 +21,48 @@
 package org.kapott.hbci.GV;
 
 
-import java.util.Properties;
-
 import org.kapott.hbci.GV_Result.GVRInfoList;
-import org.kapott.hbci.manager.HBCIHandler;
 import org.kapott.hbci.manager.HBCIUtils;
-import org.kapott.hbci.manager.HBCIUtilsInternal;
-import org.kapott.hbci.manager.LogFilter;
+import org.kapott.hbci.passport.HBCIPassportInternal;
 import org.kapott.hbci.status.HBCIMsgStatus;
 
-public final class GVInfoList
-    extends HBCIJobImpl
-{
-    public static String getLowlevelName()
-    {
+import java.util.HashMap;
+
+public final class GVInfoList extends AbstractHBCIJob {
+
+    public GVInfoList(HBCIPassportInternal passport) {
+        super(passport, getLowlevelName(), new GVRInfoList(passport));
+
+        addConstraint("maxentries", "maxentries", "");
+    }
+
+    public static String getLowlevelName() {
         return "InfoList";
     }
-    
-    public GVInfoList(HBCIHandler handler)
-    {
-        super(handler,getLowlevelName(),new GVRInfoList());
 
-        addConstraint("maxentries","maxentries","", LogFilter.FILTER_NONE);
-    }
+    protected void extractResults(HBCIMsgStatus msgstatus, String header, int idx) {
+        HashMap<String, String> result = msgstatus.getData();
+        for (int i = 0; ; i++) {
+            GVRInfoList.Info entry = new GVRInfoList.Info();
+            String header2 = HBCIUtils.withCounter(header + ".InfoInfo", i);
 
-    protected void extractResults(HBCIMsgStatus msgstatus,String header,int idx)
-    {
-        Properties result=msgstatus.getData();
-        for (int i=0;;i++) {
-            GVRInfoList.Info entry=new GVRInfoList.Info();
-            String           header2=HBCIUtilsInternal.withCounter(header+".InfoInfo",i);
-
-            if (result.getProperty(header2+".code")==null)
+            if (result.get(header2 + ".code") == null)
                 break;
-            
-            entry.code=result.getProperty(header2+".code");
-            entry.date=HBCIUtils.string2DateISO(result.getProperty(header2+".version"));
-            entry.description=result.getProperty(header2+".descr");
-            entry.format=result.getProperty(header2+".format");
-            entry.type=result.getProperty(header2+".type");
 
-            for (int j=0;;j++) {
-                String hint=result.getProperty(header2+HBCIUtilsInternal.withCounter(".comment",j));
-                if (hint==null)
+            entry.code = result.get(header2 + ".code");
+            entry.date = HBCIUtils.string2DateISO(result.get(header2 + ".version"));
+            entry.description = result.get(header2 + ".descr");
+            entry.format = result.get(header2 + ".format");
+            entry.type = result.get(header2 + ".type");
+
+            for (int j = 0; ; j++) {
+                String hint = result.get(header2 + HBCIUtils.withCounter(".comment", j));
+                if (hint == null)
                     break;
                 entry.addComment(hint);
             }
 
-            ((GVRInfoList)(jobResult)).addEntry(entry);
+            ((GVRInfoList) (jobResult)).addEntry(entry);
         }
     }
 }

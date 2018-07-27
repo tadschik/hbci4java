@@ -1,4 +1,3 @@
-
 /*  $Id: MultipleDEGs.java,v 1.1 2011/05/04 22:38:03 willuhn Exp $
 
     This file is part of HBCI4Java
@@ -21,123 +20,106 @@
 
 package org.kapott.hbci.protocol;
 
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Properties;
-
-import org.kapott.hbci.protocol.factory.DEGFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-public final class MultipleDEGs
-     extends MultipleSyntaxElements
-{
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.ListIterator;
+
+@Slf4j
+public final class MultipleDEGs extends MultipleSyntaxElements {
+
     private char delimiter;
 
-    protected SyntaxElement createAndAppendNewElement(Node ref, String path, int idx, Document syntax)
-    {
-        SyntaxElement ret=null;
+    public MultipleDEGs(Node degref, char delimiter, String path, Document document) {
+        super(degref, path, document);
+        initData(delimiter);
+    }
 
-        addElement((ret=DEGFactory.getInstance().createDEG(getType(), getName(), path, idx, syntax)));
+    public MultipleDEGs(Node degref, char delimiter, String path, char predelim0, char predelim1, StringBuffer res, int fullResLen, Document document, Hashtable<String, String> predefs, Hashtable<String, String> valids) {
+        super(degref, path, predelim0, predelim1, res, fullResLen, document, predefs, valids);
+        initData(delimiter);
+    }
+
+    protected SyntaxElement createAndAppendNewElement(Node ref, String path, int idx, Document document) {
+        SyntaxElement ret = new DEG(getType(), getName(), path, idx, document);
+
+        addElement(ret);
         return ret;
     }
 
-    private void initData(Node degref, char delimiter, String path, Document syntax)
-    {
+    private void initData(char delimiter) {
         this.delimiter = delimiter;
     }
-    
-    public MultipleDEGs(Node degref, char delimiter, String path, Document syntax)
-    {
-        super(degref, path, syntax);
-        initData(degref,delimiter,path,syntax);
+
+    public void init(Node degref, char delimiter, String path, Document document) {
+        super.init(degref, path, document);
+        initData(delimiter);
     }
 
-    public void init(Node degref, char delimiter, String path, Document syntax)
-    {
-        super.init(degref, path, syntax);
-        initData(degref,delimiter,path,syntax);
-    }
-
-    public String toString(int zero)
-    {
-        StringBuffer ret=new StringBuffer(128);
+    public String toString(int dummy) {
+        StringBuffer ret = new StringBuffer(128);
         boolean first = true;
 
-        for (ListIterator<SyntaxElement> i = getElements().listIterator(); i.hasNext(); ) {
+        for (SyntaxElement syntaxElement : getElements()) {
             if (!first)
                 ret.append(delimiter);
-            first=false;
+            first = false;
 
-            DEG deg = (DEG)(i.next());
-            if (deg != null)
-                ret.append(deg.toString(0));
+            if (syntaxElement != null)
+                ret.append(((DEG) syntaxElement).toString(0));
         }
+
 
         return ret.toString();
     }
 
     // --------------------------------------------------------------------------------------------------------------
 
-    protected SyntaxElement parseAndAppendNewElement(Node ref, String path, char predelim, int idx, StringBuffer res, int fullResLen, Document syntax, Hashtable<String, String> predefs,Hashtable<String, String> valids)
-    {
-        SyntaxElement ret=null;
-        addElement((ret=DEGFactory.getInstance().createDEG(getType(), getName(), path, predelim, idx, res, fullResLen, syntax, predefs,valids)));
+    public void log() {
+        for (ListIterator<SyntaxElement> i = getElements().listIterator(); i.hasNext(); ) {
+            DEG deg = (DEG) (i.next());
+            if (deg != null)
+                log.trace(deg.toString(0));
+        }
+    }
+
+    protected SyntaxElement parseAndAppendNewElement(Node ref, String path, char predelim, int idx, StringBuffer res, int fullResLen, Document document, Hashtable<String, String> predefs, Hashtable<String, String> valids) {
+        SyntaxElement ret;
+        addElement((ret = new DEG(getType(), getName(), path, predelim, idx, res, fullResLen, document, predefs, valids)));
         return ret;
     }
-    
-    private void initData(Node degref, char delimiter, String path, char predelim0, char predelim1, StringBuffer res, int fullResLen, Document syntax, Hashtable<?, ?> predefs,Hashtable<?, ?> valids)
-    {
-        this.delimiter = delimiter;
+
+    public void init(Node degref, char delimiter, String path, char predelim0, char predelim1, StringBuffer res, int fullResLen, Document document, Hashtable<String, String> predefs, Hashtable<String, String> valids) {
+        super.init(degref, path, predelim0, predelim1, res, fullResLen, document, predefs, valids);
+        initData(delimiter);
     }
 
-    public MultipleDEGs(Node degref, char delimiter, String path, char predelim0, char predelim1, StringBuffer res, int fullResLen, Document syntax, Hashtable<String, String> predefs,Hashtable<String, String> valids)
-    {
-        super(degref, path, predelim0, predelim1, res, fullResLen, syntax, predefs,valids);
-        initData(degref,delimiter,path,predelim0,predelim1,res,fullResLen,syntax,predefs,valids);
-    }
-
-    public void init (Node degref, char delimiter, String path, char predelim0, char predelim1, StringBuffer res, int fullResLen,Document syntax, Hashtable<String, String> predefs,Hashtable<String, String> valids)
-    {
-        super.init(degref, path, predelim0, predelim1, res, fullResLen, syntax, predefs,valids);
-        initData(degref,delimiter,path,predelim0,predelim1,res,fullResLen,syntax,predefs,valids);
-    }
-
-    public void getElementPaths(Properties p,int[] segref,int[] degref,int[] deref)
-    {
-        if (getElements().size()!=0) {
-            for (Iterator<SyntaxElement> i=getElements().iterator();i.hasNext();) {
-                SyntaxElement e=i.next();
-                if (e!=null) {
-                    e.getElementPaths(p,segref,degref,deref);
+    public void getElementPaths(HashMap<String, String> p, int[] segref, int[] degref, int[] deref) {
+        if (getElements().size() != 0) {
+            for (Iterator<SyntaxElement> i = getElements().iterator(); i.hasNext(); ) {
+                SyntaxElement e = i.next();
+                if (e != null) {
+                    e.getElementPaths(p, segref, degref, deref);
                 }
             }
         } else {
-            if (deref==null) {
-                p.setProperty(Integer.toString(segref[0])+
-                              ":"+Integer.toString(degref[0]),getPath());
+            if (deref == null) {
+                p.put(Integer.toString(segref[0]) +
+                        ":" + Integer.toString(degref[0]), getPath());
                 degref[0]++;
             } else {
-                p.setProperty(Integer.toString(segref[0])+
-                              ":"+
-                              Integer.toString(degref[0])+
-                              ","+
-                              Integer.toString(deref[0]),
-                              getPath());
+                p.put(Integer.toString(segref[0]) +
+                                ":" +
+                                Integer.toString(degref[0]) +
+                                "," +
+                                Integer.toString(deref[0]),
+                        getPath());
                 deref[0]++;
             }
         }
-    }
-    
-    public void destroy()
-    {
-        List<SyntaxElement> children=getElements();
-        for (Iterator<SyntaxElement> i=children.iterator();i.hasNext();) {
-            DEGFactory.getInstance().unuseObject(i.next());
-        }
-        
-        super.destroy();
     }
 }

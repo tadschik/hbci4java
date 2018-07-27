@@ -1,4 +1,3 @@
-
 /*  $Id: GVUebSEPA.java,v 1.1 2011/05/04 22:37:54 willuhn Exp $
 
     This file is part of HBCI4Java
@@ -21,20 +20,30 @@
 
 package org.kapott.hbci.GV;
 
-import org.kapott.hbci.manager.HBCIHandler;
-import org.kapott.hbci.manager.LogFilter;
+import org.kapott.hbci.passport.HBCIPassportInternal;
 
 /**
  * Job-Implementierung fuer SEPA-Multi-Ueberweisungen.
  */
-public class GVMultiUebSEPA extends GVUebSEPA
-{
+public class GVMultiUebSEPA extends GVUebSEPA {
+    public GVMultiUebSEPA(HBCIPassportInternal passport) {
+        this(passport, getLowlevelName());
+    }
+
+    public GVMultiUebSEPA(HBCIPassportInternal passport, String name) {
+        super(passport, name);
+
+        addConstraint("batchbook", "sepa.batchbook", "");
+        addConstraint("Total.value", "Total.value", null);
+        addConstraint("Total.curr", "Total.curr", null);
+    }
+
     /**
      * Liefert den Lowlevel-Namen des Jobs.
+     *
      * @return der Lowlevel-Namen des Jobs.
      */
-    public static String getLowlevelName()
-    {
+    public static String getLowlevelName() {
         return "SammelUebSEPA";
     }
 
@@ -42,36 +51,12 @@ public class GVMultiUebSEPA extends GVUebSEPA
      * @see org.kapott.hbci.GV.AbstractSEPAGV#getPainJobName()
      */
     @Override
-    public String getPainJobName()
-    {
+    public String getPainJobName() {
         return "UebSEPA";
     }
 
-    /**
-     * ct.
-     * @param handler
-     */
-    public GVMultiUebSEPA(HBCIHandler handler)
-    {
-        this(handler, getLowlevelName());
-    }
-
-    /**
-     * ct.
-     * @param handler
-     * @param name
-     */
-    public GVMultiUebSEPA(HBCIHandler handler, String name)
-    {
-        super(handler, name);
-
-        addConstraint("batchbook", "sepa.batchbook", "", LogFilter.FILTER_NONE);
-        addConstraint("Total.value", "Total.value", null, LogFilter.FILTER_MOST);
-        addConstraint("Total.curr", "Total.curr", null, LogFilter.FILTER_NONE);
-    }
-
-    @Override protected void createSEPAFromParams()
-    {
+    @Override
+    protected void createSEPAFromParams() {
         super.createSEPAFromParams();
         setParam("Total", SepaUtil.sumBtgValueObject(sepaParams));
     }

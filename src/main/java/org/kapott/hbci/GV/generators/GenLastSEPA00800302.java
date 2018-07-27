@@ -1,75 +1,33 @@
 package org.kapott.hbci.GV.generators;
 
+import org.kapott.hbci.GV.AbstractSEPAGV;
+import org.kapott.hbci.GV.SepaUtil;
+import org.kapott.hbci.sepa.PainVersion;
+import org.kapott.hbci.sepa.jaxb.pain_008_003_02.*;
+
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Properties;
 
-import org.kapott.hbci.GV.AbstractSEPAGV;
-import org.kapott.hbci.GV.SepaUtil;
-import org.kapott.hbci.sepa.SepaVersion;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.AccountIdentificationSEPA;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.ActiveOrHistoricCurrencyAndAmountSEPA;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.ActiveOrHistoricCurrencyCodeEUR;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.AmendmentInformationDetailsSDD;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.BranchAndFinancialInstitutionIdentificationSEPA2;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.BranchAndFinancialInstitutionIdentificationSEPA3;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.CashAccountSEPA1;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.CashAccountSEPA2;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.ChargeBearerTypeSEPACode;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.CustomerDirectDebitInitiationV02;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.DirectDebitTransactionInformationSDD;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.DirectDebitTransactionSDD;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.Document;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.FinancialInstitutionIdentificationSEPA2;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.FinancialInstitutionIdentificationSEPA3;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.GroupHeaderSDD;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.IdentificationSchemeNameSEPA;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.LocalInstrumentSEPA;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.MandateRelatedInformationSDD;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.ObjectFactory;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.OthrIdentification;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.OthrIdentificationCode;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.PartyIdentificationSEPA1;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.PartyIdentificationSEPA2;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.PartyIdentificationSEPA3;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.PartyIdentificationSEPA5;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.PartySEPA2;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.PaymentIdentificationSEPA;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.PaymentInstructionInformationSDD;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.PaymentMethod2Code;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.PaymentTypeInformationSDD;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.PersonIdentificationSEPA2;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.PurposeSEPA;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.RemittanceInformationSEPA1Choice;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.RestrictedFinancialIdentificationSEPA;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.RestrictedPersonIdentificationSEPA;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.RestrictedPersonIdentificationSchemeNameSEPA;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.RestrictedSMNDACode;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.SequenceType1Code;
-import org.kapott.hbci.sepa.jaxb.pain_008_003_02.ServiceLevelSEPA;
-
 
 /**
  * SEPA-Generator fuer pain.008.003.02.
  */
-public class GenLastSEPA00800302 extends AbstractSEPAGenerator
-{
+public class GenLastSEPA00800302 extends AbstractSEPAGenerator {
     /**
      * @see org.kapott.hbci.GV.generators.AbstractSEPAGenerator#getPainVersion()
      */
     @Override
-    public SepaVersion getPainVersion()
-    {
-        return SepaVersion.PAIN_008_003_02;
+    public PainVersion getPainVersion() {
+        return PainVersion.PAIN_008_003_02;
     }
 
     /**
      * @see org.kapott.hbci.GV.generators.ISEPAGenerator#generate(java.util.Properties, java.io.OutputStream, boolean)
      */
     @Override
-    public void generate(Properties sepaParams, OutputStream os, boolean validate) throws Exception
-    {
+    public void generate(Properties sepaParams, OutputStream os, boolean validate) throws Exception {
         Integer maxIndex = SepaUtil.maxIndex(sepaParams);
 
         //Document
@@ -80,7 +38,7 @@ public class GenLastSEPA00800302 extends AbstractSEPAGenerator
         doc.setCstmrDrctDbtInitn(new CustomerDirectDebitInitiationV02());
         doc.getCstmrDrctDbtInitn().setGrpHdr(new GroupHeaderSDD());
 
-        final String sepaId   = sepaParams.getProperty("sepaid");
+        final String sepaId = sepaParams.getProperty("sepaid");
         final String pmtInfId = sepaParams.getProperty("pmtinfid");
 
         //Group Header
@@ -121,9 +79,7 @@ public class GenLastSEPA00800302 extends AbstractSEPAGenerator
         if (srcBic != null && srcBic.length() > 0) // BIC ist inzwischen optional
         {
             pmtInf.getCdtrAgt().getFinInstnId().setBIC(srcBic);
-        }
-        else
-        {
+        } else {
             pmtInf.getCdtrAgt().getFinInstnId().setOthr(new OthrIdentification());
             pmtInf.getCdtrAgt().getFinInstnId().getOthr().setId(OthrIdentificationCode.NOTPROVIDED);
         }
@@ -141,19 +97,15 @@ public class GenLastSEPA00800302 extends AbstractSEPAGenerator
 
         //Payment Information - Credit Transfer Transaction Information
         ArrayList<DirectDebitTransactionInformationSDD> drctDbtTxInfs = (ArrayList<DirectDebitTransactionInformationSDD>) pmtInf.getDrctDbtTxInf();
-        if (maxIndex != null)
-        {
-            for (int tnr = 0; tnr <= maxIndex; tnr++)
-            {
+        if (maxIndex != null) {
+            for (int tnr = 0; tnr <= maxIndex; tnr++) {
                 drctDbtTxInfs.add(createDirectDebitTransactionInformationSDD(sepaParams, tnr));
             }
-        }
-        else
-        {
+        } else {
             drctDbtTxInfs.add(createDirectDebitTransactionInformationSDD(sepaParams, null));
         }
 
-        String batch = SepaUtil.getProperty(sepaParams,"batchbook",null);
+        String batch = SepaUtil.getProperty(sepaParams, "batchbook", null);
         if (batch != null)
             pmtInf.setBtchBookg(batch.equals("1"));
 
@@ -161,8 +113,7 @@ public class GenLastSEPA00800302 extends AbstractSEPAGenerator
         this.marshal(of.createDocument(doc), os, validate);
     }
 
-    private DirectDebitTransactionInformationSDD createDirectDebitTransactionInformationSDD(Properties sepaParams, Integer index) throws Exception
-    {
+    private DirectDebitTransactionInformationSDD createDirectDebitTransactionInformationSDD(Properties sepaParams, Integer index) throws Exception {
         DirectDebitTransactionInformationSDD drctDbtTxInf = new DirectDebitTransactionInformationSDD();
         drctDbtTxInf.setDrctDbtTx(new DirectDebitTransactionSDD());
         drctDbtTxInf.getDrctDbtTx().setCdtrSchmeId(new PartyIdentificationSEPA3());
@@ -180,8 +131,7 @@ public class GenLastSEPA00800302 extends AbstractSEPAGenerator
 
         boolean amend = Boolean.valueOf(sepaParams.getProperty(SepaUtil.insertIndex("amendmandindic", index)));
         drctDbtTxInf.getDrctDbtTx().getMndtRltdInf().setAmdmntInd(amend);
-        if(amend)
-        {
+        if (amend) {
             drctDbtTxInf.getDrctDbtTx().getMndtRltdInf().setAmdmntInfDtls(new AmendmentInformationDetailsSDD());
             drctDbtTxInf.getDrctDbtTx().getMndtRltdInf().getAmdmntInfDtls().setOrgnlDbtrAgt(new BranchAndFinancialInstitutionIdentificationSEPA2());
             drctDbtTxInf.getDrctDbtTx().getMndtRltdInf().getAmdmntInfDtls().getOrgnlDbtrAgt().setFinInstnId(new FinancialInstitutionIdentificationSEPA2());
@@ -191,13 +141,12 @@ public class GenLastSEPA00800302 extends AbstractSEPAGenerator
 
         //Payment Information - Credit Transfer Transaction Information - Payment Identification
         drctDbtTxInf.setPmtId(new PaymentIdentificationSEPA());
-        drctDbtTxInf.getPmtId().setEndToEndId(SepaUtil.getProperty(sepaParams,SepaUtil.insertIndex("endtoendid", index),AbstractSEPAGV.ENDTOEND_ID_NOTPROVIDED)); // sicherstellen, dass "NOTPROVIDED" eingetragen wird, wenn keine ID angegeben ist
+        drctDbtTxInf.getPmtId().setEndToEndId(SepaUtil.getProperty(sepaParams, SepaUtil.insertIndex("endtoendid", index), AbstractSEPAGV.ENDTOEND_ID_NOTPROVIDED)); // sicherstellen, dass "NOTPROVIDED" eingetragen wird, wenn keine ID angegeben ist
 
 
         //Payment Information - Credit Transfer Transaction Information - Creditor
         drctDbtTxInf.setDbtr(new PartyIdentificationSEPA2());
         drctDbtTxInf.getDbtr().setNm(sepaParams.getProperty(SepaUtil.insertIndex("dst.name", index)));
-
 
 
         //Payment Information - Credit Transfer Transaction Information - Creditor Account
@@ -210,12 +159,9 @@ public class GenLastSEPA00800302 extends AbstractSEPAGenerator
         drctDbtTxInf.getDbtrAgt().setFinInstnId(new FinancialInstitutionIdentificationSEPA3());
 
         String bic = sepaParams.getProperty(SepaUtil.insertIndex("dst.bic", index));
-        if (bic != null && bic.length() > 0)
-        {
+        if (bic != null && bic.length() > 0) {
             drctDbtTxInf.getDbtrAgt().getFinInstnId().setBIC(bic);
-        }
-        else
-        {
+        } else {
             drctDbtTxInf.getDbtrAgt().getFinInstnId().setOthr(new OthrIdentification());
             drctDbtTxInf.getDbtrAgt().getFinInstnId().getOthr().setId(OthrIdentificationCode.NOTPROVIDED);
         }
@@ -229,15 +175,13 @@ public class GenLastSEPA00800302 extends AbstractSEPAGenerator
 
         //Payment Information - Credit Transfer Transaction Information - Usage
         String usage = sepaParams.getProperty(SepaUtil.insertIndex("usage", index));
-        if (usage != null && usage.length() > 0)
-        {
+        if (usage != null && usage.length() > 0) {
             drctDbtTxInf.setRmtInf(new RemittanceInformationSEPA1Choice());
             drctDbtTxInf.getRmtInf().setUstrd(usage);
         }
 
         String purposeCode = sepaParams.getProperty(SepaUtil.insertIndex("purposecode", index));
-        if (purposeCode != null && purposeCode.length() > 0)
-        {
+        if (purposeCode != null && purposeCode.length() > 0) {
             PurposeSEPA p = new PurposeSEPA();
             p.setCd(purposeCode);
             drctDbtTxInf.setPurp(p);

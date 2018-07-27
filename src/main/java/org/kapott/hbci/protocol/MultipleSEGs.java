@@ -1,4 +1,3 @@
-
 /*  $Id: MultipleSEGs.java,v 1.1 2011/05/04 22:38:02 willuhn Exp $
 
     This file is part of HBCI4Java
@@ -21,44 +20,47 @@
 
 package org.kapott.hbci.protocol;
 
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Properties;
-
-import org.kapott.hbci.protocol.factory.SEGFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-public final class MultipleSEGs
-     extends MultipleSyntaxElements
-{
-    protected SyntaxElement createAndAppendNewElement(Node ref, String path, int idx, Document syntax)
-    {
-        SyntaxElement ret=null;
-        addElement((ret=SEGFactory.getInstance().createSEG(getType(), getName(), path, idx, syntax)));
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.ListIterator;
+
+@Slf4j
+public final class MultipleSEGs extends MultipleSyntaxElements {
+
+    public MultipleSEGs(Node segref, String path, Document document) {
+        super(segref, path, document);
+    }
+
+    public MultipleSEGs(Node segref, String path, char predelim0, char predelim1, StringBuffer res, int fullResLen, Document document, Hashtable<String, String> predefs, Hashtable<String, String> valids) {
+        super(segref, path, predelim0, predelim1, res, fullResLen, document, predefs, valids);
+    }
+
+    protected SyntaxElement createAndAppendNewElement(Node ref, String path, int idx, Document document) {
+        SyntaxElement ret = new SEG(getType(), getName(), path, idx, document);
+        addElement(ret);
         return ret;
     }
 
-    public MultipleSEGs(Node segref, String path, Document syntax)
-    {
-        super(segref, path, syntax);
+    public void init(Node segref, String path, Document document) {
+        super.init(segref, path, document);
     }
 
-    public void init(Node segref, String path, Document syntax)
-    {
-        super.init(segref, path, syntax);
+    @Override
+    public String toString() {
+        return super.toString();
     }
 
-    public String toString(int zero)
-    {
+    public String toString(int dummy) {
         StringBuffer ret = new StringBuffer(256);
 
-        for (ListIterator<SyntaxElement> i = getElements().listIterator(); i.hasNext(); ) {
-            SEG seg = (SEG)(i.next());
-            if (seg != null)
-                ret.append(seg.toString(0));
+        for (SyntaxElement syntaxElement : getElements()) {
+            if (syntaxElement != null)
+                ret.append(((SEG) syntaxElement).toString(0));
         }
 
         return ret.toString();
@@ -66,33 +68,33 @@ public final class MultipleSEGs
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    public MultipleSEGs(Node segref, String path, char predelim0, char predelim1, StringBuffer res, int fullResLen, Document syntax, Hashtable<String,String> predefs,Hashtable<String,String> valids)
-    {
-        super(segref, path, predelim0, predelim1, res, fullResLen, syntax, predefs,valids);
+    public void log() {
+        for (ListIterator<SyntaxElement> i = getElements().listIterator(); i.hasNext(); ) {
+            SEG seg = (SEG) (i.next());
+            if (seg != null)
+                log.trace(seg.toString(0));
+        }
     }
 
-    public void init(Node segref, String path, char predelim0, char predelim1, StringBuffer res, int fullResLen, Document syntax, Hashtable<String,String> predefs,Hashtable<String,String> valids)
-    {
-        super.init(segref, path, predelim0, predelim1, res, fullResLen, syntax, predefs,valids);
+    public void init(Node segref, String path, char predelim0, char predelim1, StringBuffer res, int fullResLen, Document document, Hashtable<String, String> predefs, Hashtable<String, String> valids) {
+        super.init(segref, path, predelim0, predelim1, res, fullResLen, document, predefs, valids);
     }
 
-    protected SyntaxElement parseAndAppendNewElement(Node ref, String path, char predelim, int idx, StringBuffer res, int fullResLen, Document syntax, Hashtable<String,String> predefs,Hashtable<String,String> valids)
-    {
-        SyntaxElement ret=null;
-        addElement((ret=SEGFactory.getInstance().createSEG(getType(), getName(), path, predelim, idx, res, fullResLen, syntax, predefs,valids)));
+    protected SyntaxElement parseAndAppendNewElement(Node ref, String path, char predelim, int idx, StringBuffer res, int fullResLen, Document document, Hashtable<String, String> predefs, Hashtable<String, String> valids) {
+        SyntaxElement ret = null;
+        addElement((ret = new SEG(getType(), getName(), path, predelim, idx, res, fullResLen, document, predefs, valids)));
         return ret;
     }
 
-    public void getElementPaths(Properties p,int[] segref,int[] degref,int[] deref)
-    {
-        for (Iterator<SyntaxElement> i=getElements().iterator();i.hasNext();) {
-            SyntaxElement e= i.next();
-            if (e!=null) {
-                e.getElementPaths(p,segref,degref,deref);
+    public void getElementPaths(HashMap<String, String> p, int[] segref, int[] degref, int[] deref) {
+        for (Iterator<SyntaxElement> i = getElements().iterator(); i.hasNext(); ) {
+            SyntaxElement e = i.next();
+            if (e != null) {
+                e.getElementPaths(p, segref, degref, deref);
             }
         }
     }
-    
+
     // TODO: diese Methode gehört zu einem dirty hack (der aber gut funktioniert)
     // Diese Methode wird von SyntaxElement.parse() verwendet, um bei den
     // SFs "Params" und "GVRes" dafür zu sorgen, dass nach jedem gefunden Segment
@@ -104,18 +106,8 @@ public final class MultipleSEGs
     //   Params.LastPar1
     //   Params.UebPar1
     //   Params_2.KUmsPar1
-    public boolean hasValidChilds()
-    {
-        return (getElements().size()!=0);
+    public boolean hasValidChilds() {
+        return (getElements().size() != 0);
     }
-    
-    public void destroy()
-    {
-        List<SyntaxElement> children=getElements();
-        for (Iterator<SyntaxElement> i=children.iterator();i.hasNext();) {
-            SEGFactory.getInstance().unuseObject(i.next());
-        }
-        
-        super.destroy();
-    }
+
 }

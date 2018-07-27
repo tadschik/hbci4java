@@ -1,4 +1,3 @@
-
 /*  $Id: PinTanSSLHostnameVerifier.java,v 1.1 2011/05/04 22:37:51 willuhn Exp $
 
     This file is part of HBCI4Java
@@ -21,19 +20,18 @@
 
 package org.kapott.hbci.comm;
 
+import lombok.extern.slf4j.Slf4j;
+
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
 
-import org.kapott.hbci.manager.HBCIUtils;
-
 // modifizierter HostnameVerifier, der zum Einsatz kommt, wenn Zert.-Check
 // deaktiviert ist.
-public class PinTanSSLHostnameVerifier 
-    implements HostnameVerifier 
-{
-    public boolean verify(String hostname,SSLSession session)
-    {
-    	HBCIUtils.log("cert checking disabled -> hostname always OK", HBCIUtils.LOG_DEBUG);
+@Slf4j
+public class PinTanSSLHostnameVerifier implements HostnameVerifier {
+
+    public boolean verify(String hostname, SSLSession session) {
+        log.debug("cert checking disabled -> hostname always OK");
         return true;
     }
 }

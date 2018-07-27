@@ -1,31 +1,80 @@
 package org.kapott.hbci.GV;
 
-import java.text.DecimalFormat;
-import java.util.Enumeration;
-import java.util.Properties;
-
 import org.kapott.hbci.GV_Result.GVRDauerNew;
 import org.kapott.hbci.exceptions.InvalidUserDataException;
-import org.kapott.hbci.manager.HBCIHandler;
-import org.kapott.hbci.manager.HBCIUtilsInternal;
-import org.kapott.hbci.manager.LogFilter;
-import org.kapott.hbci.sepa.SepaVersion;
-import org.kapott.hbci.sepa.SepaVersion.Type;
+import org.kapott.hbci.manager.HBCIUtils;
+import org.kapott.hbci.passport.HBCIPassportInternal;
+import org.kapott.hbci.sepa.PainVersion;
+import org.kapott.hbci.sepa.PainVersion.Type;
 import org.kapott.hbci.status.HBCIMsgStatus;
 
-/**
- * Geschaeftsvorfall zum Anlegen eines neuen SEPA-Dauerauftrages.
- */
+import java.text.DecimalFormat;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Properties;
+
 public class GVDauerSEPANew extends AbstractSEPAGV {
 
-    private final static SepaVersion DEFAULT = SepaVersion.PAIN_001_001_02;
-    
+    private final static PainVersion DEFAULT = PainVersion.PAIN_001_001_02;
+
+    public GVDauerSEPANew(HBCIPassportInternal passport) {
+        super(passport, getLowlevelName(), new GVRDauerNew(passport));
+
+        addConstraint("src.bic", "My.bic", null);
+        addConstraint("src.iban", "My.iban", null);
+
+        if (this.canNationalAcc(passport)) // nationale Bankverbindung mitschicken, wenn erlaubt
+        {
+            addConstraint("src.country", "My.KIK.country", "");
+            addConstraint("src.blz", "My.KIK.blz", "");
+            addConstraint("src.number", "My.number", "");
+            addConstraint("src.subnumber", "My.subnumber", "");
+        }
+
+        addConstraint("_sepadescriptor", "sepadescr", this.getPainVersion().getURN());
+        addConstraint("_sepapain", "sepapain", null);
+
+        /* dummy constraints to allow an application to set these values. the
+         * overriden setLowlevelParam() stores these values in a special structure
+         * which is later used to create the SEPA pain document. */
+        addConstraint("src.bic", "sepa.src.bic", null);
+        addConstraint("src.iban", "sepa.src.iban", null);
+        addConstraint("src.name", "sepa.src.name", null);
+        addConstraint("dst.bic", "sepa.dst.bic", null);
+        addConstraint("dst.iban", "sepa.dst.iban", null);
+        addConstraint("dst.name", "sepa.dst.name", null);
+        addConstraint("btg.value", "sepa.btg.value", null);
+        addConstraint("btg.curr", "sepa.btg.curr", "EUR");
+        addConstraint("usage", "sepa.usage", "");
+
+        //Constraints für die PmtInfId (eindeutige SEPA Message ID) und EndToEndId (eindeutige ID um Transaktion zu identifizieren)
+        addConstraint("sepaid", "sepa.sepaid", getSEPAMessageId());
+        addConstraint("pmtinfid", "sepa.pmtinfid", getSEPAMessageId());
+        addConstraint("endtoendid", "sepa.endtoendid", ENDTOEND_ID_NOTPROVIDED);
+        addConstraint("purposecode", "sepa.purposecode", "");
+
+        // DauerDetails
+        addConstraint("firstdate", "DauerDetails.firstdate", null);
+        addConstraint("timeunit", "DauerDetails.timeunit", null);
+        addConstraint("turnus", "DauerDetails.turnus", null);
+        addConstraint("execday", "DauerDetails.execday", null);
+        addConstraint("lastdate", "DauerDetails.lastdate", "");
+    }
+
+    /**
+     * Liefert den Lowlevel-Namen des Jobs.
+     *
+     * @return der Lowlevel-Namen des Jobs.
+     */
+    public static String getLowlevelName() {
+        return "DauerSEPANew";
+    }
+
     /**
      * @see org.kapott.hbci.GV.AbstractSEPAGV#getDefaultPainVersion()
      */
     @Override
-    protected SepaVersion getDefaultPainVersion()
-    {
+    protected PainVersion getDefaultPainVersion() {
         return DEFAULT;
     }
 
@@ -33,165 +82,94 @@ public class GVDauerSEPANew extends AbstractSEPAGV {
      * @see org.kapott.hbci.GV.AbstractSEPAGV#getPainType()
      */
     @Override
-    protected Type getPainType()
-    {
+    protected Type getPainType() {
         return Type.PAIN_001;
     }
-    
-    /**
-     * Liefert den Lowlevel-Namen des Jobs.
-     * @return der Lowlevel-Namen des Jobs.
-     */
-    public static String getLowlevelName()
-    {
-        return "DauerSEPANew";
-    }
 
-    /**
-     * ct.
-     * @param handler
-     */
-    public GVDauerSEPANew(HBCIHandler handler) {
-        super(handler,getLowlevelName(), new GVRDauerNew());
+    public void setParam(String paramName, String value) {
+        HashMap<String, String> res = getJobRestrictions();
 
-        addConstraint("src.bic",  "My.bic",  null, LogFilter.FILTER_MOST);
-        addConstraint("src.iban", "My.iban", null, LogFilter.FILTER_IDS);
-        
-        if (this.canNationalAcc(handler)) // nationale Bankverbindung mitschicken, wenn erlaubt
-        {
-            addConstraint("src.country",  "My.KIK.country", "", LogFilter.FILTER_NONE);
-            addConstraint("src.blz",      "My.KIK.blz",     "", LogFilter.FILTER_MOST);
-            addConstraint("src.number",   "My.number",      "", LogFilter.FILTER_IDS);
-            addConstraint("src.subnumber","My.subnumber",   "", LogFilter.FILTER_MOST);
-        }
-
-        addConstraint("_sepadescriptor", "sepadescr", this.getPainVersion().getURN(), LogFilter.FILTER_NONE);
-        addConstraint("_sepapain",       "sepapain", null, LogFilter.FILTER_IDS);
-
-        /* dummy constraints to allow an application to set these values. the
-         * overriden setLowlevelParam() stores these values in a special structure
-         * which is later used to create the SEPA pain document. */
-        addConstraint("src.bic",   "sepa.src.bic",   null, LogFilter.FILTER_MOST);
-        addConstraint("src.iban",  "sepa.src.iban",  null, LogFilter.FILTER_IDS);
-        addConstraint("src.name",  "sepa.src.name",  null, LogFilter.FILTER_IDS);
-        addConstraint("dst.bic",   "sepa.dst.bic",   null, LogFilter.FILTER_MOST);
-        addConstraint("dst.iban",  "sepa.dst.iban",  null, LogFilter.FILTER_IDS);
-        addConstraint("dst.name",  "sepa.dst.name",  null, LogFilter.FILTER_IDS);
-        addConstraint("btg.value", "sepa.btg.value", null, LogFilter.FILTER_NONE);
-        addConstraint("btg.curr",  "sepa.btg.curr",  "EUR", LogFilter.FILTER_NONE);
-        addConstraint("usage",     "sepa.usage",     "",   LogFilter.FILTER_NONE);
-      
-        //Constraints fÃ¼r die PmtInfId (eindeutige SEPA Message ID) und EndToEndId (eindeutige ID um Transaktion zu identifizieren)
-        addConstraint("sepaid",    "sepa.sepaid",      getSEPAMessageId(),      LogFilter.FILTER_NONE);
-        addConstraint("pmtinfid",  "sepa.pmtinfid",    getSEPAMessageId(),      LogFilter.FILTER_NONE);
-        addConstraint("endtoendid", "sepa.endtoendid", ENDTOEND_ID_NOTPROVIDED, LogFilter.FILTER_NONE);
-        addConstraint("purposecode","sepa.purposecode", "",                     LogFilter.FILTER_NONE);
-        
-        // DauerDetails
-        addConstraint("firstdate","DauerDetails.firstdate",null, LogFilter.FILTER_NONE);
-        addConstraint("timeunit","DauerDetails.timeunit",null, LogFilter.FILTER_NONE);
-        addConstraint("turnus","DauerDetails.turnus",null, LogFilter.FILTER_NONE);
-        addConstraint("execday","DauerDetails.execday",null, LogFilter.FILTER_NONE);
-        addConstraint("lastdate","DauerDetails.lastdate","", LogFilter.FILTER_NONE);
-    }
-    
-    /**
-     * @see org.kapott.hbci.GV.HBCIJobImpl#setParam(java.lang.String, java.lang.String)
-     */
-    public void setParam(String paramName,String value)
-    {
-        Properties res=getJobRestrictions();
-        
         if (paramName.equals("timeunit")) {
             if (!(value.equals("W") || value.equals("M"))) {
-                String msg=HBCIUtilsInternal.getLocMsg("EXCMSG_INV_TIMEUNIT",value);
-                if (!HBCIUtilsInternal.ignoreError(getMainPassport(),"client.errors.ignoreWrongJobDataErrors",msg))
-                    throw new InvalidUserDataException(msg);
+                String msg = HBCIUtils.getLocMsg("EXCMSG_INV_TIMEUNIT", value);
+                throw new InvalidUserDataException(msg);
             }
         } else if (paramName.equals("turnus")) {
-            String timeunit=getLowlevelParams().getProperty(getName()+".DauerDetails.timeunit");
-            
-            if (timeunit!=null) {
-                if (timeunit.equals("W")) {
-                    String st=res.getProperty("turnusweeks");
-                    
-                    if (st!=null) {
-                        String value2=new DecimalFormat("00").format(Integer.parseInt(value));
+            String timeunit = getLowlevelParams().getProperty(getName() + ".DauerDetails.timeunit");
 
-                        if (!st.equals("00") && !twoDigitValueInList(value2,st)) {
-                            String msg=HBCIUtilsInternal.getLocMsg("EXCMSG_INV_TURNUS",value);
-                            if (!HBCIUtilsInternal.ignoreError(getMainPassport(),"client.errors.ignoreWrongJobDataErrors",msg))
-                                throw new InvalidUserDataException(msg);
+            if (timeunit != null) {
+                if (timeunit.equals("W")) {
+                    String st = res.get("turnusweeks");
+
+                    if (st != null) {
+                        String value2 = new DecimalFormat("00").format(Integer.parseInt(value));
+
+                        if (!st.equals("00") && !twoDigitValueInList(value2, st)) {
+                            String msg = HBCIUtils.getLocMsg("EXCMSG_INV_TURNUS", value);
+                            throw new InvalidUserDataException(msg);
                         }
                     }
                 } else if (timeunit.equals("M")) {
-                    String st=res.getProperty("turnusmonths");
+                    String st = res.get("turnusmonths");
 
-                    if (st!=null) {
-                        String value2=new DecimalFormat("00").format(Integer.parseInt(value));
+                    if (st != null) {
+                        String value2 = new DecimalFormat("00").format(Integer.parseInt(value));
 
-                        if (!st.equals("00") && !twoDigitValueInList(value2,st)) {
-                            String msg=HBCIUtilsInternal.getLocMsg("EXCMSG_INV_TURNUS",value);
-                            if (!HBCIUtilsInternal.ignoreError(getMainPassport(),"client.errors.ignoreWrongJobDataErrors",msg))
-                                throw new InvalidUserDataException(msg);
+                        if (!st.equals("00") && !twoDigitValueInList(value2, st)) {
+                            String msg = HBCIUtils.getLocMsg("EXCMSG_INV_TURNUS", value);
+                            throw new InvalidUserDataException(msg);
                         }
                     }
                 }
             }
         } else if (paramName.equals("execday")) {
-            String timeunit=getLowlevelParams().getProperty(getName()+".DauerDetails.timeunit");
+            String timeunit = getLowlevelParams().getProperty(getName() + ".DauerDetails.timeunit");
 
-            if (timeunit!=null) {
+            if (timeunit != null) {
                 if (timeunit.equals("W")) {
-                    String st=res.getProperty("daysperweek");
+                    String st = res.get("daysperweek");
 
-                    if (st!=null && !st.equals("0") && st.indexOf(value)==-1) {
-                        String msg=HBCIUtilsInternal.getLocMsg("EXCMSG_INV_EXECDAY",value);
-                        if (!HBCIUtilsInternal.ignoreError(getMainPassport(),"client.errors.ignoreWrongJobDataErrors",msg))
-                            throw new InvalidUserDataException(msg);
+                    if (st != null && !st.equals("0") && st.indexOf(value) == -1) {
+                        String msg = HBCIUtils.getLocMsg("EXCMSG_INV_EXECDAY", value);
+                        throw new InvalidUserDataException(msg);
                     }
                 } else if (timeunit.equals("M")) {
-                    String st=res.getProperty("dayspermonth");
+                    String st = res.get("dayspermonth");
 
-                    if (st!=null) {
-                        String value2=new DecimalFormat("00").format(Integer.parseInt(value));
+                    if (st != null) {
+                        String value2 = new DecimalFormat("00").format(Integer.parseInt(value));
 
-                        if (!st.equals("00") && !twoDigitValueInList(value2,st)) {
-                            String msg=HBCIUtilsInternal.getLocMsg("EXCMSG_INV_EXECDAY",value);
-                            if (!HBCIUtilsInternal.ignoreError(getMainPassport(),"client.errors.ignoreWrongJobDataErrors",msg))
-                                throw new InvalidUserDataException(msg);
+                        if (!st.equals("00") && !twoDigitValueInList(value2, st)) {
+                            String msg = HBCIUtils.getLocMsg("EXCMSG_INV_EXECDAY", value);
+                            throw new InvalidUserDataException(msg);
                         }
                     }
                 }
             }
         }
-        
-        super.setParam(paramName,value);
+
+        super.setParam(paramName, value);
     }
-    
-    protected void extractResults(HBCIMsgStatus msgstatus,String header,int idx)
-    {
-        Properties result=msgstatus.getData();
-        String orderid=result.getProperty(header+".orderid");
-        ((GVRDauerNew)(jobResult)).setOrderId(orderid);
 
-        if (orderid!=null && orderid.length()!=0) {
-            Properties p=getLowlevelParams();
-            Properties p2=new Properties();
+    protected void extractResults(HBCIMsgStatus msgstatus, String header, int idx) {
+        HashMap<String, String> result = msgstatus.getData();
+        String orderid = result.get(header + ".orderid");
+        ((GVRDauerNew) (jobResult)).setOrderId(orderid);
 
-            for (Enumeration e=p.propertyNames();e.hasMoreElements();) {
-                String key=(String)e.nextElement();
-                p2.setProperty(key.substring(key.indexOf(".")+1),
-                               p.getProperty(key));
+        if (orderid != null && orderid.length() != 0) {
+            Properties p = getLowlevelParams();
+            Properties p2 = new Properties();
+
+            for (Enumeration e = p.propertyNames(); e.hasMoreElements(); ) {
+                String key = (String) e.nextElement();
+                p2.setProperty(key.substring(key.indexOf(".") + 1),
+                        p.getProperty(key));
             }
 
-            getMainPassport().setPersistentData("dauer_"+orderid,p2);
+            passport.setPersistentData("dauer_" + orderid, p2);
         }
     }
-    
-    /**
-     * @see org.kapott.hbci.GV.AbstractSEPAGV#getPainJobName()
-     */
+
     public String getPainJobName() {
         return "UebSEPA";
     }

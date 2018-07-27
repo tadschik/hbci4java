@@ -1,4 +1,3 @@
-
 /*  $Id: GVCardList.java,v 1.1 2011/05/04 22:37:53 willuhn Exp $
 
     This file is part of HBCI4Java
@@ -22,60 +21,54 @@
 package org.kapott.hbci.GV;
 
 
-import java.util.Properties;
-
 import org.kapott.hbci.GV_Result.GVRCardList;
-import org.kapott.hbci.manager.HBCIHandler;
 import org.kapott.hbci.manager.HBCIUtils;
-import org.kapott.hbci.manager.LogFilter;
+import org.kapott.hbci.passport.HBCIPassportInternal;
 import org.kapott.hbci.status.HBCIMsgStatus;
 import org.kapott.hbci.structures.Value;
 
-public class GVCardList 
-    extends HBCIJobImpl
-{
-    public static String getLowlevelName()
-    {
+import java.util.HashMap;
+
+public class GVCardList extends AbstractHBCIJob {
+
+    public GVCardList(HBCIPassportInternal passport) {
+        super(passport, getLowlevelName(), new GVRCardList(passport));
+
+        addConstraint("my.country", "KTV.KIK.country", "DE");
+        addConstraint("my.blz", "KTV.KIK.blz", null);
+        addConstraint("my.number", "KTV.number", null);
+        addConstraint("my.subnumber", "KTV.subnumber", "");
+    }
+
+    public static String getLowlevelName() {
         return "CardList";
     }
-    
-    public GVCardList(HBCIHandler handler)
-   {
-       super(handler,getLowlevelName(),new GVRCardList());
-       
-       addConstraint("my.country","KTV.KIK.country","DE", LogFilter.FILTER_NONE);
-       addConstraint("my.blz","KTV.KIK.blz",null, LogFilter.FILTER_MOST);
-       addConstraint("my.number","KTV.number",null, LogFilter.FILTER_IDS);
-       addConstraint("my.subnumber","KTV.subnumber","", LogFilter.FILTER_MOST);
-   }
-   
-   public void extractResults(HBCIMsgStatus msgstatus,String header,int idx)
-   {
-       Properties result=msgstatus.getData();
-       GVRCardList.CardInfo info=new GVRCardList.CardInfo();
-       String st;
-       
-       info.cardnumber=result.getProperty(header+".cardnumber");
-       info.cardordernumber=result.getProperty(header+".nextcardnumber");
-       info.cardtype=Integer.parseInt(result.getProperty(header+".cardtype"));
-       info.comment=result.getProperty(header+".comment");
-       if ((st=result.getProperty(header+".cardlimit.value"))!=null) {
-           info.limit=new Value(st,result.getProperty(header+".cardlimit.curr"));
-       }
-       info.owner=result.getProperty(header+".name");
-       if ((st=result.getProperty(header+".validfrom"))!=null) {
-           info.validFrom=HBCIUtils.string2DateISO(st);
-       }
-       if ((st=result.getProperty(header+".validuntil"))!=null) {
-           info.validUntil=HBCIUtils.string2DateISO(st);
-       }
-       
-       ((GVRCardList)getJobResult()).addEntry(info);
-   }
-    
-   public void verifyConstraints()
-   {
-       super.verifyConstraints();
-       checkAccountCRC("my");
-   }
+
+    public void extractResults(HBCIMsgStatus msgstatus, String header, int idx) {
+        HashMap<String, String> result = msgstatus.getData();
+        GVRCardList.CardInfo info = new GVRCardList.CardInfo();
+        String st;
+
+        info.cardnumber = result.get(header + ".cardnumber");
+        info.cardordernumber = result.get(header + ".nextcardnumber");
+        info.cardtype = Integer.parseInt(result.get(header + ".cardtype"));
+        info.comment = result.get(header + ".comment");
+        if ((st = result.get(header + ".cardlimit.value")) != null) {
+            info.limit = new Value(st, result.get(header + ".cardlimit.curr"));
+        }
+        info.owner = result.get(header + ".name");
+        if ((st = result.get(header + ".validfrom")) != null) {
+            info.validFrom = HBCIUtils.string2DateISO(st);
+        }
+        if ((st = result.get(header + ".validuntil")) != null) {
+            info.validUntil = HBCIUtils.string2DateISO(st);
+        }
+
+        ((GVRCardList) getJobResult()).addEntry(info);
+    }
+
+    public void verifyConstraints() {
+        super.verifyConstraints();
+        checkAccountCRC("my");
+    }
 }

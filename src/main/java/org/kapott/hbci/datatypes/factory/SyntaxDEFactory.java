@@ -1,4 +1,3 @@
-
 /*  $Id: SyntaxDEFactory.java,v 1.1 2011/05/04 22:38:01 willuhn Exp $
 
     This file is part of HBCI4Java
@@ -21,130 +20,33 @@
 
 package org.kapott.hbci.datatypes.factory;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Enumeration;
-import java.util.Hashtable;
-
 import org.kapott.hbci.datatypes.SyntaxDE;
-import org.kapott.hbci.exceptions.InitializingException;
 import org.kapott.hbci.exceptions.NoSuchConstructorException;
 import org.kapott.hbci.exceptions.NoSuchSyntaxException;
 import org.kapott.hbci.exceptions.ParseErrorException;
 import org.kapott.hbci.manager.HBCIUtils;
-import org.kapott.hbci.manager.HBCIUtilsInternal;
-import org.kapott.hbci.tools.ObjectFactory;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 public class SyntaxDEFactory {
-    private static SyntaxDEFactory instance;
 
-
-    public static SyntaxDEFactory getInstance() {
-        if (instance == null) {
-            instance = new SyntaxDEFactory();
+    public static SyntaxDE createSyntaxDE(String dataType, String path, Object value, int minsize, int maxsize) {
+        // laden der klasse, die die syntax des de enthaelt
+        try {
+            Class c = Class.forName("org.kapott.hbci.datatypes.Syntax" + dataType, false, SyntaxDEFactory.class.getClassLoader());
+            Constructor con = c.getConstructor(new Class[]{value.getClass(), int.class, int.class});
+            return (SyntaxDE) (con.newInstance(new Object[]{value, new Integer(minsize), new Integer(maxsize)}));
+        } catch (ClassNotFoundException e) {
+            throw new NoSuchSyntaxException(dataType, path);
+        } catch (NoSuchMethodException e) {
+            throw new NoSuchConstructorException(dataType);
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+            throw new ParseErrorException(HBCIUtils.getLocMsg("EXCMSG_PROT_ERRSYNDE", path), (Exception) e.getCause());
         }
-        return instance;
-    }
-
-    private SyntaxDEFactory() {
-    }
-
-    public SyntaxDE createSyntaxDE(String dataType, String path, String value, int minsize, int maxsize) {
-        SyntaxDE ret = null;
-        ObjectFactory factory = new ObjectFactory(Integer.parseInt(HBCIUtils.getParam("kernel.objpool.Syntax", "1024")));
-
-        ret = (SyntaxDE) factory.getFreeObject();
-        if (ret == null) {
-            // laden der klasse, die die syntax des de enthaelt
-            Class c;
-            try {
-                c = Class.forName("org.kapott.hbci.datatypes.Syntax" + dataType, false, this.getClass().getClassLoader());
-            } catch (ClassNotFoundException e) {
-                throw new NoSuchSyntaxException(dataType, path);
-            }
-
-            // holen des constructors fuer diese klasse
-            Constructor con;
-            try {
-                con = c.getConstructor(new Class[]{String.class, int.class, int.class});
-            } catch (NoSuchMethodException e) {
-                throw new NoSuchConstructorException(dataType);
-            }
-
-            /* anlegen einer neuen instanz der syntaxklasse und initialisieren
-             mit dem uebergebenen wert */
-            try {
-                ret = (SyntaxDE) (con.newInstance(new Object[]{value, new Integer(minsize), new Integer(maxsize)}));
-            } catch (InstantiationException e) {
-            } catch (IllegalAccessException e) {
-            } catch (InvocationTargetException e) {
-                throw new InitializingException((Exception) e.getCause(), path);
-            }
-
-            if (ret != null) {
-                factory.addToUsedPool(ret);
-            }
-        } else {
-            try {
-                ret.init(value, minsize, maxsize);
-                factory.addToUsedPool(ret);
-            } catch (RuntimeException e) {
-                factory.addToFreePool(ret);
-                throw new InitializingException(e, path);
-            }
-        }
-
-        return ret;
-    }
-
-    public SyntaxDE createSyntaxDE(String dataType, String path, StringBuffer res, int minsize, int maxsize) {
-        SyntaxDE ret = null;
-        ObjectFactory factory = new ObjectFactory(Integer.parseInt(HBCIUtils.getParam("kernel.objpool.Syntax", "1024")));
-
-        ret = (SyntaxDE) factory.getFreeObject();
-        if (ret == null) {
-            // laden der klasse, die die syntax des de enthaelt
-            Class c;
-            try {
-                c = Class.forName("org.kapott.hbci.datatypes.Syntax" + dataType, false, this.getClass().getClassLoader());
-            } catch (ClassNotFoundException e) {
-                throw new NoSuchSyntaxException(dataType, path);
-            }
-
-            // holen des constructors fuer diese klasse
-            Constructor con;
-            try {
-                con = c.getConstructor(new Class[]{StringBuffer.class, int.class, int.class});
-            } catch (NoSuchMethodException e) {
-                throw new NoSuchConstructorException(dataType);
-            }
-
-            /* anlegen einer neuen instanz der syntaxklasse und initialisieren
-             mit dem uebergebenen wert */
-            try {
-                ret = (SyntaxDE) (con.newInstance(new Object[]{res, new Integer(minsize), new Integer(maxsize)}));
-            } catch (InstantiationException e) {
-            } catch (IllegalAccessException e) {
-            } catch (InvocationTargetException e) {
-                throw new ParseErrorException(HBCIUtilsInternal.getLocMsg("EXCMSG_PROT_ERRSYNDE", path), (Exception) e.getCause());
-            }
-
-            if (ret != null) {
-                factory.addToUsedPool(ret);
-            }
-        } else {
-            try {
-                ret.init(res, minsize, maxsize);
-                factory.addToUsedPool(ret);
-            } catch (RuntimeException e) {
-                factory.addToFreePool(ret);
-                throw new ParseErrorException(HBCIUtilsInternal.getLocMsg("EXCMSG_PROT_ERRSYNDE", path), (Exception) e.getCause());
-            }
-        }
-
-        return ret;
-    }
-
-    public void unuseObject(SyntaxDE sde, String type) {
     }
 }

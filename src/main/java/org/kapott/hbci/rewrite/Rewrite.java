@@ -1,4 +1,3 @@
-
 /*  $Id: Rewrite.java,v 1.1 2011/05/04 22:37:57 willuhn Exp $
 
     This file is part of HBCI4Java
@@ -21,63 +20,51 @@
 
 package org.kapott.hbci.rewrite;
 
+import org.kapott.hbci.protocol.Message;
+import org.w3c.dom.Document;
+
 import java.util.Hashtable;
 
-import org.kapott.hbci.manager.MsgGen;
-import org.kapott.hbci.protocol.MSG;
+public abstract class Rewrite {
 
-public abstract class Rewrite
-{
-    private Hashtable<String,Object> kernelData=new Hashtable<String, Object>();
+    private Hashtable<String, Object> kernelData = new Hashtable<String, Object>();
 
-    
-    protected Rewrite()
-    {
+    protected Rewrite() {
     }
 
     public void setKernelData(Hashtable<String, Object> kernelData) {
         this.kernelData = kernelData;
     }
 
-    public void setData(String name,Object value)
-    {
-        kernelData.put(name, value);
-    }
-
-    public Object getData(String name)
-    {
+    public Object getData(String name) {
         return kernelData.get(name);
     }
 
-    public MSG outgoingClearText(MSG msg,MsgGen gen)
-    {
+    public Message outgoingClearText(Message msg) {
         return msg;
     }
-    
-    public MSG outgoingSigned(MSG msg,MsgGen gen)
-    {
+
+    public Message outgoingSigned(Message msg) {
         return msg;
     }
-    
-    public MSG outgoingCrypted(MSG msg,MsgGen gen)
-    {
+
+    public Message outgoingCrypted(Message msg) {
         return msg;
     }
-    
-    
-    
-    public String incomingCrypted(String st,MsgGen gen)
-    {
+
+    public String incomingCrypted(String st) {
         return st;
     }
-    
-    public String incomingClearText(String st,MsgGen gen)
-    {
+
+    public String incomingClearText(String st) {
         return st;
     }
-    
-    public MSG incomingData(MSG msg,MsgGen gen)
-    {
+
+    public String incomingClearText(String st, Document document) {
+        return st;
+    }
+
+    public Message incomingData(Message msg) {
         return msg;
     }
 }

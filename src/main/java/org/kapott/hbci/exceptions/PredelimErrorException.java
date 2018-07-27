@@ -1,4 +1,3 @@
-
 /*  $Id: PredelimErrorException.java,v 1.1 2011/05/04 22:38:01 willuhn Exp $
 
     This file is part of HBCI4Java
@@ -21,13 +20,11 @@
 
 package org.kapott.hbci.exceptions;
 
-import org.kapott.hbci.manager.HBCIUtilsInternal;
+import org.kapott.hbci.manager.HBCIUtils;
 
-public final class PredelimErrorException 
-     extends ParseErrorException
-{
-    public PredelimErrorException(String path,String expected,String found)
-    {
-        super(HBCIUtilsInternal.getLocMsg("EXCMSG_PREDELIM",new Object[] {path,expected,found}));
+public final class PredelimErrorException
+        extends ParseErrorException {
+    public PredelimErrorException(String path, String expected, String found) {
+        super(HBCIUtils.getLocMsg("EXCMSG_PREDELIM", new Object[]{path, expected, found}));
     }
 }

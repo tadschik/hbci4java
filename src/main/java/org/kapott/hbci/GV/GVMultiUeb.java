@@ -1,4 +1,3 @@
-
 /*  $Id: GVMultiUeb.java,v 1.1 2011/05/04 22:37:53 willuhn Exp $
 
     This file is part of HBCI4Java
@@ -23,38 +22,32 @@ package org.kapott.hbci.GV;
 
 
 import org.kapott.hbci.GV_Result.HBCIJobResultImpl;
-import org.kapott.hbci.manager.HBCIHandler;
-import org.kapott.hbci.manager.LogFilter;
+import org.kapott.hbci.passport.HBCIPassportInternal;
 
-public class GVMultiUeb
-    extends AbstractMultiGV
-{
-    public static String getLowlevelName()
-    {
+public class GVMultiUeb extends AbstractMultiGV {
+
+    public GVMultiUeb(HBCIPassportInternal passport) {
+        super(passport, getLowlevelName(), new HBCIJobResultImpl(passport));
+
+        addConstraint("data", "data", null);
+        addConstraint("my.country", "KTV.KIK.country", "DE");
+        addConstraint("my.blz", "KTV.KIK.blz", null);
+        addConstraint("my.number", "KTV.number", null);
+        addConstraint("my.subnumber", "KTV.subnumber", "");
+    }
+
+    public static String getLowlevelName() {
         return "SammelUeb";
     }
-    
-    public GVMultiUeb(HBCIHandler handler)
-    {
-        super(handler,getLowlevelName(),new HBCIJobResultImpl());
 
-        addConstraint("data","data",null, LogFilter.FILTER_NONE);
-        addConstraint("my.country","KTV.KIK.country","DE", LogFilter.FILTER_NONE);
-        addConstraint("my.blz","KTV.KIK.blz",null, LogFilter.FILTER_MOST);
-        addConstraint("my.number","KTV.number",null, LogFilter.FILTER_IDS);
-        addConstraint("my.subnumber","KTV.subnumber","", LogFilter.FILTER_MOST);
-    }
-    
-    public void setParam(String paramName, String value)
-    {
+    public void setParam(String paramName, String value) {
         if (paramName.equals("data")) {
-            value="B"+value;
+            value = "B" + value;
         }
-        super.setParam(paramName,value);
+        super.setParam(paramName, value);
     }
 
-    public void verifyConstraints()
-    {
+    public void verifyConstraints() {
         super.verifyConstraints();
         checkAccountCRC("my");
     }

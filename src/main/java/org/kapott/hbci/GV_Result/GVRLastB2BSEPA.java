@@ -1,4 +1,3 @@
-
 /*  $Id: GVRTermUeb.java,v 1.1 2011/05/04 22:37:47 willuhn Exp $
 
     This file is part of HBCI4Java
@@ -22,10 +21,15 @@
 package org.kapott.hbci.GV_Result;
 
 
+import org.kapott.hbci.passport.HBCIPassportInternal;
 
-/** RÃ¼ckgabedaten fÃ¼r das Einreichen einer terminierten SEPA-Lastschrift. Beim Einreichen
-    einer terminierten Lastschrift gibt die Bank u.U. eine Auftrags-Identifikationsnummer
-    zurÃ¼ck, die benutzt werden kann, um den Auftrag spÃ¤ter zu Ã¤ndern oder zu lÃ¶schen. */
-public class GVRLastB2BSEPA extends AbstractGVRLastSEPA
-{
+/**
+ * Rückgabedaten für das Einreichen einer terminierten SEPA-Lastschrift. Beim Einreichen
+ * einer terminierten Lastschrift gibt die Bank u.U. eine Auftrags-Identifikationsnummer
+ * zurück, die benutzt werden kann, um den Auftrag später zu ändern oder zu löschen.
+ */
+public class GVRLastB2BSEPA extends AbstractGVRLastSEPA {
+    public GVRLastB2BSEPA(HBCIPassportInternal passport) {
+        super(passport);
+    }
 }

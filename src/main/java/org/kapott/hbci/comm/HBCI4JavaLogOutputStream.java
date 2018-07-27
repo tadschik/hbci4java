@@ -1,4 +1,3 @@
-
 /*  $Id: HBCI4JavaLogOutputStream.java,v 1.1 2011/05/04 22:37:50 willuhn Exp $
 
     This file is part of HBCI4Java
@@ -21,50 +20,44 @@
 
 package org.kapott.hbci.comm;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.kapott.hbci.manager.HBCIUtils;
+@Slf4j
+public class HBCI4JavaLogOutputStream extends OutputStream {
 
-public class HBCI4JavaLogOutputStream
-    extends OutputStream
-{
     private ByteArrayOutputStream logdata;
-    
-    public HBCI4JavaLogOutputStream()
-    {
-        this.logdata=new ByteArrayOutputStream();
+
+    public HBCI4JavaLogOutputStream() {
+        this.logdata = new ByteArrayOutputStream();
     }
-    
-    public void write(int b)
-    {
+
+    public void write(int b) {
         this.logdata.write(b);
     }
 
-    public void write(byte[] b, int off, int len)
-    {
+    public void write(byte[] b, int off, int len) {
         this.logdata.write(b, off, len);
     }
 
     public void write(byte[] b)
-        throws IOException
-    {
+            throws IOException {
         this.logdata.write(b);
     }
 
     public void close()
-        throws IOException
-    {
+            throws IOException {
         this.logdata.flush();
         this.logdata.close();
     }
 
     public void flush()
-        throws IOException
-    {
-        if (this.logdata.size()!=0) {
-            HBCIUtils.log("socket log: "+this.logdata.toString(Comm.ENCODING), HBCIUtils.LOG_DEBUG2);
+            throws IOException {
+        if (this.logdata.size() != 0) {
+            log.debug("socket log: " + this.logdata.toString(CommPinTan.ENCODING));
         }
         this.logdata.reset();
     }
