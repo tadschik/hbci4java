@@ -49,7 +49,7 @@ public final class Crypt {
     public final static String ENC_KEYTYPE_RSA = "6";
     public final static String ENC_KEYTYPE_DDV = "5";
 
-    HBCIPassportInternal passport;
+    private HBCIPassportInternal passport;
 
     private String u_secfunc;    // 4=normal; 998=klartext
     private String u_keytype;    // 5=ddv, 6=rdh
@@ -116,8 +116,7 @@ public final class Crypt {
         Message newmsg = msg;
 
         if (passport.hasInstEncKey()) {
-            String msgName = msg.getName();
-            Node msgNode = msg.getSyntaxDef(msgName, msg.getDocument());
+            Node msgNode = passport.getSyntaxDef(msg.getName());
             String dontcryptAttr = ((Element) msgNode).getAttribute("dontcrypt");
 
             if (dontcryptAttr.length() == 0) {
@@ -167,8 +166,8 @@ public final class Crypt {
                     }
 
                     newmsg.propagateValue(newmsg.getPath() + ".MsgTail.SegHead.seq", segnum,
-                            SyntaxElement.DONT_TRY_TO_CREATE,
-                            SyntaxElement.ALLOW_OVERWRITE);
+                        SyntaxElement.DONT_TRY_TO_CREATE,
+                        SyntaxElement.ALLOW_OVERWRITE);
                     newmsg.autoSetMsgSize();
                 } catch (Exception ex) {
                     throw new HBCI_Exception("*** error while encrypting", ex);
@@ -195,13 +194,13 @@ public final class Crypt {
                 // key extrahieren
                 SEG crypthead = (SEG) childs.get(1).getElements().get(0);
                 byte[] cryptedkey = crypthead.getValueOfDE(msgName +
-                        ".CryptHead.CryptAlg.enckey").getBytes(CommPinTan.ENCODING);
+                    ".CryptHead.CryptAlg.enckey").getBytes(CommPinTan.ENCODING);
 
                 // neues secfunc (klartext/encrypted)
                 String secfunc = crypthead.getValueOfDE(msgName + ".CryptHead.secfunc");
                 if (!secfunc.equals(passport.getCryptFunction())) {
                     String errmsg = HBCIUtils.getLocMsg("EXCMSG_CRYPTSFFAIL", new Object[]{secfunc,
-                            passport.getCryptFunction()});
+                        passport.getCryptFunction()});
                     throw new HBCI_Exception(errmsg);
                 }
 
@@ -220,8 +219,8 @@ public final class Crypt {
                 // neuen nachrichtenstring zusammenbauen
                 StringBuffer ret = new StringBuffer(1024);
                 ret.append(msghead.toString(0)).
-                        append(new String(plainMsg, 0, plainMsg.length - padLength, CommPinTan.ENCODING)).
-                        append(msgtail.toString(0));
+                    append(new String(plainMsg, 0, plainMsg.length - padLength, CommPinTan.ENCODING)).
+                    append(msgtail.toString(0));
 
                 log.debug("decrypted message: " + ret);
 

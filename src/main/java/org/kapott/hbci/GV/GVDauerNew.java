@@ -27,9 +27,8 @@ import org.kapott.hbci.passport.HBCIPassportInternal;
 import org.kapott.hbci.status.HBCIMsgStatus;
 
 import java.text.DecimalFormat;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Properties;
+import java.util.Map;
 
 public final class GVDauerNew extends AbstractHBCIJob {
 
@@ -59,7 +58,7 @@ public final class GVDauerNew extends AbstractHBCIJob {
         // TODO: aussetzung fehlt
         // TODO: addkey fehlt
 
-        HashMap<String, String> parameters = getJobRestrictions();
+        Map<String, String> parameters = getJobRestrictions();
         int maxusage = Integer.parseInt(parameters.get("maxusage"));
 
         for (int i = 0; i < maxusage; i++) {
@@ -73,26 +72,19 @@ public final class GVDauerNew extends AbstractHBCIJob {
     }
 
     protected void extractResults(HBCIMsgStatus msgstatus, String header, int idx) {
-        HashMap<String, String> result = msgstatus.getData();
+        Map<String, String> result = msgstatus.getData();
         String orderid = result.get(header + ".orderid");
         ((GVRDauerNew) (jobResult)).setOrderId(orderid);
 
         if (orderid != null && orderid.length() != 0) {
-            Properties p = getLowlevelParams();
-            Properties p2 = new Properties();
-
-            for (Enumeration e = p.propertyNames(); e.hasMoreElements(); ) {
-                String key = (String) e.nextElement();
-                p2.setProperty(key.substring(key.indexOf(".") + 1),
-                        p.getProperty(key));
-            }
-
-            passport.setPersistentData("dauer_" + orderid, p2);
+            HashMap<String, String> p2 = new HashMap<>();
+            getLowlevelParams().forEach((key, value) ->
+                p2.put(key.substring(key.indexOf(".") + 1), value));
         }
     }
 
     public void setParam(String paramName, String value) {
-        HashMap<String, String> res = getJobRestrictions();
+        Map<String, String> res = getJobRestrictions();
 
         if (paramName.equals("timeunit")) {
             if (!(value.equals("W") || value.equals("M"))) {
@@ -100,7 +92,7 @@ public final class GVDauerNew extends AbstractHBCIJob {
                 throw new InvalidUserDataException(msg);
             }
         } else if (paramName.equals("turnus")) {
-            String timeunit = getLowlevelParams().getProperty(getName() + ".DauerDetails.timeunit");
+            String timeunit = getLowlevelParams().get(getName() + ".DauerDetails.timeunit");
 
             if (timeunit != null) {
                 if (timeunit.equals("W")) {
@@ -128,7 +120,7 @@ public final class GVDauerNew extends AbstractHBCIJob {
                 }
             }
         } else if (paramName.equals("execday")) {
-            String timeunit = getLowlevelParams().getProperty(getName() + ".DauerDetails.timeunit");
+            String timeunit = getLowlevelParams().get(getName() + ".DauerDetails.timeunit");
 
             if (timeunit != null) {
                 if (timeunit.equals("W")) {

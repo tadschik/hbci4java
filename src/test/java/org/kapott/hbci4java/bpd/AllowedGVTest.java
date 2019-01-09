@@ -1,10 +1,8 @@
 package org.kapott.hbci4java.bpd;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import org.kapott.hbci.manager.HBCIKernel;
-import org.kapott.hbci.manager.HBCIUtils;
-import org.kapott.hbci.manager.MessageFactory;
 import org.kapott.hbci.protocol.Message;
 import org.kapott.hbci.rewrite.Rewrite;
 import org.kapott.hbci4java.AbstractTest;
@@ -28,7 +26,7 @@ public class AllowedGVTest extends AbstractTest {
             String rewriterName = tok.nextToken().trim();
             if (rewriterName.length() != 0) {
                 Class cl = this.getClass().getClassLoader().loadClass("org.kapott.hbci.rewrite.R" +
-                        rewriterName);
+                    rewriterName);
                 Constructor con = cl.getConstructor((Class[]) null);
                 Rewrite rewriter = (Rewrite) (con.newInstance((Object[]) null));
                 al.add(rewriter);
@@ -39,10 +37,10 @@ public class AllowedGVTest extends AbstractTest {
         // alle patches für die unverschlüsselte nachricht durchlaufen
         String newmsgstring = data;
         for (int i = 0; i < rewriters.length; i++) {
-            newmsgstring = rewriters[i].incomingClearText(newmsgstring, null);
+            newmsgstring = rewriters[i].incomingClearText(newmsgstring, null, "Synch");
         }
 
-        Message msg = new Message("SynchRes", newmsgstring, newmsgstring.length(), null, Message.CHECK_SEQ, true);
+        Message msg = new Message("SynchRes", newmsgstring, null, Message.CHECK_SEQ, true);
         HashMap<String, String> ht = new HashMap<>();
         msg.extractValues(ht);
     }
@@ -61,7 +59,7 @@ public class AllowedGVTest extends AbstractTest {
             String rewriterName = tok.nextToken().trim();
             if (rewriterName.length() != 0) {
                 Class cl = this.getClass().getClassLoader().loadClass("org.kapott.hbci.rewrite.R" +
-                        rewriterName);
+                    rewriterName);
                 Constructor con = cl.getConstructor((Class[]) null);
                 Rewrite rewriter = (Rewrite) (con.newInstance((Object[]) null));
                 al.add(rewriter);
@@ -72,10 +70,10 @@ public class AllowedGVTest extends AbstractTest {
         // alle patches für die unverschlüsselte nachricht durchlaufen
         String newmsgstring = data;
         for (int i = 0; i < rewriters.length; i++) {
-            newmsgstring = rewriters[i].incomingClearText(newmsgstring, null);
+            newmsgstring = rewriters[i].incomingClearText(newmsgstring, null, "Synch");
         }
 
-        Message msg = new Message("SynchRes", newmsgstring, newmsgstring.length(), null, Message.CHECK_SEQ, true);
+        Message msg = new Message("SynchRes", newmsgstring, null, Message.CHECK_SEQ, true);
         HashMap<String, String> ht = new HashMap<>();
         msg.extractValues(ht);
 

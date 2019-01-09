@@ -21,14 +21,12 @@
 package org.kapott.hbci.GV;
 
 import org.kapott.hbci.GV_Result.GVRTermUebEdit;
-import org.kapott.hbci.exceptions.InvalidUserDataException;
 import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.passport.HBCIPassportInternal;
 import org.kapott.hbci.status.HBCIMsgStatus;
 
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Properties;
+import java.util.Map;
 
 public final class GVTermUebEdit extends AbstractHBCIJob {
 
@@ -52,7 +50,7 @@ public final class GVTermUebEdit extends AbstractHBCIJob {
         addConstraint("name2", "name2", "");
         addConstraint("key", "key", "51");
 
-        HashMap<String, String> parameters = getJobRestrictions();
+        Map<String, String> parameters = getJobRestrictions();
         int maxusage = Integer.parseInt(parameters.get("maxusage"));
 
         for (int i = 0; i < maxusage; i++) {
@@ -73,41 +71,39 @@ public final class GVTermUebEdit extends AbstractHBCIJob {
         ((GVRTermUebEdit) (jobResult)).setOrderIdOld(result.get(header + ".orderidold"));
 
         if (orderid != null && orderid.length() != 0) {
-            Properties p = getLowlevelParams();
-            Properties p2 = new Properties();
+            HashMap<String, String> p = getLowlevelParams();
+            HashMap<String, String> p2 = new HashMap<>();
 
-            for (Enumeration e = p.propertyNames(); e.hasMoreElements(); ) {
-                String key = (String) e.nextElement();
+            for (String key : p.keySet()) {
                 if (!key.endsWith(".id")) {
-                    p2.setProperty(key.substring(key.indexOf(".") + 1),
-                            p.getProperty(key));
+                    p2.put(key.substring(key.indexOf(".") + 1),
+                        p.get(key));
                 }
             }
 
-            passport.setPersistentData("termueb_" + orderid, p2);
+//TODO            passport.setPersistentData("termueb_" + orderid, p2);
         }
     }
 
     public void setParam(String paramName, String value) {
         super.setParam(paramName, value);
 
-        if (paramName.equals("orderid")) {
-            Properties p = (Properties) passport.getPersistentData("termueb_" + value);
-            if (p == null) {
-                String msg = HBCIUtils.getLocMsg("EXCMSG_NOSUCHSCHEDTRANS", value);
-                throw new InvalidUserDataException(msg);
-            }
-
-            for (Enumeration e = p.propertyNames(); e.hasMoreElements(); ) {
-                String key = (String) e.nextElement();
-                String key2 = getName() + "." + key;
-
-                if (getLowlevelParams().getProperty(key2) == null) {
-                    setLowlevelParam(key2,
-                            p.getProperty(key));
-                }
-            }
-        }
+//TODO
+//        if (paramName.equals("orderid")) {
+//            HashMap<String, String> p = (HashMap<String, String>) passport.getPersistentData("termueb_" + value);
+//            if (p == null) {
+//                String msg = HBCIUtils.getLocMsg("EXCMSG_NOSUCHSCHEDTRANS", value);
+//                throw new InvalidUserDataException(msg);
+//            }
+//
+//            p.forEach((key, obj) -> {
+//                String key2 = getName() + "." + key;
+//
+//                if (getLowlevelParams().get(key2) == null) {
+//                    setLowlevelParam(key2, obj);
+//                }
+//            });
+//        }
     }
 
     public void verifyConstraints() {

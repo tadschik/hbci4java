@@ -22,10 +22,13 @@ package org.kapott.hbci.passport;
 
 import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.manager.HBCIKey;
+import org.kapott.hbci.manager.HBCIProduct;
+import org.kapott.hbci.manager.HBCITwoStepMechanism;
 import org.kapott.hbci.status.HBCIMsgStatus;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Interface, welches alle Passport-Varianten implementieren müssen.
@@ -51,24 +54,6 @@ public interface HBCIPassportInternal extends HBCIPassport {
     void setInstSigKey(HBCIKey key);
 
     void setInstEncKey(HBCIKey key);
-
-    void clearMySigKey();
-
-    void clearMyEncKey();
-
-    void clearMyDigKey();
-
-    void setMyPublicSigKey(HBCIKey key);
-
-    void setMyPrivateSigKey(HBCIKey key);
-
-    void setMyPublicEncKey(HBCIKey key);
-
-    void setMyPrivateEncKey(HBCIKey key);
-
-    void setMyPublicDigKey(HBCIKey key);
-
-    void setMyPrivateDigKey(HBCIKey key);
 
     String getInstEncKeyName();
 
@@ -104,28 +89,24 @@ public interface HBCIPassportInternal extends HBCIPassport {
 
     String getHashAlg();
 
-    void setBPD(HashMap<String, String> bpd);
+    void setBPD(Map<String, String> bpd);
 
-    void setUPD(HashMap<String, String> upd);
+    void setUPD(Map<String, String> upd);
 
     void incSigId();
 
-    HashMap<String, String> getParamSegmentNames();
+    Map<String, String> getParamSegmentNames();
 
-    HashMap<String, String> getJobRestrictions(String specname);
+    Map<String, String> getJobRestrictions(String specname);
 
-    HashMap<String, String> getJobRestrictions(String gvname, String version);
-
-    void setPersistentData(String id, Object o);
-
-    Object getPersistentData(String id);
+    Map<String, String> getJobRestrictions(String gvname, String version);
 
     /* Diese Methode wird nach jeder Dialog-Initialisierung aufgerufen. Ein
-     * Passport-Objekt kann den Status der Response mit Hilfe von msgStatus
+     * Passport-Objekt kann den Status der Response mit Hilfe von msgStatusList
      * auswerten. Durch Zurückgeben von "true" wird angezeigt, dass eine
      * erneute Dialog-Initialisierung stattfinden sollte (z.B. weil sich grund-
      * legende Zugangsdaten geändert haben, secMechs neu festgelegt wurden o.ä.) */
-    boolean postInitResponseHook(HBCIMsgStatus msgStatus);
+    void postInitResponseHook(HBCIMsgStatus msgStatus);
 
     /* Gibt zurück, wieviele GV-Segmente in einer Nachricht enthalten sein dürfen.
      * Normalerweise wird das schon durch die BPD bzw. die Job-Params festgelegt,
@@ -141,7 +122,7 @@ public interface HBCIPassportInternal extends HBCIPassport {
      */
     int getMaxGVSegsPerMsg();
 
-    HashMap<String, String> getProperties();
+    Map<String, String> getProperties();
 
     HBCICallback getCallback();
 
@@ -151,11 +132,21 @@ public interface HBCIPassportInternal extends HBCIPassport {
 
     byte[] decrypt(byte[] cryptedkey, byte[] cryptedstring);
 
-    byte[] sign(byte[] hashresult);
+    Map<String, String> getSupportedLowlevelJobs();
 
-    HashMap<String, String> getSupportedLowlevelJobs(Document document);
-
-    HashMap<String, String> getLowlevelJobRestrictions(String gvname, Document document);
+    Map<String, String> getLowlevelJobRestrictions(String gvname);
 
     Document getSyntaxDocument();
+
+    Node getSyntaxDef(String name);
+
+    Object getPinTanInfo(String hbciCode);
+
+    String getOrderHashMode(int segVersion);
+
+    String getPIN();
+
+    HBCIProduct getHbciProduct();
+
+    HBCITwoStepMechanism getCurrentSecMechInfo();
 }

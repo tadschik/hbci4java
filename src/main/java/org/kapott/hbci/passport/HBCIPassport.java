@@ -20,10 +20,12 @@
 
 package org.kapott.hbci.passport;
 
+import org.kapott.hbci.GV_Result.GVRTANMediaList;
 import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.structures.Konto;
 
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>Public Interface für HBCI-Passports. Ein HBCI-Passport ist eine Art "Ausweis",
@@ -68,7 +70,7 @@ public interface HBCIPassport {
      * @return die Bankparamterdaten oder <code>null</code>, falls diese nicht im
      * Passport vorhanden sind
      */
-    HashMap<String, String> getBPD();
+    Map<String, String> getBPD();
 
     /**
      * Gibt die HBCI-Version zurück, die zuletzt verwendet wurde. Der hier zurückgegebene
@@ -92,7 +94,7 @@ public interface HBCIPassport {
      * @return die Userparameterdaten oder <code>null</code>, falls diese nicht im
      * Passport vorhanden sind
      */
-    HashMap<String, String> getUPD();
+    Map<String, String> getUPD();
 
     /**
      * <p>Gibt die Bankleitzahl des Kreditinstitutes zurück. Bei Verwendung dieser Methode
@@ -131,7 +133,7 @@ public interface HBCIPassport {
      *
      * @return Array mit Kontoinformationen über verfügbare HBCI-Konten
      */
-    Konto[] getAccounts();
+    List<Konto> getAccounts();
 
     /**
      * Ausfüllen fehlender Kontoinformationen. In der Liste der verfügbaren Konten (siehe
@@ -146,21 +148,6 @@ public interface HBCIPassport {
      *                werden
      */
     void fillAccountInfo(Konto account);
-
-    /**
-     * Gibt ein Konto-Objekt zu einer bestimmten Kontonummer zurück. Dazu wird die Liste, die via
-     * {@link #getAccounts()} erzeugt wird, nach der Kontonummer durchsucht. Es wird in
-     * jedem Fall ein nicht-leeres Kontoobjekt zurückgegeben. Wird die Kontonummer jedoch nicht in
-     * der Liste gefunden, so wird das Konto-Objekt aus den "allgemeinen" Bank-Daten gebildet:
-     * Kontonummer=<code>number</code>; Länderkennung, BLZ und Kunden-ID aus dem Passport-Objekt;
-     * Währung des Kontos hart auf "EUR"; Name=Kunden-ID.
-     *
-     * @param number die Kontonummer, für die ein Konto-Objekt erzeugt werden soll
-     * @return ein Konto-Objekt, welches mindestens die Kontonummer enthält. Wenn
-     * verfügbar, so sind auch die restlichen Informationen über dieses Konto (BLZ,
-     * Inhaber, Währung usw.) ausgefüllt
-     */
-    Konto getAccount(String number);
 
     /**
      * Gibt den Hostnamen des HBCI-Servers für dieses Passport zurück. Handelt es sich bei
@@ -226,8 +213,6 @@ public interface HBCIPassport {
      */
     void setCustomerId(String customerid);
 
-    boolean isSupported();
-
     boolean hasInstSigKey();
 
     boolean hasInstEncKey();
@@ -269,15 +254,11 @@ public interface HBCIPassport {
 
     String getDefaultLang();
 
-    HashMap<String, String> getProperties();
+    Map<String, String> getProperties();
 
     HBCICallback getCallback();
 
-    void setPersistentData(String s, Object p2);
-
-    HashMap<String, String> getJobRestrictions(String name);
-
-    Object getPersistentData(String s);
+    Map<String, String> getJobRestrictions(String name);
 
     String getProxy();
 
@@ -288,4 +269,10 @@ public interface HBCIPassport {
     Object getCryptFunction();
 
     byte[] decrypt(byte[] cryptedkey, byte[] cryptedstring);
+
+    List<GVRTANMediaList.TANMediaInfo> getTanMedias();
+
+    void setTanMedias(List<GVRTANMediaList.TANMediaInfo> tanMedias);
+
+    boolean jobSupported(String jobName);
 }

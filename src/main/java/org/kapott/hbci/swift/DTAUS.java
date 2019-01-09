@@ -257,11 +257,11 @@ public class DTAUS {
         ret.append(expand("", 5, (byte) 0x20, ALIGN_LEFT));
         ret.append(expand(Integer.toString(entries.size()), 7, (byte) 0x30, ALIGN_RIGHT));
         ret.append(expand(Long.toString(curr == CURR_DM ? sumDM : 0),
-                13, (byte) 0x30, ALIGN_RIGHT));
+            13, (byte) 0x30, ALIGN_RIGHT));
         ret.append(expand(Long.toString(sumNumber), 17, (byte) 0x30, ALIGN_RIGHT));
         ret.append(expand(Long.toString(sumBLZ), 17, (byte) 0x30, ALIGN_RIGHT));
         ret.append(expand(Long.toString(curr == CURR_EUR ? sumEUR : 0),
-                13, (byte) 0x30, ALIGN_RIGHT));
+            13, (byte) 0x30, ALIGN_RIGHT));
         ret.append(expand("", 51, (byte) 0x20, ALIGN_LEFT));
 
         return ret.toString();
@@ -485,7 +485,7 @@ public class DTAUS {
          * Feld mit '51' vorbelegt, bei Sammellastschriften mit '05'. Dieser
          * Wert kann überschrieben werden, gültige Werte finden sich in den
          * Job-Restrictions
-         * (siehe {@link org.kapott.hbci.GV.HBCIJob#getJobRestrictions()}).
+         * (siehe {@link org.kapott.hbci.GV.AbstractHBCIJob#getJobRestrictions()}).
          */
         public String key;
 

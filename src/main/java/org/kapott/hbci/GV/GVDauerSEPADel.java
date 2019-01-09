@@ -4,20 +4,18 @@ import org.kapott.hbci.GV_Result.GVRDauerEdit;
 import org.kapott.hbci.exceptions.InvalidUserDataException;
 import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.passport.HBCIPassportInternal;
-import org.kapott.hbci.sepa.PainVersion;
-import org.kapott.hbci.sepa.PainVersion.Type;
+import org.kapott.hbci.sepa.SepaVersion;
 import org.kapott.hbci.status.HBCIMsgStatus;
 
 import java.text.DecimalFormat;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Properties;
+import java.util.Map;
 
 public class GVDauerSEPADel extends AbstractSEPAGV {
 
-    private final static PainVersion DEFAULT = PainVersion.PAIN_001_001_02;
+    private final static SepaVersion DEFAULT = SepaVersion.PAIN_001_001_02;
 
-    public GVDauerSEPADel(HBCIPassportInternal passport) {
+    public GVDauerSEPADel(HBCIPassportInternal passport, String pain) {
         super(passport, getLowlevelName(), new GVRDauerEdit(passport));
 
         addConstraint("src.bic", "My.bic", null);
@@ -32,7 +30,11 @@ public class GVDauerSEPADel extends AbstractSEPAGV {
         }
 
         addConstraint("_sepadescriptor", "sepadescr", this.getPainVersion().getURN());
-        addConstraint("_sepapain", "sepapain", null);
+        if (pain == null) {
+            addConstraint("_sepapain", "sepapain", null);
+        } else {
+            setPainXml(pain);
+        }
         addConstraint("orderid", "orderid", null);
 
         /* dummy constraints to allow an application to set these values. the
@@ -41,7 +43,7 @@ public class GVDauerSEPADel extends AbstractSEPAGV {
         addConstraint("src.bic", "sepa.src.bic", null);
         addConstraint("src.iban", "sepa.src.iban", null);
         addConstraint("src.name", "sepa.src.name", null);
-        addConstraint("dst.bic", "sepa.dst.bic", null);
+        addConstraint("dst.bic", "sepa.dst.bic", "", true); // Kann eventuell entfallen, da BIC optional
         addConstraint("dst.iban", "sepa.dst.iban", null);
         addConstraint("dst.name", "sepa.dst.name", null);
         addConstraint("btg.value", "sepa.btg.value", null);
@@ -50,8 +52,8 @@ public class GVDauerSEPADel extends AbstractSEPAGV {
         addConstraint("date", "date", "");
 
         //Constraints für die PmtInfId (eindeutige SEPA Message ID) und EndToEndId (eindeutige ID um Transaktion zu identifizieren)
-        addConstraint("sepaid", "sepa.sepaid", getSEPAMessageId());
-        addConstraint("pmtinfid", "sepa.pmtinfid", getSEPAMessageId());
+        addConstraint("sepaid", "sepa.sepaid", getPainMessageId());
+        addConstraint("pmtinfid", "sepa.pmtinfid", getPainMessageId());
         addConstraint("endtoendid", "sepa.endtoendid", ENDTOEND_ID_NOTPROVIDED);
         addConstraint("purposecode", "sepa.purposecode", "");
 
@@ -77,7 +79,7 @@ public class GVDauerSEPADel extends AbstractSEPAGV {
      * @see org.kapott.hbci.GV.AbstractSEPAGV#getDefaultPainVersion()
      */
     @Override
-    protected PainVersion getDefaultPainVersion() {
+    protected SepaVersion getDefaultPainVersion() {
         return DEFAULT;
     }
 
@@ -85,12 +87,12 @@ public class GVDauerSEPADel extends AbstractSEPAGV {
      * @see org.kapott.hbci.GV.AbstractSEPAGV#getPainType()
      */
     @Override
-    protected Type getPainType() {
-        return Type.PAIN_001;
+    protected SepaVersion.Type getPainType() {
+        return SepaVersion.Type.PAIN_001;
     }
 
     public void setParam(String paramName, String value) {
-        HashMap<String, String> res = getJobRestrictions();
+        Map<String, String> res = getJobRestrictions();
 
         if (paramName.equals("timeunit")) {
             if (!(value.equals("W") || value.equals("M"))) {
@@ -98,7 +100,7 @@ public class GVDauerSEPADel extends AbstractSEPAGV {
                 throw new InvalidUserDataException(msg);
             }
         } else if (paramName.equals("turnus")) {
-            String timeunit = getLowlevelParams().getProperty(getName() + ".DauerDetails.timeunit");
+            String timeunit = getLowlevelParams().get(getName() + ".DauerDetails.timeunit");
 
             if (timeunit != null) {
                 if (timeunit.equals("W")) {
@@ -126,7 +128,7 @@ public class GVDauerSEPADel extends AbstractSEPAGV {
                 }
             }
         } else if (paramName.equals("execday")) {
-            String timeunit = getLowlevelParams().getProperty(getName() + ".DauerDetails.timeunit");
+            String timeunit = getLowlevelParams().get(getName() + ".DauerDetails.timeunit");
 
             if (timeunit != null) {
                 if (timeunit.equals("W")) {
@@ -161,16 +163,11 @@ public class GVDauerSEPADel extends AbstractSEPAGV {
         ((GVRDauerEdit) (jobResult)).setOrderIdOld(result.get(header + ".orderidold"));
 
         if (orderid != null && orderid.length() != 0) {
-            Properties p = getLowlevelParams();
-            Properties p2 = new Properties();
+            HashMap<String, String> p2 = new HashMap<>();
+            getLowlevelParams().forEach((key, value) ->
+                p2.put(key.substring(key.indexOf(".") + 1), value));
 
-            for (Enumeration e = p.propertyNames(); e.hasMoreElements(); ) {
-                String key = (String) e.nextElement();
-                p2.setProperty(key.substring(key.indexOf(".") + 1),
-                        p.getProperty(key));
-            }
-
-            passport.setPersistentData("dauer_" + orderid, p2);
+//TODO            passport.setPersistentData("dauer_" + orderid, p2);
         }
     }
 

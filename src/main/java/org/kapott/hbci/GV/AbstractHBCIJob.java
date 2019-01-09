@@ -37,9 +37,12 @@ import org.kapott.hbci.status.HBCIRetVal;
 import org.kapott.hbci.structures.Konto;
 import org.kapott.hbci.structures.Value;
 
+import java.security.MessageDigest;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.kapott.hbci.comm.CommPinTan.ENCODING;
 
 @Slf4j
 public class AbstractHBCIJob {
@@ -49,14 +52,14 @@ public class AbstractHBCIJob {
     protected HBCIPassportInternal passport;
     private String name;              /* Job-Name mit Versionsnummer */
     private String jobName;           /* Job-Name ohne Versionsnummer */
-    private String segVersion;        /* Segment-Version */
-    private Properties llParams;       /* Eingabeparameter für diesen GV (Saldo.KTV.number) */
+    private int segVersion;        /* Segment-Version */
+    private HashMap<String, String> llParams;       /* Eingabeparameter für diesen GV (Saldo.KTV.number) */
     private int idx;                  /* idx gibt an, der wievielte task innerhalb der aktuellen message
                                          dieser GV ist */
     private boolean executed;
     private int contentCounter;       /* Zähler, wie viele Rückgabedaten bereits in outStore eingetragen wurden
                                            (entspricht der anzahl der antwort-segmente!)*/
-    private Hashtable<String, String[][]> constraints;    /* Festlegungen, welche Parameter eine Anwendung setzen muss, wie diese im
+    private HashMap<String, String[][]> constraints;    /* Festlegungen, welche Parameter eine Anwendung setzen muss, wie diese im
                                          HBCI-Kernel umgesetzt werden und welche default-Werte vorgesehen sind;
                                          die Hashtable hat als Schlüssel einen String, der angibt, wie ein Wert aus einer
                                          Anwendung heraus zu setzen ist. Der dazugehörige Value ist ein Array. Jedes Element
@@ -65,19 +68,18 @@ public class AbstractHBCIJob {
                                          default-Wert an, falls für diesen Namen *kein* Wert angebeben wurde. Ist der default-
                                          Wert="", so kann das Syntaxelement weggelassen werden. Ist der default-Wert=null,
                                          so *muss* die Anwendung einen Wert spezifizieren */
-    private String externalId;
     private HashSet<String> indexedConstraints;
 
     public AbstractHBCIJob(HBCIPassportInternal passport, String jobnameLL, HBCIJobResultImpl jobResult) {
         this.passport = passport;
 
         findSpecNameForGV(jobnameLL);
-        this.llParams = new Properties();
+        this.llParams = new HashMap();
 
         this.jobResult = jobResult;
 
         this.contentCounter = 0;
-        this.constraints = new Hashtable<>();
+        this.constraints = new HashMap<>();
         this.indexedConstraints = new HashSet<>();
         this.executed = false;
 
@@ -88,7 +90,7 @@ public class AbstractHBCIJob {
            wenn es *nicht* benoetigt wird, schadet es auch nichts. und es ist
            auf keinen fall "zu viel" gesetzt, da dieser code nur ausgefuehrt wird,
            wenn das jeweilige segment tatsaechlich erzeugt werden soll */
-        llParams.setProperty(this.name, "requested");
+        llParams.put(this.name, "requested");
     }
 
     /* gibt den segmentcode für diesen job zurück */
@@ -156,25 +158,16 @@ public class AbstractHBCIJob {
         // nationalen Kontoverbindung, verlangen sie anschliessend aber. Ein Fehler der
         // Bank. Siehe http://www.onlinebanking-forum.de/forum/topic.php?p=86444#real86444
 
-        Object o = passport.getPersistentData("cannationalacc");
-        if (o != null) {
-            String s = o.toString();
-            log.info("value of \"cannationalacc\" overwritten in passport, value: " + s);
-            return s.equalsIgnoreCase("J");
-        }
-
-
         log.debug("searching for value of \"cannationalacc\" in HISPAS");
 
         // Ansonsten suchen wir in HISPAS - aber nur, wenn wir die Daten schon haben
-        if (passport.getSupportedLowlevelJobs(passport.getSyntaxDocument()).get("SEPAInfo") == null) {
+        if (!passport.jobSupported("SEPAInfo")) {
             log.info("no HISPAS data found");
             return false; // Ne, noch nicht. Dann lassen wir das erstmal weg
         }
 
-
         // SEPAInfo laden und darüber iterieren
-        HashMap<String, String> props = passport.getLowlevelJobRestrictions("SEPAInfo", passport.getSyntaxDocument());
+        Map<String, String> props = passport.getLowlevelJobRestrictions("SEPAInfo");
         String value = props.get("cannationalacc");
         log.debug("cannationalacc=" + value);
         return value != null && value.equalsIgnoreCase("J");
@@ -188,7 +181,7 @@ public class AbstractHBCIJob {
         StringBuilder key = new StringBuilder();
 
         // alle param-segmente durchlaufen
-        HashMap<String, String> bpd = passport.getBPD();
+        Map<String, String> bpd = passport.getBPD();
         for (String path : bpd.keySet()) {
             key.setLength(0);
             key.append(path);
@@ -198,7 +191,7 @@ public class AbstractHBCIJob {
                 // wenn segment mit namen des aktuellen jobs gefunden wurde
 
                 if (key.indexOf(jobnameLL + "Par") == 0 &&
-                        key.toString().endsWith(".SegHead.code")) {
+                    key.toString().endsWith(".SegHead.code")) {
                     // willuhn 2011-06-06 Maximal zulaessige Segment-Version ermitteln
                     // Hintergrund: Es gibt Szenarien, in denen nicht die hoechste verfuegbare
                     // Versionsnummer verwendet werden kann, weil die Voraussetzungen impliziert,
@@ -244,7 +237,7 @@ public class AbstractHBCIJob {
 
         // namen+versionsnummer speichern
         this.jobName = jobnameLL;
-        this.segVersion = Integer.toString(maxVersion);
+        this.segVersion = maxVersion;
         this.name = jobnameLL + this.segVersion;
     }
 
@@ -274,10 +267,8 @@ public class AbstractHBCIJob {
                 }
             }
         }
-
         return ret;
     }
-
 
     protected void addConstraint(String frontendName, String destinationName, String defValue) {
         addConstraint(frontendName, destinationName, defValue, false);
@@ -294,7 +285,7 @@ public class AbstractHBCIJob {
         String[][] values = (constraints.get(frontendName));
 
         if (values == null) {
-            // wenn es noch keine gibt, ein neues frontend-ding anlegen //FIXME: was ist ein "frontend-ding"?
+            // wenn es noch keine gibt, ein neues frontend-ding anlegen
             values = new String[1][];
             values[0] = value;
         } else {
@@ -363,16 +354,15 @@ public class AbstractHBCIJob {
         SEG seg;
         try {
             seg = new SEG(getName(), getName(), null, 0, passport.getSyntaxDocument());
-            for (Enumeration e = getLowlevelParams().propertyNames(); e.hasMoreElements(); ) {
-                String key = (String) e.nextElement();
-                String value = getLowlevelParams().getProperty(key);
+            getLowlevelParams().forEach((key, value) -> {
                 seg.propagateValue(key, value,
-                        SyntaxElement.TRY_TO_CREATE,
-                        SyntaxElement.DONT_ALLOW_OVERWRITE);
-            }
+                    SyntaxElement.TRY_TO_CREATE,
+                    SyntaxElement.DONT_ALLOW_OVERWRITE);
+            });
+
             seg.propagateValue(getName() + ".SegHead.seq", Integer.toString(segnum),
-                    SyntaxElement.DONT_TRY_TO_CREATE,
-                    SyntaxElement.ALLOW_OVERWRITE);
+                SyntaxElement.DONT_TRY_TO_CREATE,
+                SyntaxElement.ALLOW_OVERWRITE);
         } catch (Exception ex) {
             throw new HBCI_Exception("*** the job segment for this task can not be created", ex);
         }
@@ -396,7 +386,7 @@ public class AbstractHBCIJob {
      *
      * @return Properties-Objekt mit den einzelnen Restriktionen
      */
-    public HashMap<String, String> getJobRestrictions() {
+    public Map<String, String> getJobRestrictions() {
         return passport.getJobRestrictions(name);
     }
 
@@ -569,7 +559,7 @@ public class AbstractHBCIJob {
 
     protected void setLowlevelParam(String key, String value) {
         log.debug("setting lowlevel parameter " + key + " = " + value);
-        llParams.setProperty(key, value);
+        llParams.put(key, value);
     }
 
     /**
@@ -582,16 +572,16 @@ public class AbstractHBCIJob {
      *
      * @return aktuelle gesetzte Lowlevel-Parameter für diesen Job
      */
-    public Properties getLowlevelParams() {
+    public HashMap<String, String> getLowlevelParams() {
         return llParams;
     }
 
-    public void setLowlevelParams(Properties llParams) {
+    public void setLowlevelParams(HashMap<String, String> llParams) {
         this.llParams = llParams;
     }
 
     public String getLowlevelParam(String key) {
-        return getLowlevelParams().getProperty(key);
+        return getLowlevelParams().get(key);
     }
 
     public void setIdx(int idx) {
@@ -602,7 +592,7 @@ public class AbstractHBCIJob {
         return name;
     }
 
-    public String getSegVersion() {
+    public int getSegVersion() {
         return this.segVersion;
     }
 
@@ -618,15 +608,15 @@ public class AbstractHBCIJob {
      *
      * @param version die neue Versionsnummer.
      */
-    public void setSegVersion(String version) {
-        if (version == null || version.length() == 0) {
+    public void setSegVersion(int version) {
+        if (version < 1) {
             log.warn("tried to change segment version for task " + this.jobName + " explicit, but no version given");
             return;
         }
 
         // Wenn sich die Versionsnummer nicht geaendert hat, muessen wir die
         // Huehner ja nicht verrueckt machen ;)
-        if (version.equals(this.segVersion))
+        if (version == this.segVersion)
             return;
 
         log.info("changing segment version for task " + this.jobName + " explicit from " + this.segVersion + " to " + version);
@@ -645,17 +635,14 @@ public class AbstractHBCIJob {
                 continue; // nicht betroffen
 
             // Alten Schluessel entfernen und neuen einfuegen
-            String value = this.llParams.getProperty(s);
+            String value = this.llParams.get(s);
             String newName = s.replaceFirst(oldName, this.name);
             this.llParams.remove(s);
-            this.llParams.setProperty(newName, value);
+            this.llParams.put(newName, value);
         }
 
         // Destination-Namen in den LowLevel-Parameter auf den neuen Namen umbiegen
-        Enumeration<String> e = constraints.keys();
-        while (e.hasMoreElements()) {
-            String frontendName = e.nextElement();
-            String[][] values = constraints.get(frontendName);
+        constraints.forEach((frontendName, values) -> {
             for (String[] value : values) {
                 // value[0] ist das Target
                 if (!value[0].startsWith(oldName))
@@ -664,37 +651,31 @@ public class AbstractHBCIJob {
                 // Hier ersetzen wir z.Bsp. "TAN2Step5.process" gegen "TAN2Step3.process"
                 value[0] = value[0].replaceFirst(oldName, this.name);
             }
-        }
+        });
     }
 
     /* stellt fest, ob für diesen Task ein neues Auftragssegment generiert werden muss.
        Das ist in zwei Fällen der Fall: der Task wurde noch nie ausgeführt; oder der Task
        wurde bereits ausgeführt, hat aber eine "offset"-Meldung zurückgegeben */
     public boolean needsContinue(int loop) {
-        boolean needs = false;
+        if (!executed) {
+            return true;
+        }
 
-        if (executed) {
-            HBCIRetVal retval;
-            int num = jobResult.getRetNumber();
-
-            for (int i = 0; i < num; i++) {
-                retval = jobResult.getRetVal(i);
-
-                if (retval.code.equals("3040") && retval.params.length != 0 && (--loop) == 0) {
-                    needs = true;
-                    break;
-                }
+        for (HBCIRetVal retval : jobResult.getJobStatus().getRetVals()) {
+            if (retval.code.equals("3040") && retval.params.length != 0 && (--loop) == 0) {
+                return true;
             }
-        } else needs = true;
+        }
 
-        return needs;
+        return false;
     }
 
     /* gibt (sofern vorhanden) den offset-Wert des letzten HBCI-Rückgabecodes
        zurück */
     private String getContinueOffset(int loop) {
         String ret = null;
-        int num = jobResult.getRetNumber();
+        int num = jobResult.getResultsSize();
 
         for (int i = 0; i < num; i++) {
             HBCIRetVal retval = jobResult.getRetVal(i);
@@ -715,17 +696,15 @@ public class AbstractHBCIJob {
     public void fillJobResult(HBCIMsgStatus status, int offset) {
         try {
             executed = true;
-            HashMap<String, String> result = status.getData();
-
             // nachsehen, welche antwortsegmente ueberhaupt
             // zu diesem task gehoeren
 
             // res-num --> segmentheader (wird für sortierung der
             // antwort-segmente benötigt)
-            Hashtable<Integer, String> keyHeaders = new Hashtable<>();
-            result.keySet().forEach(key -> {
+            HashMap<Integer, String> keyHeaders = new HashMap<>();
+            status.getData().keySet().forEach(key -> {
                 if (key.startsWith("GVRes") && key.endsWith(".SegHead.ref")) {
-                    String segref = result.get(key);
+                    String segref = status.getData().get(key);
                     if ((Integer.parseInt(segref)) - offset == idx) {
                         // nummer des antwortsegments ermitteln
                         int resnum = 0;
@@ -734,13 +713,13 @@ public class AbstractHBCIJob {
                         }
 
                         keyHeaders.put(
-                                resnum,
-                                key.substring(0, key.length() - (".SegHead.ref").length()));
+                            resnum,
+                            key.substring(0, key.length() - (".SegHead.ref").length()));
                     }
                 }
             });
 
-            saveBasicValues(result, idx + offset);
+            saveBasicValues(status.getData(), idx + offset);
             saveReturnValues(status, idx + offset);
 
             // segment-header-namen der antwortsegmente in der reihenfolge des
@@ -778,9 +757,9 @@ public class AbstractHBCIJob {
             jobResult.storeResult("basic.segnum", Integer.toString(ref));
 
             log.debug("basic values for " + getName() + " set to "
-                    + jobResult.getDialogId() + "/"
-                    + jobResult.getMsgNum()
-                    + "/" + jobResult.getSegNum());
+                + jobResult.getDialogId() + "/"
+                + jobResult.getMsgNum()
+                + "/" + jobResult.getSegNum());
         }
     }
 
@@ -820,8 +799,8 @@ public class AbstractHBCIJob {
         result.keySet().forEach(key -> {
             if (key.startsWith(header + ".")) {
                 jobResult.storeResult(HBCIUtils.withCounter("content", idx) +
-                        "." +
-                        key.substring(header.length() + 1), result.get(key));
+                    "." +
+                    key.substring(header.length() + 1), result.get(key));
             }
         });
     }
@@ -857,10 +836,10 @@ public class AbstractHBCIJob {
                 // wenn beim validieren ein fehler auftrat, nach neuen daten fragen
                 StringBuffer sb = new StringBuffer(blz).append("|").append(number);
                 passport.getCallback().callback(
-                        HBCICallback.HAVE_CRC_ERROR,
-                        HBCIUtils.getLocMsg("CALLB_HAVE_CRC_ERROR"),
-                        HBCICallback.TYPE_TEXT,
-                        sb);
+                    HBCICallback.HAVE_CRC_ERROR,
+                    HBCIUtils.getLocMsg("CALLB_HAVE_CRC_ERROR"),
+                    HBCICallback.TYPE_TEXT,
+                    sb);
 
                 int idx = sb.indexOf("|");
                 blz = sb.substring(0, idx);
@@ -899,10 +878,10 @@ public class AbstractHBCIJob {
             if (!crcok) {
                 StringBuffer sb = new StringBuffer(iban);
                 passport.getCallback().callback(
-                        HBCICallback.HAVE_IBAN_ERROR,
-                        HBCIUtils.getLocMsg("CALLB_HAVE_IBAN_ERROR"),
-                        HBCICallback.TYPE_TEXT,
-                        sb);
+                    HBCICallback.HAVE_IBAN_ERROR,
+                    HBCIUtils.getLocMsg("CALLB_HAVE_IBAN_ERROR"),
+                    HBCICallback.TYPE_TEXT,
+                    sb);
 
                 iban = sb.toString();
             }
@@ -927,8 +906,8 @@ public class AbstractHBCIJob {
             String lowlevelHeader = paramname.substring(0, paramname.lastIndexOf(".KIK.blz"));
 
             // basierend auf dem basis-namen blz/number holen
-            String blz = llParams.getProperty(lowlevelHeader + ".KIK.blz");
-            String number = llParams.getProperty(lowlevelHeader + ".number");
+            String blz = llParams.get(lowlevelHeader + ".KIK.blz");
+            String number = llParams.get(lowlevelHeader + ".number");
             // blz/number ueberpruefen
             _checkAccountCRC(frontendname, blz, number);
         }
@@ -939,7 +918,7 @@ public class AbstractHBCIJob {
             String paramname = data2[0][0];
             String lowlevelHeader = paramname.substring(0, paramname.lastIndexOf(".iban"));
 
-            String iban = llParams.getProperty(lowlevelHeader + ".iban");
+            String iban = llParams.get(lowlevelHeader + ".iban");
             _checkIBANCRC(frontendname, iban);
         }
     }
@@ -991,14 +970,6 @@ public class AbstractHBCIJob {
         return k;
     }
 
-    public String getExternalId() {
-        return this.externalId;
-    }
-
-    public void setExternalId(String id) {
-        this.externalId = id;
-    }
-
     protected boolean twoDigitValueInList(String value, String list) {
         boolean found = false;
         int len = list.length();
@@ -1029,5 +1000,37 @@ public class AbstractHBCIJob {
             }
         }
         return key;
+    }
+
+    public String createOrderHash(int segVersion) {
+        SEG seg = createJobSegment(3);
+        seg.validate();
+        String segdata = seg.toString(0);
+        log.debug("calculating hash for jobsegment: " + segdata);
+
+        // zu verwendenden Hash-Algorithmus von dem Wert "orderhashmode" aus den BPD abhängig machen
+        String alg = null;
+        String provider = null;
+
+        String orderhashmode = passport.getOrderHashMode(segVersion);
+        if (orderhashmode.equals("1")) {
+            alg = "RIPEMD160";
+            provider = "CryptAlgs4Java";
+        } else if (orderhashmode.equals("2")) {
+            alg = "SHA-1";
+        }
+        log.debug("using " + alg + "/" + provider + " for generating order hash");
+
+        try {
+            MessageDigest digest = MessageDigest.getInstance(alg, provider);
+            digest.update(segdata.getBytes(ENCODING));
+            return new String(digest.digest(), ENCODING);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean needTan() {
+        return passport.getPinTanInfo(getHBCICode()).equals("J");
     }
 }

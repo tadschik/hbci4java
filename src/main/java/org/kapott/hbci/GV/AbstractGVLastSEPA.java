@@ -2,19 +2,16 @@ package org.kapott.hbci.GV;
 
 import org.kapott.hbci.GV_Result.AbstractGVRLastSEPA;
 import org.kapott.hbci.passport.HBCIPassportInternal;
-import org.kapott.hbci.sepa.PainVersion;
-import org.kapott.hbci.sepa.PainVersion.Type;
+import org.kapott.hbci.sepa.SepaVersion;
 import org.kapott.hbci.status.HBCIMsgStatus;
 
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Properties;
 
 /**
  * Abstrakte Basisklasse fuer die terminierten SEPA-Lastschriften.
  */
 public abstract class AbstractGVLastSEPA extends AbstractSEPAGV {
-    private final static PainVersion DEFAULT = PainVersion.PAIN_008_001_01;
+    private final static SepaVersion DEFAULT = SepaVersion.PAIN_008_001_01;
 
     public AbstractGVLastSEPA(HBCIPassportInternal passport, String lowlevelName, AbstractGVRLastSEPA result) {
         super(passport, lowlevelName, result);
@@ -45,8 +42,8 @@ public abstract class AbstractGVLastSEPA extends AbstractSEPAGV {
         addConstraint("btg.curr", "sepa.btg.curr", "EUR", true);
         addConstraint("usage", "sepa.usage", "", true);
 
-        addConstraint("sepaid", "sepa.sepaid", getSEPAMessageId());
-        addConstraint("pmtinfid", "sepa.pmtinfid", getSEPAMessageId());
+        addConstraint("sepaid", "sepa.sepaid", getPainMessageId());
+        addConstraint("pmtinfid", "sepa.pmtinfid", getPainMessageId());
         addConstraint("endtoendid", "sepa.endtoendid", ENDTOEND_ID_NOTPROVIDED, true);
         addConstraint("creditorid", "sepa.creditorid", null, true);
         addConstraint("mandateid", "sepa.mandateid", null, true);
@@ -83,7 +80,7 @@ public abstract class AbstractGVLastSEPA extends AbstractSEPAGV {
      * @see org.kapott.hbci.GV.AbstractSEPAGV#getDefaultPainVersion()
      */
     @Override
-    protected PainVersion getDefaultPainVersion() {
+    protected SepaVersion getDefaultPainVersion() {
         return DEFAULT;
     }
 
@@ -91,8 +88,8 @@ public abstract class AbstractGVLastSEPA extends AbstractSEPAGV {
      * @see org.kapott.hbci.GV.AbstractSEPAGV#getPainType()
      */
     @Override
-    protected Type getPainType() {
-        return Type.PAIN_008;
+    protected SepaVersion.Type getPainType() {
+        return SepaVersion.Type.PAIN_008;
     }
 
     /**
@@ -112,17 +109,13 @@ public abstract class AbstractGVLastSEPA extends AbstractSEPAGV {
         ((AbstractGVRLastSEPA) (jobResult)).setOrderId(orderid);
 
         if (orderid != null && orderid.length() != 0) {
-            Properties p = getLowlevelParams();
-            Properties p2 = new Properties();
-
-            for (Enumeration e = p.propertyNames(); e.hasMoreElements(); ) {
-                String key = (String) e.nextElement();
-                p2.setProperty(key.substring(key.indexOf(".") + 1), p.getProperty(key));
-            }
+            HashMap<String, String> p2 = new HashMap<>();
+            getLowlevelParams().forEach((key, value) ->
+                p2.put(key.substring(key.indexOf(".") + 1), value));
 
             // TODO: Fuer den Fall, dass sich die Order-IDs zwischen CORE, COR1 und B2B
             // ueberschneiden koennen, muessen hier unterschiedliche Keys vergeben werden.
-            passport.setPersistentData("termlast_" + orderid, p2);
+//TODO            passport.setPersistentData("termlast_" + orderid, p2);
         }
     }
 }

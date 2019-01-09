@@ -21,7 +21,6 @@
 package org.kapott.hbci.security;
 
 import lombok.extern.slf4j.Slf4j;
-import org.kapott.hbci.comm.CommPinTan;
 import org.kapott.hbci.exceptions.HBCI_Exception;
 import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.passport.HBCIPassportInternal;
@@ -29,7 +28,6 @@ import org.kapott.hbci.protocol.*;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +35,7 @@ import java.util.Random;
 
 @Slf4j
 public final class Sig {
+
     public final static String SECFUNC_HBCI_SIG_RDH = "1";
     public final static String SECFUNC_HBCI_SIG_DDV = "2";
 
@@ -63,8 +62,6 @@ public final class Sig {
     public final static String SIGMODE_PSS = "19";
     public final static String SIGMODE_RETAIL_MAC = "999";
 
-    private Message msg;
-
     private String u_secfunc;
     private String u_cid;
     private String u_role;
@@ -81,240 +78,62 @@ public final class Sig {
     private String u_hashalg;
     private String sigstring;
 
-    public Sig(Message msg) {
-        this.msg = msg;
-    }
-
-    // sighead-segment mit werten aus den lokalen variablen füllen
-    private void fillSigHead(HBCIPassportInternal passport, SEG sighead) {
-        String sigheadName = sighead.getPath();
-        String seccheckref = Integer.toString(Math.abs(new Random().nextInt()));
-
-        Date d = new Date();
-
-        sighead.propagateValue(sigheadName + ".secfunc", u_secfunc,
-                SyntaxElement.DONT_TRY_TO_CREATE,
-                SyntaxElement.DONT_ALLOW_OVERWRITE);
-        sighead.propagateValue(sigheadName + ".seccheckref", seccheckref,
-                SyntaxElement.DONT_TRY_TO_CREATE,
-                SyntaxElement.DONT_ALLOW_OVERWRITE);
-        /* TODO: enable this later (when other range types are supported)
-             sighead.propagateValue(sigheadName+".range",range,false); */
-        sighead.propagateValue(sigheadName + ".role", u_role,
-                SyntaxElement.DONT_TRY_TO_CREATE,
-                SyntaxElement.DONT_ALLOW_OVERWRITE);
-        sighead.propagateValue(sigheadName + ".SecIdnDetails.func", (msg.getName().endsWith("Res") ? "2" : "1"),
-                SyntaxElement.DONT_TRY_TO_CREATE,
-                SyntaxElement.DONT_ALLOW_OVERWRITE);
-        if (u_cid.length() != 0) {
-            // DDV
-            sighead.propagateValue(sigheadName + ".SecIdnDetails.cid", "B" + u_cid,
-                    SyntaxElement.DONT_TRY_TO_CREATE,
-                    SyntaxElement.DONT_ALLOW_OVERWRITE);
-        } else {
-            // RDH und PinTan
-            sighead.propagateValue(sigheadName + ".SecIdnDetails.sysid", u_sysid,
-                    SyntaxElement.DONT_TRY_TO_CREATE,
-                    SyntaxElement.DONT_ALLOW_OVERWRITE);
-        }
-        sighead.propagateValue(sigheadName + ".SecTimestamp.date", HBCIUtils.date2StringISO(d),
-                SyntaxElement.DONT_TRY_TO_CREATE,
-                SyntaxElement.DONT_ALLOW_OVERWRITE);
-        sighead.propagateValue(sigheadName + ".SecTimestamp.time", HBCIUtils.time2StringISO(d),
-                SyntaxElement.DONT_TRY_TO_CREATE,
-                SyntaxElement.DONT_ALLOW_OVERWRITE);
-
-        sighead.propagateValue(sigheadName + ".secref", u_sigid,
-                SyntaxElement.DONT_TRY_TO_CREATE,
-                SyntaxElement.DONT_ALLOW_OVERWRITE);
-
-        sighead.propagateValue(sigheadName + ".HashAlg.alg", u_hashalg,
-                SyntaxElement.DONT_TRY_TO_CREATE,
-                SyntaxElement.DONT_ALLOW_OVERWRITE);
-        sighead.propagateValue(sigheadName + ".SigAlg.alg", u_sigalg,
-                SyntaxElement.DONT_TRY_TO_CREATE,
-                SyntaxElement.DONT_ALLOW_OVERWRITE);
-        sighead.propagateValue(sigheadName + ".SigAlg.mode", u_sigmode,
-                SyntaxElement.DONT_TRY_TO_CREATE,
-                SyntaxElement.DONT_ALLOW_OVERWRITE);
-
-        sighead.propagateValue(sigheadName + ".KeyName.KIK.country", u_keycountry,
-                SyntaxElement.DONT_TRY_TO_CREATE,
-                SyntaxElement.DONT_ALLOW_OVERWRITE);
-        sighead.propagateValue(sigheadName + ".KeyName.KIK.blz", u_keyblz,
-                SyntaxElement.DONT_TRY_TO_CREATE,
-                SyntaxElement.DONT_ALLOW_OVERWRITE);
-        sighead.propagateValue(sigheadName + ".KeyName.userid", u_keyuserid,
-                SyntaxElement.DONT_TRY_TO_CREATE,
-                SyntaxElement.DONT_ALLOW_OVERWRITE);
-        sighead.propagateValue(sigheadName + ".KeyName.keynum", u_keynum,
-                SyntaxElement.DONT_TRY_TO_CREATE,
-                SyntaxElement.DONT_ALLOW_OVERWRITE);
-        sighead.propagateValue(sigheadName + ".KeyName.keyversion", u_keyversion,
-                SyntaxElement.DONT_TRY_TO_CREATE,
-                SyntaxElement.DONT_ALLOW_OVERWRITE);
-
-        sighead.propagateValue(sigheadName + ".SecProfile.method", passport.getProfileMethod(),
-                SyntaxElement.DONT_TRY_TO_CREATE,
-                SyntaxElement.DONT_ALLOW_OVERWRITE);
-        sighead.propagateValue(sigheadName + ".SecProfile.version", passport.getProfileVersion(),
-                SyntaxElement.DONT_TRY_TO_CREATE,
-                SyntaxElement.DONT_ALLOW_OVERWRITE);
-    }
-
-    // sigtail-segment mit werten aus den lokalen variablen füllen
-    private void fillSigTail(SEG sighead, SEG sigtail) {
-        String sigtailName = sigtail.getPath();
-
-        sigtail.propagateValue(sigtailName + ".seccheckref",
-                sighead.getValueOfDE(sighead.getPath() + ".seccheckref"),
-                SyntaxElement.DONT_TRY_TO_CREATE,
-                SyntaxElement.DONT_ALLOW_OVERWRITE);
-    }
-
-    /* daten zusammensammeln, die signiert werden müssen; idx gibt dabei an,
-     * die wievielte signatur erzeugt werden soll - wird benötigt, um festzustellen,
-     * welche sighead- und sigtail-segmente in die signatur eingehen */
-    private String collectHashData(int idx) {
-        int numOfPassports = 1;
-        StringBuilder ret = new StringBuilder(1024);
-
-        List<MultipleSyntaxElements> msgelementslist = msg.getChildContainers();
-        List<SyntaxElement> sigheads = msgelementslist.get(1).getElements();
-        List<SyntaxElement> sigtails = msgelementslist.get(msgelementslist.size() - 2).getElements();
-
-        // alle benötigten sighead-segmente zusammensuchen
-        for (int i = numOfPassports - 1 - idx; i < (u_range.equals("1") ? (numOfPassports - idx) : numOfPassports); i++) {
-            ret.append(((SEG) (sigheads.get(i))).toString(0));
-        }
-
-        // alle nutzdaten hinzufügen
-        for (int i = 2; i < msgelementslist.size() - 2; i++) {
-            ret.append(msgelementslist.get(i).toString(0));
-        }
-
-        // bei schalen-modell-signaturen alle "inneren" sigtails mit hinzufügen
-        for (int i = 0; i < (u_range.equals("1") ? 0 : idx); i++) {
-            ret.append(((SEG) (sigtails.get(i))).toString(0));
-        }
-
-        return ret.toString();
-    }
-
-    public boolean signIt(HBCIPassportInternal passport) {
-        String msgName = msg.getName();
-        Node msgNode = msg.getSyntaxDef(msgName, msg.getDocument());
+    public boolean signIt(Message msg, HBCIPassportInternal passport) {
+        Node msgNode = msg.getSyntaxDef(msg.getName(), passport.getSyntaxDocument());
         String dontsignAttr = ((Element) msgNode).getAttribute("dontsign");
 
         if (dontsignAttr.length() == 0) {
             try {
-                int numOfPassports = 1;
+                List<MultipleSyntaxElements> msgelements = msg.getChildContainers();
+                List<SyntaxElement> sigheads = msgelements.get(1).getElements();
+                List<SyntaxElement> sigtails = msgelements.get(msgelements.size() - 2).getElements();
 
-                // create an empty sighead and sigtail segment for each required signature
-                for (int idx = 0; idx < numOfPassports; idx++) {
-                    SEG sighead = new SEG("SigHeadUser", "SigHead", msgName, numOfPassports - 1 - idx, msg.getDocument());
-                    SEG sigtail = new SEG("SigTailUser", "SigTail", msgName, idx, msg.getDocument());
+                SEG sigHead = new SEG("SigHeadUser", "SigHead", msg.getName(), 0, passport.getSyntaxDocument());
+                sigheads.set(0, sigHead);
+                SEG sigTail = new SEG("SigTailUser", "SigTail", msg.getName(), 0, passport.getSyntaxDocument());
+                sigtails.set(0, sigTail);
 
-                    List<MultipleSyntaxElements> msgelements = msg.getChildContainers();
-                    List<SyntaxElement> sigheads = msgelements.get(1).getElements();
-                    List<SyntaxElement> sigtails = msgelements.get(msgelements.size() - 2).getElements();
+                u_secfunc = passport.getSigFunction();
+                u_cid = "";
+                u_role = "1";
+                u_range = "1";
+                u_keyblz = passport.getBLZ();
+                u_keycountry = passport.getCountry();
+                u_keyuserid = passport.getMySigKeyName();
+                u_keynum = passport.getMySigKeyNum();
+                u_keyversion = passport.getMySigKeyVersion();
+                u_sysid = passport.getSysId();
+                u_sigid = passport.getSigId().toString();
+                u_sigalg = passport.getSigAlg();
+                u_sigmode = passport.getSigMode();
+                u_hashalg = passport.getHashAlg();
+                passport.incSigId();
 
-                    // insert sighead segment in msg
-                    if ((numOfPassports - 1 - idx) < sigheads.size()) {
-                    } else {
-                        for (int i = sigheads.size() - 1; i < numOfPassports - 1 - idx; i++) {
-                            sigheads.add(null);
-                        }
-                    }
-                    sigheads.set(numOfPassports - 1 - idx, sighead);
-
-                    // insert sigtail segment in message
-                    if (idx < sigtails.size()) {
-                    } else {
-                        for (int i = sigtails.size() - 1; i < idx; i++) {
-                            sigtails.add(null);
-                        }
-                    }
-                    sigtails.set(idx, sigtail);
-                }
-
-                // fill all sighead and sigtail segments
-                for (int idx = 0; idx < numOfPassports; idx++) {
-                    setParam("secfunc", passport.getSigFunction());
-                    setParam("cid", "");
-                    setParam("role", "1");
-                    setParam("range", "1");
-                    setParam("keyblz", passport.getBLZ());
-                    setParam("keycountry", passport.getCountry());
-                    setParam("keyuserid", passport.getMySigKeyName());
-                    setParam("keynum", passport.getMySigKeyNum());
-                    setParam("keyversion", passport.getMySigKeyVersion());
-                    setParam("sysid", passport.getSysId());
-                    setParam("sigid", passport.getSigId().toString());
-                    setParam("sigalg", passport.getSigAlg());
-                    setParam("sigmode", passport.getSigMode());
-                    setParam("hashalg", passport.getHashAlg());
-                    passport.incSigId();
-
-                    List<MultipleSyntaxElements> msgelements = msg.getChildContainers();
-                    List<SyntaxElement> sigheads = msgelements.get(1).getElements();
-                    List<SyntaxElement> sigtails = msgelements.get(msgelements.size() - 2).getElements();
-
-                    SEG sighead = (SEG) sigheads.get(numOfPassports - 1 - idx);
-                    SEG sigtail = (SEG) sigtails.get(idx);
-
-                    fillSigHead(passport, sighead);
-                    fillSigTail(sighead, sigtail);
-                }
+                fillSigHead(sigHead, passport.getProfileMethod(), passport.getProfileVersion(), msg.getName().endsWith("Res"));
+                fillSigTail(sigHead, sigTail);
 
                 msg.enumerateSegs(0, SyntaxElement.ALLOW_OVERWRITE);
                 msg.validate();
                 msg.enumerateSegs(1, SyntaxElement.ALLOW_OVERWRITE);
 
-                // calculate signatures for each segment
-                for (int idx = 0; idx < numOfPassports; idx++) {
-                    List<MultipleSyntaxElements> msgelements = msg.getChildContainers();
-                    List<SyntaxElement> sigtails = msgelements.get(msgelements.size() - 2).getElements();
-                    SEG sigtail = (SEG) sigtails.get(idx);
+                msgelements = msg.getChildContainers();
+                sigtails = msgelements.get(msgelements.size() - 2).getElements();
+                sigTail = (SEG) sigtails.get(0);
 
-                    /* first calculate hash-result, then sign the hashresult. In
-                     * most cases, the hash() step will be executed by the signature
-                     * algorithm, so the hash() call returns the message as-is.
-                     * Currently the only exception is PKCS#1-10, where an extra
-                     * round of hashing must be executed before applying the
-                     * signature process */
-                    byte[] hashresult = collectHashData(idx).getBytes(CommPinTan.ENCODING);
-                    byte[] signature = passport.sign(hashresult);
+                msg.propagateValue(sigTail.getPath() + ".UserSig.pin", passport.getPIN(),
+                    SyntaxElement.DONT_TRY_TO_CREATE,
+                    SyntaxElement.DONT_ALLOW_OVERWRITE);
 
-                    if (passport.needUserSig()) {
-                        String pintan = new String(signature, CommPinTan.ENCODING);
-                        int pos = pintan.indexOf("|");
-
-                        if (pos != -1) {
-                            // wenn überhaupt eine signatur existiert
-                            // (wird für server benötigt)
-                            String pin = pintan.substring(0, pos);
-                            msg.propagateValue(sigtail.getPath() + ".UserSig.pin", pin,
-                                    SyntaxElement.DONT_TRY_TO_CREATE,
-                                    SyntaxElement.DONT_ALLOW_OVERWRITE);
-
-                            if (pos < pintan.length() - 1) {
-                                String tan = pintan.substring(pos + 1);
-                                msg.propagateValue(sigtail.getPath() + ".UserSig.tan", tan,
-                                        SyntaxElement.DONT_TRY_TO_CREATE,
-                                        SyntaxElement.DONT_ALLOW_OVERWRITE);
-                            }
-                        }
-                    } else { // normale signatur
-                        msg.propagateValue(sigtail.getPath() + ".sig", "B" + new String(signature, CommPinTan.ENCODING),
-                                SyntaxElement.DONT_TRY_TO_CREATE,
-                                SyntaxElement.DONT_ALLOW_OVERWRITE);
-                    }
-
-                    msg.validate();
-                    msg.enumerateSegs(1, SyntaxElement.ALLOW_OVERWRITE);
-                    msg.autoSetMsgSize();
+                String tan = passport.getCallback().needTAN();
+                if (tan != null) {
+                    msg.propagateValue(sigTail.getPath() + ".UserSig.tan", tan,
+                        SyntaxElement.DONT_TRY_TO_CREATE,
+                        SyntaxElement.DONT_ALLOW_OVERWRITE);
                 }
+
+                msg.validate();
+                msg.enumerateSegs(1, SyntaxElement.ALLOW_OVERWRITE);
+                msg.autoSetMsgSize();
             } catch (Exception ex) {
                 throw new HBCI_Exception("*** error while signing", ex);
             }
@@ -323,34 +142,97 @@ public final class Sig {
         return true;
     }
 
-    private void readSigHead(HBCIPassportInternal passport) {
+    // sighead-segment mit werten aus den lokalen variablen füllen
+    private void fillSigHead(SEG sighead, String profileMethod, String profileVersion, boolean response) {
+        String sigheadName = sighead.getPath();
+        String seccheckref = Integer.toString(Math.abs(new Random().nextInt()));
+
+        Date d = new Date();
+
+        sighead.propagateValue(sigheadName + ".secfunc", u_secfunc,
+            SyntaxElement.DONT_TRY_TO_CREATE,
+            SyntaxElement.DONT_ALLOW_OVERWRITE);
+        sighead.propagateValue(sigheadName + ".seccheckref", seccheckref,
+            SyntaxElement.DONT_TRY_TO_CREATE,
+            SyntaxElement.DONT_ALLOW_OVERWRITE);
+        /* TODO: enable this later (when other range types are supported)
+             sighead.propagateValue(sigheadName+".range",range,false); */
+        sighead.propagateValue(sigheadName + ".role", u_role,
+            SyntaxElement.DONT_TRY_TO_CREATE,
+            SyntaxElement.DONT_ALLOW_OVERWRITE);
+        sighead.propagateValue(sigheadName + ".SecIdnDetails.func", (response ? "2" : "1"),
+            SyntaxElement.DONT_TRY_TO_CREATE,
+            SyntaxElement.DONT_ALLOW_OVERWRITE);
+        if (u_cid.length() != 0) {
+            // DDV
+            sighead.propagateValue(sigheadName + ".SecIdnDetails.cid", "B" + u_cid,
+                SyntaxElement.DONT_TRY_TO_CREATE,
+                SyntaxElement.DONT_ALLOW_OVERWRITE);
+        } else {
+            // RDH und PinTan
+            sighead.propagateValue(sigheadName + ".SecIdnDetails.sysid", u_sysid,
+                SyntaxElement.DONT_TRY_TO_CREATE,
+                SyntaxElement.DONT_ALLOW_OVERWRITE);
+        }
+        sighead.propagateValue(sigheadName + ".SecTimestamp.date", HBCIUtils.date2StringISO(d),
+            SyntaxElement.DONT_TRY_TO_CREATE,
+            SyntaxElement.DONT_ALLOW_OVERWRITE);
+        sighead.propagateValue(sigheadName + ".SecTimestamp.time", HBCIUtils.time2StringISO(d),
+            SyntaxElement.DONT_TRY_TO_CREATE,
+            SyntaxElement.DONT_ALLOW_OVERWRITE);
+
+        sighead.propagateValue(sigheadName + ".secref", u_sigid,
+            SyntaxElement.DONT_TRY_TO_CREATE,
+            SyntaxElement.DONT_ALLOW_OVERWRITE);
+
+        sighead.propagateValue(sigheadName + ".HashAlg.alg", u_hashalg,
+            SyntaxElement.DONT_TRY_TO_CREATE,
+            SyntaxElement.DONT_ALLOW_OVERWRITE);
+        sighead.propagateValue(sigheadName + ".SigAlg.alg", u_sigalg,
+            SyntaxElement.DONT_TRY_TO_CREATE,
+            SyntaxElement.DONT_ALLOW_OVERWRITE);
+        sighead.propagateValue(sigheadName + ".SigAlg.mode", u_sigmode,
+            SyntaxElement.DONT_TRY_TO_CREATE,
+            SyntaxElement.DONT_ALLOW_OVERWRITE);
+
+        sighead.propagateValue(sigheadName + ".KeyName.KIK.country", u_keycountry,
+            SyntaxElement.DONT_TRY_TO_CREATE,
+            SyntaxElement.DONT_ALLOW_OVERWRITE);
+        sighead.propagateValue(sigheadName + ".KeyName.KIK.blz", u_keyblz,
+            SyntaxElement.DONT_TRY_TO_CREATE,
+            SyntaxElement.DONT_ALLOW_OVERWRITE);
+        sighead.propagateValue(sigheadName + ".KeyName.userid", u_keyuserid,
+            SyntaxElement.DONT_TRY_TO_CREATE,
+            SyntaxElement.DONT_ALLOW_OVERWRITE);
+        sighead.propagateValue(sigheadName + ".KeyName.keynum", u_keynum,
+            SyntaxElement.DONT_TRY_TO_CREATE,
+            SyntaxElement.DONT_ALLOW_OVERWRITE);
+        sighead.propagateValue(sigheadName + ".KeyName.keyversion", u_keyversion,
+            SyntaxElement.DONT_TRY_TO_CREATE,
+            SyntaxElement.DONT_ALLOW_OVERWRITE);
+
+        sighead.propagateValue(sigheadName + ".SecProfile.method", profileMethod,
+            SyntaxElement.DONT_TRY_TO_CREATE,
+            SyntaxElement.DONT_ALLOW_OVERWRITE);
+        sighead.propagateValue(sigheadName + ".SecProfile.version", profileVersion,
+            SyntaxElement.DONT_TRY_TO_CREATE,
+            SyntaxElement.DONT_ALLOW_OVERWRITE);
+    }
+
+    // sigtail-segment mit werten aus den lokalen variablen füllen
+    private void fillSigTail(SEG sighead, SEG sigtail) {
+        String sigtailName = sigtail.getPath();
+
+        sigtail.propagateValue(sigtailName + ".seccheckref",
+            sighead.getValueOfDE(sighead.getPath() + ".seccheckref"),
+            SyntaxElement.DONT_TRY_TO_CREATE,
+            SyntaxElement.DONT_ALLOW_OVERWRITE);
+    }
+
+    private void readSigHead(Message msg, HBCIPassportInternal passport) {
         String sigheadName = msg.getName() + ".SigHead";
 
         u_secfunc = msg.getValueOfDE(sigheadName + ".secfunc");
-
-        // TODO: das ist abgeschaltet, weil das Thema "Sicherheitsfunktion, kodiert"
-        // ab FinTS-3 anders behandelt wird - siehe Spez.
-        /*
-        if (u_secfunc.equals("2")) {
-            // DDV
-            u_cid=msg.getValueOfDE(sigheadName+".SecIdnDetails.cid");
-            if (!u_cid.equals(mainPassport.getCID())) {
-                String errmsg=HBCIUtils.getLocMsg("EXCMSG_CRYPTCIDFAIL");
-                if (!HBCIUtils.ignoreError(null,"client.errors.ignoreSignErrors",errmsg))
-                    throw new HBCI_Exception(errmsg);
-            }
-        } else {
-            // RDH und PinTan (= 2 und 999)
-            try {
-                // falls noch keine system-id ausgehandelt wurde, so sendet der
-                // hbci-server auch keine... deshalb der try-catch-block
-                u_sysid=msg.getValueOfDE(sigheadName+".SecIdnDetails.sysid");
-            } catch (Exception e) {
-                u_sysid="0";
-            }
-        }
-        */
-
         u_role = msg.getValueOfDE(sigheadName + ".role");
         u_range = msg.getValueOfDE(sigheadName + ".range");
         u_keycountry = msg.getValueOfDE(sigheadName + ".KeyName.KIK.country");
@@ -390,34 +272,9 @@ public final class Sig {
             String errmsg = HBCIUtils.getLocMsg("EXCMSG_SIGREFFAIL");
             throw new HBCI_Exception(errmsg);
         }
-
-        // TODO: dieser test ist erst mal deaktiviert. grund: beim pin/tan-zwei-
-        // schritt-verfahren ist die passport.getSigFunction()==922 (z.B.). 
-        // wenn jedoch zeitgleich HITAN über eine bankensignatur abgesichert
-        // wird, steht in der antwort secfunc=1 (RDH) drin. 
-        /*
-        if (!u_secfunc.equals(mainPassport.getSigFunction())) {
-            String errmsg=HBCIUtils.getLocMsg("EXCMSG_SIGTYPEFAIL",new String[] {u_secfunc,mainPassport.getSigFunction()});
-            if (!HBCIUtils.ignoreError(null,"client.errors.ignoreSignErrors",errmsg))
-                throw new HBCI_Exception(errmsg);
-        }
-        */
-
-        // TODO: hier auch die DEG SecProfile lesen und überprüfen
-
-        // TODO: diese checks werden vorerst abgeschaltet, damit die pin-tan sigs
-        // ohne probleme funktionieren
-        /*
-        if (!u_sigalg.equals(passport.getSigAlg()))
-            throw new HBCI_Exception(HBCIUtils.getLocMsg("EXCMSG_SIGALGFAIL",new String[] {u_sigalg,passport.getSigAlg()}));
-        if (!u_sigmode.equals(passport.getSigMode()))
-            throw new HBCI_Exception(HBCIUtils.getLocMsg("EXCMSG_SIGMODEFAIL",new String[] {u_sigmode,passport.getSigMode()}));
-        if (!u_hashalg.equals(passport.getHashAlg()))
-            throw new HBCI_Exception(HBCIUtils.getLocMsg("EXCMSG_SIGHASHFAIL",new String[] {u_hashalg,passport.getHashAlg()}));
-        */
     }
 
-    private boolean hasSig() {
+    private boolean hasSig(Message msg) {
         boolean ret = true;
         MultipleSyntaxElements seglist = (msg.getChildContainers().get(1));
 
@@ -441,15 +298,15 @@ public final class Sig {
         return ret;
     }
 
-    public boolean verify(HBCIPassportInternal passport) {
+    public boolean verify(Message msg, HBCIPassportInternal passport) {
         if (passport.hasInstSigKey()) {
             String msgName = msg.getName();
             Node msgNode = msg.getSyntaxDef(msgName, passport.getSyntaxDocument());
             String dontsignAttr = ((Element) msgNode).getAttribute("dontsign");
 
             if (dontsignAttr.length() == 0) {
-                if (hasSig()) {
-                    readSigHead(passport);
+                if (hasSig(msg)) {
+                    readSigHead(msg, passport);
                     return true;
                 } else {
                     log.warn("message has no signature");
@@ -470,13 +327,4 @@ public final class Sig {
         }
     }
 
-    public void setParam(String key, String value) {
-        try {
-            Field f = this.getClass().getDeclaredField("u_" + key);
-            log.debug("setting " + key + " to " + value);
-            f.set(this, value);
-        } catch (Exception ex) {
-            throw new HBCI_Exception("*** error while setting sig parameter", ex);
-        }
-    }
 }

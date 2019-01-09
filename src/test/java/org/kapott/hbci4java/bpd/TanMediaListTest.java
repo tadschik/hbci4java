@@ -1,9 +1,6 @@
 package org.kapott.hbci4java.bpd;
 
 import org.junit.Test;
-import org.kapott.hbci.manager.HBCIKernel;
-import org.kapott.hbci.manager.HBCIUtils;
-import org.kapott.hbci.manager.MessageFactory;
 import org.kapott.hbci.protocol.Message;
 import org.kapott.hbci.rewrite.Rewrite;
 import org.kapott.hbci4java.AbstractTest;
@@ -11,7 +8,6 @@ import org.kapott.hbci4java.AbstractTest;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.StringTokenizer;
 
 public class TanMediaListTest extends AbstractTest {
@@ -29,7 +25,7 @@ public class TanMediaListTest extends AbstractTest {
             String rewriterName = tok.nextToken().trim();
             if (rewriterName.length() != 0) {
                 Class cl = this.getClass().getClassLoader().loadClass("org.kapott.hbci.rewrite.R" +
-                        rewriterName);
+                    rewriterName);
                 Constructor con = cl.getConstructor((Class[]) null);
                 Rewrite rewriter = (Rewrite) (con.newInstance((Object[]) null));
                 al.add(rewriter);
@@ -42,10 +38,10 @@ public class TanMediaListTest extends AbstractTest {
 
 
         for (int i = 0; i < rewriters.length; i++) {
-            newmsgstring = rewriters[i].incomingClearText(newmsgstring, null);
+            newmsgstring = rewriters[i].incomingClearText(newmsgstring, null, "CustomMsg");
         }
 
-        Message msg = new Message("CustomMsgRes", newmsgstring, newmsgstring.length(), null, Message.CHECK_SEQ, true);
+        Message msg = new Message("CustomMsgRes", newmsgstring, null, Message.CHECK_SEQ, true);
         HashMap<String, String> ht = new HashMap<>();
         msg.extractValues(ht);
     }

@@ -27,8 +27,8 @@ import org.kapott.hbci.exceptions.HBCI_Exception;
 import org.kapott.hbci.exceptions.InvalidArgumentException;
 import org.kapott.hbci.exceptions.InvalidUserDataException;
 import org.kapott.hbci.manager.DocumentFactory;
+import org.kapott.hbci.manager.HBCIProduct;
 import org.kapott.hbci.manager.HBCIUtils;
-import org.kapott.hbci.protocol.Message;
 import org.kapott.hbci.structures.Konto;
 import org.kapott.hbci.structures.Limit;
 import org.kapott.hbci.structures.Value;
@@ -53,9 +53,9 @@ import java.util.*;
 public abstract class AbstractHBCIPassport implements HBCIPassportInternal, Serializable {
 
     protected HBCICallback callback;
-    protected HashMap<String, String> properties;
-    private HashMap<String, String> bpd;
-    private HashMap<String, String> upd;
+    protected Map<String, String> properties;
+    private Map<String, String> bpd;
+    private Map<String, String> upd;
     private String hbciversion;
     private String country;
     private String blz;
@@ -66,17 +66,18 @@ public abstract class AbstractHBCIPassport implements HBCIPassportInternal, Seri
     private String sysid;
     private Long sigid;
     private Document syntaxDocument;
-    private Hashtable<String, Object> persistentData = new Hashtable<>();
+    private HBCIProduct hbciProduct;
 
-    public AbstractHBCIPassport(String hbciversion, HashMap<String, String> properties, HBCICallback callback) {
+    public AbstractHBCIPassport(String hbciversion, Map<String, String> properties, HBCICallback callback, HBCIProduct product) {
         this.hbciversion = hbciversion;
         this.callback = callback;
         this.properties = properties;
+        this.hbciProduct = product;
 
         init();
     }
 
-    public static HBCIPassport getInstance(HBCICallback callback, HashMap<String, String> properties, String name, Object init) {
+    public static HBCIPassport getInstance(HBCICallback callback, Map<String, String> properties, String name, Object init) {
         if (name == null) {
             throw new NullPointerException("name of passport implementation must not be null");
         }
@@ -114,7 +115,7 @@ public abstract class AbstractHBCIPassport implements HBCIPassportInternal, Seri
      *
      * @return Instanz eines HBCI-Passports
      */
-    public static HBCIPassport getInstance(HBCICallback callback, HashMap<String, String> properties, Object init) {
+    public static HBCIPassport getInstance(HBCICallback callback, Map<String, String> properties, Object init) {
         String passportName = properties.get("client.passport.default");
         if (passportName == null)
             throw new InvalidUserDataException(HBCIUtils.getLocMsg("EXCMSG_NODEFPASS"));
@@ -122,11 +123,11 @@ public abstract class AbstractHBCIPassport implements HBCIPassportInternal, Seri
         return getInstance(callback, properties, passportName, init);
     }
 
-    public static HBCIPassport getInstance(HBCICallback callback, HashMap<String, String> properties, String name) {
+    public static HBCIPassport getInstance(HBCICallback callback, Map<String, String> properties, String name) {
         return getInstance(callback, properties, name, null);
     }
 
-    public static HBCIPassport getInstance(HBCICallback callback, HashMap<String, String> properties) {
+    public static HBCIPassport getInstance(HBCICallback callback, Map<String, String> properties) {
         return getInstance(callback, properties, (Object) null);
     }
 
@@ -150,7 +151,7 @@ public abstract class AbstractHBCIPassport implements HBCIPassportInternal, Seri
         }
     }
 
-    public final Konto[] getAccounts() {
+    public final List<Konto> getAccounts() {
         ArrayList<Konto> ret = new ArrayList<>();
 
         if (upd != null) {
@@ -180,7 +181,7 @@ public abstract class AbstractHBCIPassport implements HBCIPassportInternal, Seri
                     Limit limit = new Limit();
                     limit.type = st.charAt(0);
                     limit.value = new Value(upd.get(header + ".KLimit.BTG.value"),
-                            upd.get(header + ".KLimit.BTG.curr"));
+                        upd.get(header + ".KLimit.BTG.curr"));
                     if ((st = upd.get(header + ".KLimit.limitdays")) != null)
                         limit.days = Integer.parseInt(st);
                 }
@@ -199,7 +200,7 @@ public abstract class AbstractHBCIPassport implements HBCIPassportInternal, Seri
             }
         }
 
-        return ret.toArray(new Konto[0]);
+        return ret;
     }
 
     public final void fillAccountInfo(Konto account) {
@@ -208,14 +209,12 @@ public abstract class AbstractHBCIPassport implements HBCIPassportInternal, Seri
         boolean haveNumber = (number != null && number.length() != 0);
         boolean haveIBAN = (iban != null && iban.length() != 0);
 
-        Konto[] accounts = getAccounts();
-
-        for (Konto account1 : accounts) {
+        for (Konto account1 :  getAccounts()) {
             String temp_number = HBCIUtils.stripLeadingZeroes(account1.number);
             String temp_iban = HBCIUtils.stripLeadingZeroes(account1.iban);
 
             if (haveNumber && number.equals(temp_number) ||
-                    haveIBAN && iban.equals(temp_iban)) {
+                haveIBAN && iban.equals(temp_iban)) {
                 account.blz = account1.blz;
                 account.country = account1.country;
                 account.number = account1.number;
@@ -232,7 +231,14 @@ public abstract class AbstractHBCIPassport implements HBCIPassportInternal, Seri
         }
     }
 
-    public final Konto getAccount(String number) {
+    public final Konto findAccountByIban(String iban) {
+        return getAccounts().stream()
+            .filter(konto -> konto.iban.equals(iban))
+            .findFirst()
+            .orElse(null);
+    }
+
+    public final Konto findAccountByAccountNumber(String number) {
         Konto ret = new Konto();
         ret.number = number;
         fillAccountInfo(ret);
@@ -292,21 +298,6 @@ public abstract class AbstractHBCIPassport implements HBCIPassportInternal, Seri
         this.sysid = sysid;
     }
 
-    public final void clearMySigKey() {
-        setMyPublicSigKey(null);
-        setMyPrivateSigKey(null);
-    }
-
-    public final void clearMyEncKey() {
-        setMyPublicEncKey(null);
-        setMyPrivateEncKey(null);
-    }
-
-    public final void clearMyDigKey() {
-        setMyPublicDigKey(null);
-        setMyPrivateDigKey(null);
-    }
-
     public final String getBPDVersion() {
         String version = ((bpd != null) ? bpd.get("BPA.version") : null);
         return ((version != null) ? version : "0");
@@ -342,7 +333,7 @@ public abstract class AbstractHBCIPassport implements HBCIPassportInternal, Seri
             int i = 0;
 
             while ((header = HBCIUtils.withCounter("BPA.SuppVersions.version", i)) != null &&
-                    (value = bpd.get(header)) != null) {
+                (value = bpd.get(header)) != null) {
                 temp.add(value);
                 i++;
             }
@@ -376,12 +367,11 @@ public abstract class AbstractHBCIPassport implements HBCIPassportInternal, Seri
         setSigId(getSigId() + 1);
     }
 
-    public HashMap<String, String> getParamSegmentNames() {
-        HashMap<String, String> ret = new HashMap<>();
+    public Map<String, String> getParamSegmentNames() {
+        Map<String, String> ret = new HashMap<>();
 
         bpd.keySet().forEach(key -> {
-            if (key.startsWith("Params") &&
-                    key.endsWith(".SegHead.code")) {
+            if (key.startsWith("Params") && key.endsWith(".SegHead.code")) {
                 int dotPos = key.indexOf('.');
                 int dotPos2 = key.indexOf('.', dotPos + 1);
 
@@ -404,7 +394,7 @@ public abstract class AbstractHBCIPassport implements HBCIPassportInternal, Seri
                     String knownVersion = (String) ret.get(gvname);
 
                     if (knownVersion == null ||
-                            Integer.parseInt(version) > Integer.parseInt(knownVersion)) {
+                        Integer.parseInt(version) > Integer.parseInt(knownVersion)) {
                         ret.put(gvname, version);
                     }
                 }
@@ -414,7 +404,7 @@ public abstract class AbstractHBCIPassport implements HBCIPassportInternal, Seri
         return ret;
     }
 
-    public HashMap<String, String> getJobRestrictions(String specname) {
+    public Map<String, String> getJobRestrictions(String specname) {
         int versionPos = specname.length() - 1;
         char ch;
 
@@ -423,21 +413,21 @@ public abstract class AbstractHBCIPassport implements HBCIPassportInternal, Seri
         }
 
         return getJobRestrictions(
-                specname.substring(0, versionPos + 1),
-                specname.substring(versionPos + 1));
+            specname.substring(0, versionPos + 1),
+            specname.substring(versionPos + 1));
     }
 
-    public HashMap<String, String> getJobRestrictions(String gvname, String version) {
-        HashMap<String, String> result = new HashMap<>();
+    public Map<String, String> getJobRestrictions(String gvname, String version) {
+        Map<String, String> result = new HashMap<>();
 
         String searchstring = gvname + "Par" + version;
         bpd.keySet().forEach(key -> {
             if (key.startsWith("Params") &&
-                    key.indexOf("." + searchstring + ".Par") != -1) {
+                key.indexOf("." + searchstring + ".Par") != -1) {
                 int searchIdx = key.indexOf(searchstring);
                 result.put(key.substring(key.indexOf(".",
-                        searchIdx + searchstring.length() + 4) + 1),
-                        bpd.get(key));
+                    searchIdx + searchstring.length() + 4) + 1),
+                    bpd.get(key));
             }
         });
 
@@ -469,15 +459,15 @@ public abstract class AbstractHBCIPassport implements HBCIPassportInternal, Seri
      * @return Liste aller möglichen Property-Keys, für die im Result-Objekt eines Lowlevel-Jobs
      * Werte vorhanden sein könnten
      */
-    public List<String> getLowlevelJobResultNames(Document document, String gvname, Message msgGen) {
+    public List<String> getLowlevelJobResultNames(String gvname) {
         if (gvname == null || gvname.length() == 0)
             throw new InvalidArgumentException(HBCIUtils.getLocMsg("EXCMSG_EMPTY_JOBNAME"));
 
-        String version = getSupportedLowlevelJobs(document).get(gvname);
+        String version = getSupportedLowlevelJobs().get(gvname);
         if (version == null)
             throw new HBCI_Exception("*** lowlevel job " + gvname + " not supported");
 
-        return getGVResultNames(document, gvname, version);
+        return getGVResultNames(syntaxDocument, gvname, version);
     }
 
     /**
@@ -502,18 +492,33 @@ public abstract class AbstractHBCIPassport implements HBCIPassportInternal, Seri
      * Geschäftsvorfallnamen (Lowlevel) mit der jeweils von <em>HBCI4Java</em>
      * verwendeten GV-Versionsnummer.
      */
-    public HashMap<String, String> getSupportedLowlevelJobs(Document document) {
-        HashMap<String, String> paramSegments = getParamSegmentNames();
-        HashMap<String, String> result = new HashMap<>();
+    public Map<String, String> getSupportedLowlevelJobs() {
+        Map<String, String> paramSegments = getParamSegmentNames();
+        Map<String, String> result = new HashMap<>();
 
         paramSegments.keySet().forEach(segName -> {
             // überprüfen, ob parameter-segment tatsächlich zu einem GV gehört
             // gilt z.b. für "PinTan" nicht
-            if (getLowlevelGVs(document).containsKey(segName))
+            if (getLowlevelGVs(syntaxDocument).containsKey(segName))
                 result.put(segName, paramSegments.get(segName));
         });
 
         return result;
+    }
+
+    public boolean jobSupported(String jobName) {
+        return getSupportedLowlevelJobs().containsKey(jobName);
+    }
+
+    /**
+     * @param type the name of the syntaxelement to be returned
+     * @return a XML-node with the definition of the requested syntaxelement
+     */
+    public Node getSyntaxDef(String type) {
+        Node ret = syntaxDocument.getElementById(type);
+        if (ret == null)
+            throw new org.kapott.hbci.exceptions.NoSuchElementException("element", type);
+        return ret;
     }
 
     /**
@@ -539,11 +544,11 @@ public abstract class AbstractHBCIPassport implements HBCIPassportInternal, Seri
      *               ermittelt werden sollen
      * @return Properties-Objekt mit den einzelnen Restriktionen
      */
-    public HashMap<String, String> getLowlevelJobRestrictions(String gvname, Document document) {
+    public Map<String, String> getLowlevelJobRestrictions(String gvname) {
         if (gvname == null || gvname.length() == 0)
             throw new InvalidArgumentException(HBCIUtils.getLocMsg("EXCMSG_EMPTY_JOBNAME"));
 
-        String version = getSupportedLowlevelJobs(document).get(gvname);
+        String version = getSupportedLowlevelJobs().get(gvname);
         if (version == null)
             throw new HBCI_Exception("*** lowlevel job " + gvname + " not supported");
 
@@ -705,52 +710,37 @@ public abstract class AbstractHBCIPassport implements HBCIPassportInternal, Seri
         }
     }
 
-    /**
-     * @param jobnameHL der Highlevel-Name des Jobs, dessen Unterstützung überprüft werden soll
-     * @return <code>true</code>, wenn dieser Job von der Bank unterstützt wird und
-     * mit <em>HBCI4Java</em> verwendet werden kann; ansonsten <code>false</code>
-     */
-    public boolean isSupported(String jobnameHL, Document document) {
-        if (jobnameHL == null || jobnameHL.length() == 0)
-            throw new InvalidArgumentException(HBCIUtils.getLocMsg("EXCMSG_EMPTY_JOBNAME"));
+    public String getOrderHashMode(int segVersion) {
+        return getBPD().keySet().stream()
+            .filter(key -> {
+                // p.getProperty("Params_x.TAN2StepParY.ParTAN2StepZ.can1step")
+                if (key.startsWith("Params")) {
+                    String subkey = key.substring(key.indexOf('.') + 1);
+                    if (subkey.startsWith("TAN2StepPar" + segVersion) && subkey.endsWith(".orderhashmode")) {
+                        return true;
+                    }
+                }
+                return false;
+            })
+            .findFirst()
+            .map(s -> getBPD().get(s))
+            .orElse("");
 
-        try {
-            Class cl = Class.forName("org.kapott.hbci.GV.GV" + jobnameHL);
-            String lowlevelName = (String) cl.getMethod("getLowlevelName", (Class[]) null).invoke(null, (Object[]) null);
-            return getSupportedLowlevelJobs(document).keySet().contains(lowlevelName);
-        } catch (Exception e) {
-            throw new HBCI_Exception(HBCIUtils.getLocMsg("EXCMSG_HANDLER_HLCHECKERR", jobnameHL), e);
-        }
     }
 
-    public void setPersistentData(String id, Object o) {
-        if (o != null)
-            persistentData.put(id, o);
-        else
-            persistentData.remove(id);
+    public HBCIProduct getHbciProduct() {
+        return hbciProduct;
     }
 
     public Document getSyntaxDocument() {
         return syntaxDocument;
     }
 
-    public Object getPersistentData(String id) {
-        return persistentData.get(id);
-    }
-
-    public Hashtable<String, Object> getPersistentData() {
-        return persistentData;
-    }
-
-    public void setPersistentData(Hashtable<String, Object> persistentData) {
-        this.persistentData = persistentData;
-    }
-
-    public final HashMap<String, String> getBPD() {
+    public final Map<String, String> getBPD() {
         return bpd;
     }
 
-    public void setBPD(HashMap<String, String> bpd) {
+    public void setBPD(Map<String, String> bpd) {
         this.bpd = bpd;
     }
 
@@ -758,11 +748,11 @@ public abstract class AbstractHBCIPassport implements HBCIPassportInternal, Seri
         return (hbciversion != null) ? hbciversion : "";
     }
 
-    public final HashMap<String, String> getUPD() {
+    public final Map<String, String> getUPD() {
         return upd;
     }
 
-    public final void setUPD(HashMap<String, String> upd) {
+    public final void setUPD(Map<String, String> upd) {
         this.upd = upd;
     }
 
@@ -786,7 +776,7 @@ public abstract class AbstractHBCIPassport implements HBCIPassportInternal, Seri
         return 0;
     }
 
-    public HashMap<String, String> getProperties() {
+    public Map<String, String> getProperties() {
         return properties;
     }
 

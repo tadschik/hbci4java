@@ -26,12 +26,13 @@ import org.kapott.hbci.passport.HBCIPassportInternal;
  * Job-Implementierung fuer SEPA-Multi-Ueberweisungen.
  */
 public class GVMultiUebSEPA extends GVUebSEPA {
+
     public GVMultiUebSEPA(HBCIPassportInternal passport) {
-        this(passport, getLowlevelName());
+        this(passport, getLowlevelName(), null);
     }
 
-    public GVMultiUebSEPA(HBCIPassportInternal passport, String name) {
-        super(passport, name);
+    public GVMultiUebSEPA(HBCIPassportInternal passport, String name, String messageID) {
+        super(passport, name, messageID);
 
         addConstraint("batchbook", "sepa.batchbook", "");
         addConstraint("Total.value", "Total.value", null);
@@ -56,8 +57,20 @@ public class GVMultiUebSEPA extends GVUebSEPA {
     }
 
     @Override
-    protected void createSEPAFromParams() {
-        super.createSEPAFromParams();
-        setParam("Total", SepaUtil.sumBtgValueObject(sepaParams));
+    public void verifyConstraints() {
+        setParam("Total", SepaUtil.sumBtgValueObject(painParams));
+
+        super.verifyConstraints();
+    }
+
+    @Override
+    public String getChallengeParam(String path) {
+        if (path.equals("sepa.btg.value")) {
+            return getLowlevelParam(getName()+".Total.value");
+        }
+        else if (path.equals("sepa.btg.curr")) {
+            return getLowlevelParam(getName()+".Total.curr");
+        }
+        return null;
     }
 }

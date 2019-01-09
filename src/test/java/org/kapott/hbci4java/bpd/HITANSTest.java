@@ -13,16 +13,13 @@ package org.kapott.hbci4java.bpd;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.kapott.hbci.manager.HBCIKernel;
-import org.kapott.hbci.manager.MessageFactory;
+import org.kapott.hbci.manager.DocumentFactory;
+import org.kapott.hbci.manager.HBCITwoStepMechanism;
 import org.kapott.hbci.passport.PinTanPassport;
 import org.kapott.hbci.protocol.Message;
 import org.kapott.hbci4java.AbstractTest;
 
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Properties;
 
 /**
  * Testet das Parsen der HITANS-Segmente aus den BPD.
@@ -42,7 +39,8 @@ public class HITANSTest extends AbstractTest {
     private HashMap<String, String> getBPD(String file, String version) throws Exception {
         String data = getFile(file);
 
-        Message msg = new Message("DialogInitAnonRes", data, data.length(), null, Message.CHECK_SEQ, true);
+        Message msg = new Message("DialogInitAnonRes", data, DocumentFactory.createDocument(version),
+            Message.CHECK_SEQ, true);
         HashMap<String, String> ht = new HashMap<>();
         msg.extractValues(ht);
 
@@ -66,21 +64,17 @@ public class HITANSTest extends AbstractTest {
      */
     @Test
     public void testHitans5() throws Exception {
-        HashMap<String, String> bpd = getBPD("bpd/bpd2-formatted.txt", "300");
-
-
+        HashMap<String, String> bpd = getBPD("bpd2-formatted.txt", "300");
 
         bpd.forEach((name, value) -> {
-
-            // Das darf kein Template-Parameter sein
-            if (value.equals("HITANS"))
-                Assert.assertFalse(name.contains("Template"));
-
             // Hoechste Versionsnummer holen. Die muss 5 sein
-            if (name.contains("TAN2StepPar") && name.endsWith("SegHead.version")) {
-                int newVersion = Integer.parseInt(value);
-                if (newVersion > version)
-                    version = newVersion;
+            if (name.contains("TAN2StepPar")) {
+                System.out.println(name + " " + value);
+                if (name.endsWith("SegHead.version")) {
+                    int newVersion = Integer.parseInt(value);
+                    if (newVersion > version)
+                        version = newVersion;
+                }
             }
         });
         Assert.assertEquals(version, 5);
@@ -94,21 +88,19 @@ public class HITANSTest extends AbstractTest {
     @Test
     public void testCurrentSecMechInfo() throws Exception {
         HashMap<String, String> bpd = getBPD("bpd/bpd2-formatted.txt", "300");
-        PinTanPassport passport = new PinTanPassport(null, null, null);
-        passport.setCurrentTANMethod("942");
+        PinTanPassport passport = new PinTanPassport(null, null, null, null);
         passport.setBPD(bpd);
 
-        HashMap<String, String> secmech = passport.getCurrentSecMechInfo();
+        HBCITwoStepMechanism secmech = passport.getCurrentSecMechInfo();
 
         // secmech darf nicht null sein
         Assert.assertNotNull(secmech);
 
         // Das TAN-Verfahren 942 gibts in den BPD drei mal. In HITANS 5, 4 und 2.
         // Der Code muss die Version aus der aktuellsten Segment-Version liefern.
-        Assert.assertEquals(secmech.get("segversion"), "5");
+        Assert.assertEquals(secmech.getSegversion(), "5");
     }
 }
-
 
 /**********************************************************************
  * $Log: HITANSTest.java,v $

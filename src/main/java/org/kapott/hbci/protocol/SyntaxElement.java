@@ -32,7 +32,7 @@ import org.w3c.dom.NodeList;
 import java.util.*;
 
 /* ein syntaxelement ist ein strukturelement einer hbci-nachricht (die nachricht
-    selbst, eine segmentfolge, ein einzelnes segment, eine deg oder 
+    selbst, eine segmentfolge, ein einzelnes segment, eine deg oder
     ein einzelnes de) */
 @Slf4j
 public abstract class SyntaxElement {
@@ -41,7 +41,7 @@ public abstract class SyntaxElement {
     public final static boolean DONT_TRY_TO_CREATE = false;
     public final static boolean ALLOW_OVERWRITE = true;
     public final static boolean DONT_ALLOW_OVERWRITE = false;
-    private List<MultipleSyntaxElements> childContainers;
+    private List<MultipleSyntaxElements> childContainers = new ArrayList<>();
     /**
      * < @internal @brief alle in diesem element enthaltenen unterelemente
      */
@@ -144,8 +144,8 @@ public abstract class SyntaxElement {
      * enthalten, die fuer einige syntaxelemente den wert angeben, den diese
      * elemente zwingend haben muessen (z.b. ein bestimmter segmentcode o.ae.)
      */
-    protected SyntaxElement(String type, String name, String path, char predelim, int idx, StringBuffer res, int fullResLen, Document document, Hashtable<String, String> predefs, Hashtable<String, String> valids) {
-        initData(type, name, path, predelim, idx, res, fullResLen, document, predefs, valids);
+    protected SyntaxElement(String type, String name, String path, char predelim, int idx, StringBuffer res, Document document, HashMap<String, String> predefs, HashMap<String, String> valids) {
+        initData(type, name, path, predelim, idx, res, document, predefs, valids);
     }
 
     /**
@@ -178,7 +178,7 @@ public abstract class SyntaxElement {
      * die delimiter an, die direkt vor dem zu erzeugenden syntaxelement
      * auftauchen muessten
      */
-    protected abstract MultipleSyntaxElements parseNewChildContainer(Node ref, char predelim0, char predelim1, StringBuffer res, int fullResLen, Document document, Hashtable<String, String> predefs, Hashtable<String, String> valids);
+    protected abstract MultipleSyntaxElements parseNewChildContainer(Node ref, char predelim0, char predelim1, StringBuffer res, Document document, HashMap<String, String> predefs, HashMap<String, String> valids);
 
     private void initData(String type, String name, String ppath, int idx, Document document) {
         if (getElementTypeName().equals("SEG"))
@@ -186,12 +186,7 @@ public abstract class SyntaxElement {
 
         this.type = type;
         this.name = name;
-        this.parent = null;
-        this.needsRequestTag = false;
-        this.haveRequestTag = false;
-        this.childContainers = new ArrayList<>();
         this.document = document;
-        this.def = null;
 
         /* der pfad wird gebildet aus bisherigem pfad
          plus name des elementes
@@ -218,9 +213,6 @@ public abstract class SyntaxElement {
                     MultipleSyntaxElements child = createAndAppendNewChildContainer(ref, document);
                     if (child != null) {
                         child.setParent(this);
-                        // TODO: überprüfen, ob noch an anderen Stellen Container
-                        // erzeugt werden - diese müssten dann auch die richtige
-                        // syntaxIdx bekommen
                         child.setSyntaxIdx(syntaxIdx);
 
                         if (getElementTypeName().equals("MSG"))
@@ -324,7 +316,7 @@ public abstract class SyntaxElement {
         return idx;
     }
 
-    private void initData(String type, String name, String ppath, char predelim, int idx, StringBuffer res, int fullResLen, Document document, Hashtable<String, String> predefs, Hashtable<String, String> valids) {
+    private void initData(String type, String name, String ppath, char predelim, int idx, StringBuffer res, Document document, HashMap<String, String> predefs, HashMap<String, String> valids) {
         this.type = type;
         this.name = name;
         this.parent = null;
@@ -337,6 +329,7 @@ public abstract class SyntaxElement {
          * gesamtlänge des ursprünglichen msg-strings minus der länge des
          * reststrings, der jetzt zu parsen ist, und der mit dem aktuellen
          * datenelement beginnt */
+        int fullResLen = res.length();
         this.posInMsg = fullResLen - res.length();
 
         StringBuilder temppath = new StringBuilder(128);
@@ -387,9 +380,9 @@ public abstract class SyntaxElement {
             for (Node ref = def.getFirstChild(); ref != null; ref = ref.getNextSibling()) {
                 if (ref.getNodeType() == Node.ELEMENT_NODE) {
                     MultipleSyntaxElements child = parseAndAppendNewChildContainer(ref,
-                            ((counter++) == 0) ? predelim : getInDelim(),
-                            getInDelim(),
-                            res, fullResLen, document, predefs, valids);
+                        ((counter++) == 0) ? predelim : getInDelim(),
+                        getInDelim(),
+                        res, document, predefs, valids);
 
                     if (child != null) {
                         child.setParent(this);
@@ -406,8 +399,8 @@ public abstract class SyntaxElement {
                         // antwort in ein eigenes GVRes kommt, damit die zuordnung reihenfolge-erkennung
                         // der empfangenen GVRes-segmente funktioniert (in HBCIJobImpl.fillJobResult())
                         if ((this instanceof SF) &&
-                                (getName().equals("Params") || getName().equals("GVRes")) &&
-                                ((MultipleSEGs) child).hasValidChilds()) {
+                            (getName().equals("Params") || getName().equals("GVRes")) &&
+                            ((MultipleSEGs) child).hasValidChilds()) {
                             break;
                         }
                     }
@@ -419,12 +412,12 @@ public abstract class SyntaxElement {
         setValid(true);
     }
 
-    protected void init(String type, String name, String path, char predelim, int idx, StringBuffer res, int fullResLen, Document document, Hashtable<String, String> predefs, Hashtable<String, String> valids) {
-        initData(type, name, path, predelim, idx, res, fullResLen, document, predefs, valids);
+    protected void init(String type, String name, String path, char predelim, int idx, StringBuffer res, Document document, HashMap<String, String> predefs, HashMap<String, String> valids) {
+        initData(type, name, path, predelim, idx, res, document, predefs, valids);
     }
 
-    protected MultipleSyntaxElements parseAndAppendNewChildContainer(Node ref, char predelim0, char predelim1, StringBuffer res, int fullResLen, Document document, Hashtable<String, String> predefs, Hashtable<String, String> valids) {
-        MultipleSyntaxElements ret = parseNewChildContainer(ref, predelim0, predelim1, res, fullResLen, document, predefs, valids);
+    protected MultipleSyntaxElements parseAndAppendNewChildContainer(Node ref, char predelim0, char predelim1, StringBuffer res, Document document, HashMap<String, String> predefs, HashMap<String, String> valids) {
+        MultipleSyntaxElements ret = parseNewChildContainer(ref, predelim0, predelim1, res, document, predefs, valids);
         if (ret != null)
             addChildContainer(ret);
         return ret;
@@ -511,7 +504,7 @@ public abstract class SyntaxElement {
                     // tatsächlich kein .ueb.kik.blz angelegt werden kann), wird false
                     // ("can not propagate") zurückgegeben. im übergeordneten modul
                     // (msg) soll dann nicht versucht werden, das nächste sub-element
-                    // (gv) anzulegen - dieser test merkt, dass es "gv" schon gibt 
+                    // (gv) anzulegen - dieser test merkt, dass es "gv" schon gibt
                     boolean found = false;
                     for (MultipleSyntaxElements c : childContainers) {
                         if (c.getName().equals(subType)) {

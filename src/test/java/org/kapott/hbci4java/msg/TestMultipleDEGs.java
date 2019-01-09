@@ -2,14 +2,11 @@ package org.kapott.hbci4java.msg;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.kapott.hbci.manager.HBCIKernel;
-import org.kapott.hbci.manager.MessageFactory;
 import org.kapott.hbci.protocol.Message;
 import org.kapott.hbci.protocol.MultipleSyntaxElements;
 import org.kapott.hbci4java.AbstractTest;
 
 import java.util.HashMap;
-import java.util.Hashtable;
 
 /**
  * Testet den Workaround zum Abkuerzen multipler optionaler DEGs.
@@ -27,7 +24,7 @@ public class TestMultipleDEGs extends AbstractTest {
 
 
         long start = System.currentTimeMillis();
-        Message msg = new Message("DialogInitRes", data, data.length(), null, Message.CHECK_SEQ, true);
+        Message msg = new Message("DialogInitRes", data, null, Message.CHECK_SEQ, true);
         HashMap<String, String> ht = new HashMap<>();
         msg.extractValues(ht);
         long end = System.currentTimeMillis();

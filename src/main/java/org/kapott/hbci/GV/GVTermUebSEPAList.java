@@ -27,8 +27,7 @@ import org.kapott.hbci.comm.CommPinTan;
 import org.kapott.hbci.exceptions.HBCI_Exception;
 import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.passport.HBCIPassportInternal;
-import org.kapott.hbci.sepa.PainVersion;
-import org.kapott.hbci.sepa.PainVersion.Type;
+import org.kapott.hbci.sepa.SepaVersion;
 import org.kapott.hbci.status.HBCIMsgStatus;
 import org.kapott.hbci.structures.Konto;
 import org.kapott.hbci.structures.Value;
@@ -36,10 +35,10 @@ import org.kapott.hbci.structures.Value;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Properties;
+
 
 public final class GVTermUebSEPAList extends AbstractSEPAGV {
-    private final static PainVersion DEFAULT = PainVersion.PAIN_001_001_02;
+    private final static SepaVersion DEFAULT = SepaVersion.PAIN_001_001_02;
 
     public GVTermUebSEPAList(HBCIPassportInternal passport) {
         super(passport, getLowlevelName(), new GVRTermUebList(passport));
@@ -69,7 +68,7 @@ public final class GVTermUebSEPAList extends AbstractSEPAGV {
      * @see org.kapott.hbci.GV.AbstractSEPAGV#getDefaultPainVersion()
      */
     @Override
-    protected PainVersion getDefaultPainVersion() {
+    protected SepaVersion getDefaultPainVersion() {
         return DEFAULT;
     }
 
@@ -77,8 +76,8 @@ public final class GVTermUebSEPAList extends AbstractSEPAGV {
      * @see org.kapott.hbci.GV.AbstractSEPAGV#getPainType()
      */
     @Override
-    protected Type getPainType() {
-        return Type.PAIN_001;
+    protected SepaVersion.Type getPainType() {
+        return SepaVersion.Type.PAIN_001;
     }
 
     protected void extractResults(HBCIMsgStatus msgstatus, String header, int idx) {
@@ -98,7 +97,7 @@ public final class GVTermUebSEPAList extends AbstractSEPAGV {
 
         final String sepadescr = result.get(header + ".sepadescr");
         final String pain = result.get(header + ".sepapain");
-        final PainVersion version = PainVersion.choose(sepadescr, pain);
+        final SepaVersion version = SepaVersion.choose(sepadescr, pain);
 
         ISEPAParser parser = SEPAParserFactory.get(version);
         ArrayList<HashMap<String, String>> sepaResults = new ArrayList<>();
@@ -124,8 +123,8 @@ public final class GVTermUebSEPAList extends AbstractSEPAGV {
         entry.other.bic = separesult.get("dst.bic");
         entry.other.name = separesult.get("dst.name");
         entry.value = new Value(
-                separesult.get("value"),
-                separesult.get("curr"));
+            separesult.get("value"),
+            separesult.get("curr"));
         entry.addUsage(separesult.get("usage"));
 
         entry.orderid = result.get(header + ".orderid");
@@ -137,18 +136,18 @@ public final class GVTermUebSEPAList extends AbstractSEPAGV {
         ((GVRTermUebList) (jobResult)).addEntry(entry);
 
         if (entry.orderid != null && entry.orderid.length() != 0) {
-            Properties p2 = new Properties();
+            HashMap<String, String> p2 = new HashMap();
 
             result.keySet().forEach(key -> {
                 if (key.startsWith(header + ".") &&
-                        !key.startsWith(header + ".SegHead.") &&
-                        !key.endsWith(".orderid")) {
-                    p2.setProperty(key.substring(header.length() + 1),
-                            result.get(key));
+                    !key.startsWith(header + ".SegHead.") &&
+                    !key.endsWith(".orderid")) {
+                    p2.put(key.substring(header.length() + 1),
+                        result.get(key));
                 }
             });
 
-            passport.setPersistentData("termueb_" + entry.orderid, p2);
+//TODO            passport.setPersistentData("termueb_" + entry.orderid, p2);
         }
     }
 

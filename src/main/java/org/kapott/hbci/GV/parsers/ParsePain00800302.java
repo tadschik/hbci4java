@@ -12,15 +12,16 @@ import java.util.List;
 /**
  * Parser-Implementierung fuer Pain 008.003.02.
  */
-public class ParsePain00800302 extends AbstractSepaParser {
-
+public class ParsePain00800302 extends AbstractSepaParser<List<HashMap<String, String>>> {
     /**
-     * @see org.kapott.hbci.GV.parsers.ISEPAParser#parse(java.io.InputStream, java.util.List)
+     * @see org.kapott.hbci.GV.parsers.ISEPAParser#parse(InputStream, Object)
      */
     public void parse(InputStream xml, List<HashMap<String, String>> sepaResults) {
-
         Document doc = JAXB.unmarshal(xml, Document.class);
         CustomerDirectDebitInitiationV02 pain = doc.getCstmrDrctDbtInitn();
+
+        if (pain == null)
+            return;
 
         List<PaymentInstructionInformationSDD> pmtInfs = pain.getPmtInf();
 

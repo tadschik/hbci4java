@@ -38,6 +38,7 @@ import java.security.spec.RSAPublicKeySpec;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 /* @brief Class representing an HBCI institute.
 
@@ -66,18 +67,18 @@ public final class HBCIInstitute implements IHandlerData {
      */
     void updateBPD(HashMap<String, String> result) {
         log.debug("extracting BPD from results");
-        HashMap<String, String> p = new HashMap<>();
+        HashMap<String, String> newBPD = new HashMap<>();
 
         result.keySet().forEach(key -> {
             if (key.startsWith("BPD.")) {
-                p.put(key.substring(("BPD.").length()), result.get(key));
+                newBPD.put(key.substring(("BPD.").length()), result.get(key));
             }
         });
 
-        if (p.size() != 0) {
-            p.put(BPD_KEY_HBCIVERSION, passport.getHBCIVersion());
-            p.put(BPD_KEY_LASTUPDATE, String.valueOf(System.currentTimeMillis()));
-            passport.setBPD(p);
+        if (newBPD.size() != 0) {
+            newBPD.put(BPD_KEY_HBCIVERSION, passport.getHBCIVersion());
+            newBPD.put(BPD_KEY_LASTUPDATE, String.valueOf(System.currentTimeMillis()));
+            passport.setBPD(newBPD);
             log.info("installed new BPD with version " + passport.getBPDVersion());
             passport.getCallback().status(HBCICallback.STATUS_INST_BPD_INIT_DONE, passport.getBPD());
         }
@@ -105,15 +106,15 @@ public final class HBCIInstitute implements IHandlerData {
                 String keyVersion = result.get(head + ".KeyName.keyversion");
 
                 log.info("found key " +
-                        keyCountry + "_" + keyBLZ + "_" + keyUserId + "_" + keyType + "_" +
-                        keyNum + "_" + keyVersion);
+                    keyCountry + "_" + keyBLZ + "_" + keyUserId + "_" + keyType + "_" +
+                    keyNum + "_" + keyVersion);
 
                 byte[] keyExponent = result.get(head + ".PubKey.exponent").getBytes(CommPinTan.ENCODING);
                 byte[] keyModulus = result.get(head + ".PubKey.modulus").getBytes(CommPinTan.ENCODING);
 
                 KeyFactory fac = KeyFactory.getInstance("RSA");
                 KeySpec spec = new RSAPublicKeySpec(new BigInteger(+1, keyModulus),
-                        new BigInteger(+1, keyExponent));
+                    new BigInteger(+1, keyExponent));
                 Key key = fac.generatePublic(spec);
 
                 if (keyType.equals("S")) {
@@ -140,7 +141,7 @@ public final class HBCIInstitute implements IHandlerData {
      * @return true, wenn die BPD abgelaufen sind.
      */
     private boolean isBPDExpired() {
-        HashMap<String, String> bpd = passport.getBPD();
+        Map<String, String> bpd = passport.getBPD();
         log.info("[BPD] max age: " + maxAge + " days");
 
         long maxMillis = -1L;
@@ -184,7 +185,7 @@ public final class HBCIInstitute implements IHandlerData {
      */
     public void fetchBPDAnonymous() {
         // BPD abholen, wenn nicht vorhanden oder HBCI-Version geaendert
-        HashMap<String, String> bpd = passport.getBPD();
+        Map<String, String> bpd = passport.getBPD();
         String hbciVersionOfBPD = (bpd != null) ? bpd.get(BPD_KEY_HBCIVERSION) : null;
 
         final String version = passport.getBPDVersion();
@@ -244,11 +245,6 @@ public final class HBCIInstitute implements IHandlerData {
         // tatsaechlich unterstuetzt wird
         log.debug("checking if requested hbci parameters are supported");
         if (passport.getBPD() != null) {
-            if (!passport.isSupported()) {
-                String msg = HBCIUtils.getLocMsg("EXCMSG_SECMETHNOTSUPP");
-                throw new InvalidUserDataException(msg);
-            }
-
             if (!Arrays.asList(passport.getSuppVersions()).contains(passport.getHBCIVersion())) {
                 String msg = HBCIUtils.getLocMsg("EXCMSG_VERSIONNOTSUPP");
                 throw new InvalidUserDataException(msg);
@@ -256,22 +252,11 @@ public final class HBCIInstitute implements IHandlerData {
         } else {
             log.warn("can not check if requested parameters are supported");
         }
-
-        passport.setPersistentData("_registered_institute", Boolean.TRUE);
     }
 
     private HBCIMsgStatus anonymousDialogInit() {
-        Message message = MessageFactory.createMessage("DialogInitAnon", passport.getSyntaxDocument());
-        message.rawSet("Idn.KIK.blz", passport.getBLZ());
-        message.rawSet("Idn.KIK.country", passport.getCountry());
-        message.rawSet("ProcPrep.BPD", "0");
-        message.rawSet("ProcPrep.UPD", passport.getUPDVersion());
-        message.rawSet("ProcPrep.lang", "0");
-        message.rawSet("ProcPrep.prodName", "HBCI4Java");
-        message.rawSet("ProcPrep.prodVersion", "2.5");
-
-        return kernel.rawDoIt(message, HBCIKernel.DONT_SIGNIT, HBCIKernel.DONT_CRYPTIT,
-                HBCIKernel.DONT_NEED_SIG, HBCIKernel.DONT_NEED_CRYPT);
+        Message message = MessageFactory.createAnonymouaDialogInit(passport);
+        return kernel.rawDoIt(message, HBCIKernel.DONT_SIGNIT, HBCIKernel.DONT_CRYPTIT);
     }
 
     private void anonymousDialogEnd(String dialogid) {
@@ -282,7 +267,7 @@ public final class HBCIInstitute implements IHandlerData {
         message.rawSet("MsgHead.msgnum", "2");
         message.rawSet("DialogEndS.dialogid", dialogid);
         message.rawSet("MsgTail.msgnum", "2");
-        HBCIMsgStatus status = kernel.rawDoIt(message, HBCIKernel.DONT_SIGNIT, HBCIKernel.DONT_CRYPTIT, HBCIKernel.DONT_NEED_SIG, HBCIKernel.DONT_NEED_CRYPT);
+        HBCIMsgStatus status = kernel.rawDoIt(message, HBCIKernel.DONT_SIGNIT, HBCIKernel.DONT_CRYPTIT);
         passport.getCallback().status(HBCICallback.STATUS_DIALOG_END_DONE, status);
 
         if (!status.isOK()) {

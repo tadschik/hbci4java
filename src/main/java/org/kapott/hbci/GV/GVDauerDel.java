@@ -25,9 +25,7 @@ import org.kapott.hbci.exceptions.InvalidUserDataException;
 import org.kapott.hbci.manager.HBCIUtils;
 import org.kapott.hbci.passport.HBCIPassportInternal;
 
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Properties;
+import java.util.Map;
 
 public final class GVDauerDel extends AbstractHBCIJob {
 
@@ -80,7 +78,7 @@ public final class GVDauerDel extends AbstractHBCIJob {
 
     public void setParam(String paramName, String value) {
         if (paramName.equals("date")) {
-            HashMap<String, String> res = getJobRestrictions();
+            Map<String, String> res = getJobRestrictions();
             String st_cantermdel = res.get("cantermdel");
 
             if (st_cantermdel != null && st_cantermdel.equals("N")) {
@@ -90,18 +88,15 @@ public final class GVDauerDel extends AbstractHBCIJob {
 
             // TODO: minpretime und maxpretime auswerten
         } else if (paramName.equals("orderid")) {
-            Properties p = (Properties) passport.getPersistentData("dauer_" + value);
-            if (p != null && p.size() != 0) {
-                for (Enumeration e = p.propertyNames(); e.hasMoreElements(); ) {
-                    String key = (String) e.nextElement();
-
-                    if (!key.equals("date") &&
-                            !key.startsWith("Aussetzung.")) {
-                        setLowlevelParam(getName() + "." + key,
-                                p.getProperty(key));
-                    }
-                }
-            }
+//TODO            HashMap<String, String> p = (HashMap<String, String>) passport.getPersistentData("dauer_" + value);
+//            if (p != null && p.size() != 0) {
+//                p.keySet().forEach(key -> {
+//                    if (!key.equals("date") &&
+//                        !key.startsWith("Aussetzung.")) {
+//                        setLowlevelParam(getName() + "." + key, p.get(key));
+//                    }
+//                });
+//            }
         }
 
         super.setParam(paramName, value);

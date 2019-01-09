@@ -49,7 +49,7 @@ public class HBCIJobResultImpl implements Serializable, HBCIJobResult {
             resultData.put(key, value);
     }
 
-    public int getRetNumber() {
+    public int getResultsSize() {
         return jobStatus.getRetVals().size();
     }
 
@@ -59,9 +59,9 @@ public class HBCIJobResultImpl implements Serializable, HBCIJobResult {
 
     public boolean isOK() {
         return globStatus.getStatusCode() != HBCIStatus.STATUS_ERR &&
-                jobStatus.getStatusCode() != HBCIStatus.STATUS_ERR &&
-                (globStatus.getStatusCode() != HBCIStatus.STATUS_UNKNOWN ||
-                        jobStatus.getStatusCode() != HBCIStatus.STATUS_UNKNOWN);
+            jobStatus.getStatusCode() != HBCIStatus.STATUS_ERR &&
+            (globStatus.getStatusCode() != HBCIStatus.STATUS_UNKNOWN ||
+                jobStatus.getStatusCode() != HBCIStatus.STATUS_UNKNOWN);
     }
 
     public String getDialogId() {

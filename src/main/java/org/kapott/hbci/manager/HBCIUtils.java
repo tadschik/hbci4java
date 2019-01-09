@@ -38,7 +38,6 @@ import java.util.Map.Entry;
 public final class HBCIUtils {
 
     private static final String VERSION = "HBCI4Java-2.5.12";
-    public static Properties blzs = new Properties();
     public static Map<String, BankInfo> banks = new HashMap<>();
     private static ResourceBundle resourceBundle = ResourceBundle.getBundle("hbci4java-messages", Locale.getDefault());
 
@@ -166,9 +165,9 @@ public final class HBCIUtils {
         // Wir machen das auch nur dann, wenn beide Nummern zusammen max.
         // 10 Zeichen ergeben
         if (k.subnumber != null &&
-                k.subnumber.length() > 0 &&
-                k.subnumber.matches("[0-9]{1,8}") &&
-                k.number.length() + k.subnumber.length() <= 10)
+            k.subnumber.length() > 0 &&
+            k.subnumber.matches("[0-9]{1,8}") &&
+            k.number.length() + k.subnumber.length() <= 10)
             konto += k.subnumber;
 
         /////////////////
@@ -657,7 +656,7 @@ public final class HBCIUtils {
     }
 
     private static void refreshBLZList(String blzpath)
-            throws IOException {
+        throws IOException {
         if (blzpath == null) {
             blzpath = "";
         }
@@ -685,9 +684,10 @@ public final class HBCIUtils {
      * @throws IOException
      **/
     public static void refreshBLZList(InputStream in)
-            throws IOException {
+        throws IOException {
         LoggerFactory.getLogger(HBCIUtils.class).debug("trying to load BLZ data");
-        blzs.clear();
+
+        Properties blzs = new Properties();
         blzs.load(in);
 
         banks.clear();
@@ -699,6 +699,11 @@ public final class HBCIUtils {
             info.setBlz(blz);
             banks.put(blz, info);
         }
+    }
+
+
+    public static void addBankInfo(BankInfo bankInfo) {
+        banks.put(bankInfo.getBlz(), bankInfo);
     }
 
     /**
@@ -836,4 +841,5 @@ public final class HBCIUtils {
     public static Locale getLocale() {
         return Locale.getDefault();
     }
+
 }

@@ -1,42 +1,40 @@
 package org.kapott.hbci.GV;
 
+import org.kapott.hbci.GV_Result.GVRKontoauszug;
 import org.kapott.hbci.GV_Result.HBCIJobResultImpl;
-import org.kapott.hbci.manager.HBCIHandler;
-import org.kapott.hbci.manager.LogFilter;
+import org.kapott.hbci.passport.HBCIPassportInternal;
 
 /**
  * Geschaeftsvorfall fuer das Senden der Empfangsquittung mittels HKQTG.
  */
-public class GVReceipt extends HBCIJobImpl
-{
+public class GVReceipt extends AbstractHBCIJob {
+
+    public GVReceipt(HBCIPassportInternal passport, String name) {
+        super(passport, name, new GVRKontoauszug(passport));
+    }
+
+    public GVReceipt(HBCIPassportInternal passport) {
+        super(passport, getLowlevelName(), new HBCIJobResultImpl(passport));
+        addConstraint("receipt", "receipt", "");
+    }
+
     /**
      * Liefert den Lowlevel-Namen des Geschaeftsvorfalls.
+     *
      * @return der Lowlevel-Namen des Geschaeftsvorfalls.
      */
-    public static String getLowlevelName()
-    {
+    public static String getLowlevelName() {
         return "Receipt";
     }
-    
-    /**
-     * ct.
-     * @param handler
-     */
-    public GVReceipt(HBCIHandler handler)
-    {
-      super(handler, getLowlevelName(), new HBCIJobResultImpl());
-      addConstraint("receipt","receipt","", LogFilter.FILTER_NONE);
-    }
-    
+
     /**
      * @see org.kapott.hbci.GV.HBCIJobImpl#setParam(java.lang.String, java.lang.String)
      */
-    public void setParam(String paramName, String value)
-    {
+    public void setParam(String paramName, String value) {
         // Feld als binaer markieren
         if (paramName.equals("receipt"))
-            value="B"+value;
-        super.setParam(paramName,value);
+            value = "B" + value;
+        super.setParam(paramName, value);
     }
 
 }

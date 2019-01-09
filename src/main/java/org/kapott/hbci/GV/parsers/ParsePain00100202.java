@@ -13,16 +13,14 @@ import java.util.List;
 /**
  * Parser-Implementierung fuer Pain 001.002.02.
  */
-public class ParsePain00100202 extends AbstractSepaParser {
-
+public class ParsePain00100202 extends AbstractSepaParser<List<HashMap<String, String>>> {
     /**
-     * @see org.kapott.hbci.GV.parsers.ISEPAParser#parse(java.io.InputStream, java.util.List)
+     * @see org.kapott.hbci.GV.parsers.ISEPAParser#parse(InputStream, Object)
      */
     public void parse(InputStream xml, List<HashMap<String, String>> sepaResults) {
-
         Document doc = JAXB.unmarshal(xml, Document.class);
 
-        //Payment Information 
+        //Payment Information
         Pain00100102 pain = doc.getPain00100102();
 
         if (pain == null)
@@ -35,7 +33,7 @@ public class ParsePain00100202 extends AbstractSepaParser {
             List<CreditTransferTransactionInformationSCT> txList = pmtInf.getCdtTrfTxInf();
 
             for (CreditTransferTransactionInformationSCT tx : txList) {
-                HashMap<String, String> prop = new HashMap<>();
+                HashMap<String, String> prop = new HashMap();
 
                 put(prop, Names.PMTINFID, pmtInf.getPmtInfId());
                 put(prop, Names.SRC_NAME, pain.getGrpHdr().getInitgPty().getNm());

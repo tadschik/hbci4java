@@ -27,6 +27,7 @@ import org.w3c.dom.Node;
 
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Optional;
 
 public final class SEG extends SyntaxElement {
 
@@ -34,8 +35,8 @@ public final class SEG extends SyntaxElement {
         super(type, name, path, idx, document);
     }
 
-    public SEG(String type, String name, String path, char predelim, int idx, StringBuffer res, int fullResLen, Document document, Hashtable<String, String> predefs, Hashtable<String, String> valids) {
-        super(type, name, path, predelim, idx, res, fullResLen, document, predefs, valids);
+    public SEG(String type, String name, String path, char predelim, int idx, StringBuffer res, Document document, HashMap<String, String> predefs, HashMap<String, String> valids) {
+        super(type, name, path, predelim, idx, res, document, predefs, valids);
     }
 
     protected String getElementTypeName() {
@@ -88,19 +89,12 @@ public final class SEG extends SyntaxElement {
         return ret.toString();
     }
 
-    public void log() {
-        for (MultipleSyntaxElements dataList : getChildContainers()) {
-            if (dataList != null)
-                dataList.log();
-        }
-    }
-
     public void setSeq(int idx, boolean allowOverwrite) {
         String segcounterPath = "SegHead.seq";
         String targetPath = getPath() + "." + segcounterPath;
 
         if (!propagateValue(targetPath,
-                Integer.toString(idx), DONT_TRY_TO_CREATE, allowOverwrite))
+            Integer.toString(idx), DONT_TRY_TO_CREATE, allowOverwrite))
             throw new NoSuchPathException(targetPath);
     }
 
@@ -121,17 +115,18 @@ public final class SEG extends SyntaxElement {
     // analoges in Sig.hasSig()
     public String getCode() {
         String codePath = "SegHead.code";
-        SyntaxElement code = getElement(getPath() + "." + codePath);
-        return code.toString();
+        return Optional.ofNullable(getElement(getPath() + "." + codePath))
+            .map(Object::toString)
+            .orElse(null);
     }
 
-    protected MultipleSyntaxElements parseNewChildContainer(Node dataref, char predelim0, char predelim1, StringBuffer res, int fullResLen, Document document, Hashtable<String, String> predefs, Hashtable<String, String> valids) {
+    protected MultipleSyntaxElements parseNewChildContainer(Node dataref, char predelim0, char predelim1, StringBuffer res, Document document, HashMap<String, String> predefs, HashMap<String, String> valids) {
         MultipleSyntaxElements ret = null;
 
         if ((dataref.getNodeName()).equals("DEG"))
-            ret = new MultipleDEGs(dataref, '+', getPath(), predelim0, predelim1, res, fullResLen, document, predefs, valids);
+            ret = new MultipleDEGs(dataref, '+', getPath(), predelim0, predelim1, res, document, predefs, valids);
         else if ((dataref.getNodeName()).equals("DE"))
-            ret = new MultipleDEs(dataref, '+', getPath(), predelim0, predelim1, res, fullResLen, document, predefs, valids);
+            ret = new MultipleDEs(dataref, '+', getPath(), predelim0, predelim1, res, document, predefs, valids);
 
         return ret;
     }
@@ -140,8 +135,8 @@ public final class SEG extends SyntaxElement {
         return '+';
     }
 
-    public void init(String type, String name, String path, char predelim, int idx, StringBuffer res, int fullResLen, Document document, Hashtable<String, String> predefs, Hashtable<String, String> valids) {
-        super.init(type, name, path, predelim, idx, res, fullResLen, document, predefs, valids);
+    public void init(String type, String name, String path, char predelim, int idx, StringBuffer res, Document document, HashMap<String, String> predefs, HashMap<String, String> valids) {
+        super.init(type, name, path, predelim, idx, res, document, predefs, valids);
     }
 
     public int checkSegSeq(int value) {

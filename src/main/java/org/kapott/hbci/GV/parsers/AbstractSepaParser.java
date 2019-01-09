@@ -5,8 +5,10 @@ import java.util.HashMap;
 
 /**
  * Abstrakte Basis-Klasse der SEPA PAIN-Parser.
+ *
+ * @param <T> der konkrete Typ.
  */
-public abstract class AbstractSepaParser implements ISEPAParser {
+public abstract class AbstractSepaParser<T> implements ISEPAParser<T> {
     /**
      * Speichert den Wert in den Properties.
      *

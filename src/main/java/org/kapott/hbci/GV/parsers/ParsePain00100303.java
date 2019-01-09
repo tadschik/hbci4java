@@ -13,20 +13,18 @@ import java.util.List;
 /**
  * Parser-Implementierung fuer Pain 001.003.03.
  */
-public class ParsePain00100303 extends AbstractSepaParser {
-
+public class ParsePain00100303 extends AbstractSepaParser<List<HashMap<String, String>>> {
     /**
-     * @see org.kapott.hbci.GV.parsers.ISEPAParser#parse(java.io.InputStream, java.util.List)
+     * @see org.kapott.hbci.GV.parsers.ISEPAParser#parse(InputStream, Object)
      */
     public void parse(InputStream xml, List<HashMap<String, String>> sepaResults) {
-
         Document doc = JAXB.unmarshal(xml, Document.class);
         CustomerCreditTransferInitiationV03 pain = doc.getCstmrCdtTrfInitn();
 
         if (pain == null)
             return;
 
-        //Payment Information 
+        //Payment Information
         List<PaymentInstructionInformationSCT> pmtInfs = pain.getPmtInf();
 
         for (PaymentInstructionInformationSCT pmtInf : pmtInfs) {
